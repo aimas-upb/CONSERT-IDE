@@ -75,26 +75,53 @@
          id="ContextEntityExtension"
          name="ContextEntityExtension"
          point="org.eclipse.ui.newWizards">
-       	<category 
-        	id="com.xyz.XYZ" 
-        	name="Consert"> 
-      	</category> 
-      	<category 
-        	id="com.xyz.XYZ.Web" 
-        	name="Context Model Definition" 
-        	parentCategory="com.xyz.XYZ"> 
-      	</category> 
-      	<wizard 
-          id="com.xyz.wizard1" 
-          name="ContextEntity" 
-          category="com.xyz.XYZ/com.xyz.XYZ.Web" 
-          icon="./icons/XYZwizard1.gif" 
-          class="conserttest.wizards.MyNewWizard"> 
-          <description> 
-              Emilia's simple XYZ artifact and set initial content 
-          </description> 
-           <selection class="conserttest.wizards.MyNewWizard"/>          
-      	</wizard> 
+      <wizard
+            category="ConsertCategory"
+            class="conserttest.wizards.NewConsertProjectWizard"
+            icon="./icons/sample.gif"
+            id="ConsertTest.wizard2"
+            name="Consert Project"
+            project="true">
+         <description>
+            Create a new Consert Project.
+         </description>
+         <selection
+               class="conserttest.wizards.NewConsertProjectWizard"
+               name="NewConsertProjectWizard">
+         </selection>
+      </wizard>
+      <wizard
+            category="ConsertCategory"
+            class="conserttest.wizards.NewContextEntityWizard"
+            icon="./icons/sample.gif"
+            id="com.xyz.wizard1"
+            name="Context Entity">
+         <description>
+            Emilia's simple XYZ artifact and set initial content
+         </description>
+         <selection
+               class="conserttest.wizards.NewContextEntityWizard"
+               name="NewContextEntityWizard">
+         </selection>
+      </wizard>
+      <wizard
+            category="ConsertCategory"
+            class="conserttest.wizards.NewContextAssertionWizard"
+            icon="./icons/sample.gif"
+            id="ConsertTest.wizard1"
+            name="Context Assertion">
+         <description>
+            Create a new Context Assertion.
+         </description>
+         <selection
+               class="conserttest.wizards.NewContextAssertionWizard"
+               name="NewContextAssertionWizard">
+         </selection>
+      </wizard>
+      <category
+            id="ConsertCategory"
+            name="Consert">
+      </category>
    </extension>
    <extension
          point="org.eclipse.ui.editors">
