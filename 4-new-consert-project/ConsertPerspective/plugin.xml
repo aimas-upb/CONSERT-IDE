@@ -50,7 +50,7 @@
             category="ConsertPerspective.consertProject"
             class="wizards.ConsertProjectWizard"
             finalPerspective="ConsertPerspective.perspective1"
-            hasPages="false"
+            hasPages="true"
             icon="icons/ConsertProject.png"
             id="ConsertPerspective.ProjectWizard"
             name="ConsertProject"
@@ -77,6 +77,15 @@
       </wizard>
              
      
+   </extension>
+   <extension
+         id="consertperspective.projectNature"
+         point="org.eclipse.core.resources.natures">
+      <runtime>
+         <run
+               class="natures.ProjectNature">
+         </run>
+      </runtime>
    </extension>
 
 </plugin>
