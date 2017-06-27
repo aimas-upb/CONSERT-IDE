@@ -7,7 +7,7 @@
    <extension
          point="org.eclipse.ui.perspectives">
          <perspective
-            class="perspective.PerspectiveFactory1"
+            class="org.aimas.consert.ide.perspective.PerspectiveFactory1"
             fixed="true"
             id="ConsertPerspective.perspective1"
             name="ConsertPerspective">
@@ -48,7 +48,7 @@
       <wizard
             canFinishEarly="true"
             category="ConsertPerspective.consertProject"
-            class="wizards.ConsertProjectWizard"
+            class="org.aimas.consert.ide.wizards.ConsertProjectWizard"
             finalPerspective="ConsertPerspective.perspective1"
             hasPages="true"
             icon="icons/ConsertProject.png"
@@ -67,7 +67,7 @@
       </category>
       <wizard
             category="ConsertPerspective.contextmodeldefinition/ConsertPerspective.contextentity"
-            class="wizards.ContextEntityWizard"
+            class="org.aimas.consert.ide.wizards.ContextEntityWizard"
             finalPerspective="ConsertPerspective.perspective1"
             hasPages="true"
             icon="icons/cherry1600.png"
@@ -82,7 +82,7 @@
       </category>
       <wizard
             category="ConsertPerspective.contextmodeldefinition/ConsertPerspective.contextassertion"
-            class="wizards.ContextAssertionWizard"
+            class="org.aimas.consert.ide.wizards.ContextAssertionWizard"
             finalPerspective="ConsertPerspective.perspective1"
             hasPages="true"
             icon="icons/cherry1600.png"

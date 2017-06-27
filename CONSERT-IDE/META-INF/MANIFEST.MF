@@ -14,10 +14,10 @@ Export-Package: org.aimas.consert.ide.model,
  org.aimas.consert.ide.utils,
  org.aimas.consert.ide.wizards,
  org.aimas.consert.ide.wizards.pages
-Require-Bundle: org.eclipse.ui;bundle-version="3.108.1",
- org.eclipse.jdt.ui;bundle-version="3.12.2",
- org.eclipse.core.resources;bundle-version="3.11.1",
- org.eclipse.core.runtime;bundle-version="3.12.0",
- org.junit;bundle-version="4.12.0",
- org.eclipse.ui.ide;bundle-version="3.12.3"
+Require-Bundle: org.eclipse.ui,
+ org.eclipse.jdt.ui,
+ org.eclipse.core.resources,
+ org.eclipse.core.runtime,
+ org.eclipse.ui.ide,
+ org.eclipse.osgi.services;bundle-version="3.5.100"
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
