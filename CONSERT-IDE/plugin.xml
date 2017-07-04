@@ -102,5 +102,19 @@
          </run>
       </runtime>
    </extension>
+   <extension
+         point="org.eclipse.ui.importWizards">
+      <category
+            id="CONSERT-IDE.category1"
+            name="ConsertProject">
+      </category>
+      <wizard
+            category="CONSERT-IDE.category1"
+            class="org.aimas.consert.ide.wizards.ConsertProjectImportWizard"
+            icon="icons/ConsertProject.png"
+            id="CONSERT-IDE.wizard1"
+            name="ConsertProject">
+      </wizard>
+   </extension>
 
 </plugin>

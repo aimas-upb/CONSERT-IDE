@@ -110,7 +110,7 @@ public class WizardNewEntityPage extends WizardPage {
 	}
 
 	public String getTextComment() {
-		return textName.getText();
+		return textComment.getText();
 	}
 
 }
