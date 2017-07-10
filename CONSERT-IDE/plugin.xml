@@ -46,7 +46,6 @@
             name="ConsertProject">
       </category>
       <wizard
-            canFinishEarly="true"
             category="ConsertPerspective.consertProject"
             class="org.aimas.consert.ide.wizards.ConsertProjectWizard"
             finalPerspective="ConsertPerspective.perspective1"
@@ -116,5 +115,16 @@
             name="ConsertProject">
       </wizard>
    </extension>
-
+   <extension
+         point="org.eclipse.ui.editors">
+      <editor
+            class="org.aimas.consert.ide.editor.MultiPageEditor"
+            contributorClass="org.aimas.consert.ide.editor.MultiPageEditorContributor"
+            default="true"
+            extensions="txt"
+            filenames="consert.txt"
+            id="org.aimas.consert.ide.editor.ConsertEditor"
+            name="ConsertEditor">
+      </editor>
+   </extension>
 </plugin>
