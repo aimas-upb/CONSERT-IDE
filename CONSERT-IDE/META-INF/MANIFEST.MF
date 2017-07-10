@@ -3,9 +3,9 @@ Bundle-ManifestVersion: 2
 Bundle-Name: CONSERT-IDE
 Bundle-SymbolicName: CONSERT-IDE;singleton:=true
 Bundle-Version: 1.0.0.qualifier
-Bundle-ClassPath: libs/jackson-core-asl-1.0.0.jar,
- libs/jackson-jaxrs-1.0.0.jar,
- libs/jackson-mapper-asl-1.0.0.jar,
+Bundle-ClassPath: libs/jackson-annotations-2.8.8.jar,
+ libs/jackson-core-2.8.8.jar,
+ libs/jackson-databind-2.8.8.jar,
  .
 Bundle-Vendor: AI-MAS
 Export-Package: org.aimas.consert.ide.model,
@@ -19,5 +19,8 @@ Require-Bundle: org.eclipse.ui,
  org.eclipse.core.resources,
  org.eclipse.core.runtime,
  org.eclipse.ui.ide,
- org.eclipse.osgi.services;bundle-version="3.5.100"
+ org.eclipse.osgi.services;bundle-version="3.5.100",
+ org.eclipse.ui.editors,
+ org.eclipse.jface.text,
+ org.eclipse.ui.forms
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
