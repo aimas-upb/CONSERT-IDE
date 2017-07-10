@@ -44,11 +44,10 @@ public class JsonParser {
 			JsonNode rootNode = mapper.readTree(in);
 			in.close();
 
-			String jsonInStringModel = mapper.writeValueAsString(model);
 			if (rootNode.has("ContextAssertions") && model instanceof ContextAssertionModel) {
-				((ObjectNode) rootNode).withArray("ContextAssertions").add(jsonInStringModel);
+				((ObjectNode) rootNode).withArray("ContextAssertions").add(mapper.valueToTree(model));
 			} else if (rootNode.has("ContextEntities") && model instanceof ContextEntityModel) {
-				((ObjectNode) rootNode).withArray("ContextEntities").add(jsonInStringModel);
+				((ObjectNode) rootNode).withArray("ContextEntities").add(mapper.valueToTree(model));
 			}
 
 			mapper.writeValue(new File(folder.getFile("consert.txt").getLocation().toString()), rootNode);
