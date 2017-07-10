@@ -1,12 +1,19 @@
 package org.aimas.consert.ide.utils;
 
-import java.io.FileOutputStream;
+import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
 
-import org.codehaus.jackson.map.ObjectMapper;
+import org.aimas.consert.ide.model.AbstractContextModel;
+import org.aimas.consert.ide.model.ContextAssertionModel;
+import org.aimas.consert.ide.model.ContextEntityModel;
 import org.eclipse.core.resources.IFolder;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.ResourcesPlugin;
+
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 
 public class JsonParser {
 	private static JsonParser instance;
@@ -23,7 +30,7 @@ public class JsonParser {
 		return instance;
 	}
 
-	public boolean appendToFile(String projectName, Object model) {
+	public boolean appendToFile(String projectName, AbstractContextModel model) {
 		IProject project = ResourcesPlugin.getWorkspace().getRoot().getProject(projectName);
 		IFolder folder = project.getFolder("origin");
 		if (!project.exists()) {
@@ -33,18 +40,20 @@ public class JsonParser {
 
 		// Convert object to JSON string and save into file directly
 		try {
-			FileOutputStream out = new FileOutputStream(folder.getFile("consert.txt").getLocation().toFile(), true);
-			// JsonGenerator g =
-			// mapper.getJsonFactory().createJsonGenerator(out);
-			// mapper.writeValue(folder.getFile("consert.txt").getLocation().toFile(),
-			// model);
-			mapper.writeValue(out, model);
-			// Convert object to JSON string
-			// String jsonInString = mapper.writeValueAsString(model);
-			// System.out.println(jsonInString);
+			FileInputStream in = new FileInputStream(folder.getFile("consert.txt").getLocation().toFile());
+			JsonNode rootNode = mapper.readTree(in);
+			in.close();
+
+			String jsonInStringModel = mapper.writeValueAsString(model);
+			if (rootNode.has("ContextAssertions") && model instanceof ContextAssertionModel) {
+				((ObjectNode) rootNode).withArray("ContextAssertions").add(jsonInStringModel);
+			} else if (rootNode.has("ContextEntities") && model instanceof ContextEntityModel) {
+				((ObjectNode) rootNode).withArray("ContextEntities").add(jsonInStringModel);
+			}
+
+			mapper.writeValue(new File(folder.getFile("consert.txt").getLocation().toString()), rootNode);
 			System.out.println(model);
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 		return true;
