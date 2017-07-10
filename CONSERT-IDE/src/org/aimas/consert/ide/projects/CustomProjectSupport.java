@@ -1,7 +1,6 @@
 package org.aimas.consert.ide.projects;
 
 import java.io.ByteArrayInputStream;
-import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URI;
@@ -103,13 +102,14 @@ public class CustomProjectSupport {
 			createFolder(etcFolders);
 		}
 		// create origin folder
-		
+
 		IFolder folder = newProject.getFolder("origin");
 		IFile file = folder.getFile("consert.txt");
 		if (!file.exists()) {
-		    byte[] bytes = "File contents".getBytes();
-		    InputStream source = new ByteArrayInputStream(bytes);
-		    file.create(source, IResource.NONE, null);
+			String contents = "{\"ContextEntities\":[],\"ContextAssertions\":[]}";
+			byte[] bytes = contents.getBytes();
+			InputStream source = new ByteArrayInputStream(bytes);
+			file.create(source, IResource.NONE, null);
 		}
 	}
 
