@@ -9,19 +9,24 @@ import org.eclipse.ui.IFileEditorInput;
 import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.editors.text.TextEditor;
 import org.eclipse.ui.forms.editor.FormEditor;
+import org.eclipse.ui.forms.editor.IFormPage;
 
 public class MultiPageEditor extends FormEditor {
 	private JsonSourceViewerConfiguration viewerConfiguration;
 	private IEditorInput editorInput;
 	/** The text editor used in page 0. */
 	private TextEditor editor;
+	/** The form editor used in page 1. */
+	private FormView formView;
 
 	public TextEditor getTextEditor() {
 		return editor;
 	}
 
-	/** The form editor used in page 1. */
-	private FormView formView;
+	@Override
+	public boolean isDirty() {
+		return formView.isDirty() || editor.isDirty();
+	}
 
 	@Override
 	public void init(IEditorSite site, IEditorInput editorInput) throws PartInitException {
@@ -34,7 +39,8 @@ public class MultiPageEditor extends FormEditor {
 	@Override
 	protected void addPages() {
 		try {
-			addPage(new FormView(this));
+			formView = new FormView(this);
+			addPage(formView);
 			editor = new TextEditor();
 			int index = addPage(editor, getEditorInput());
 			setPageText(index, "SourceView");
@@ -46,7 +52,14 @@ public class MultiPageEditor extends FormEditor {
 
 	@Override
 	public void doSave(IProgressMonitor monitor) {
-		getEditor(1).doSave(monitor);
+		IFormPage page = getActivePageInstance();
+		if (page == null) {
+			System.out.println("saves the editor on disk, but needs to reload formView!");
+			getEditor(1).doSave(monitor);
+		} else {
+			((FormView) page).doSave(monitor);
+		}
+
 	}
 
 	@Override
