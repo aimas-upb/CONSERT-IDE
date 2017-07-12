@@ -96,7 +96,7 @@ public class FormView extends FormPage {
 	protected void createFormContent(IManagedForm managedForm) {
 		form = managedForm.getForm();
 		FormToolkit toolkit = managedForm.getToolkit();
-		form.setText(editor.getEditorInput().getName());
+		form.setText(editor.getTextEditor().getEditorInput().getName());
 		GridLayout layout = new GridLayout();
 		form.getBody().setLayout(layout);
 		layout.numColumns = 2;

@@ -12,8 +12,6 @@ import org.eclipse.ui.forms.editor.FormEditor;
 import org.eclipse.ui.forms.editor.IFormPage;
 
 public class MultiPageEditor extends FormEditor {
-	private JsonSourceViewerConfiguration viewerConfiguration;
-	private IEditorInput editorInput;
 	/** The text editor used in page 0. */
 	private TextEditor editor;
 	/** The form editor used in page 1. */
@@ -33,7 +31,6 @@ public class MultiPageEditor extends FormEditor {
 		if (!(editorInput instanceof IFileEditorInput))
 			throw new PartInitException("Invalid Input: Must be IFileEditorInput");
 		super.init(site, editorInput);
-		this.editorInput = editorInput;
 	}
 
 	@Override
