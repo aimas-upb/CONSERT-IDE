@@ -1,12 +1,19 @@
 package org.aimas.consert.ide.editor;
 
+import java.io.File;
 import java.io.IOException;
+import java.util.HashMap;
+import java.util.Map;
 
+import org.aimas.consert.ide.model.AbstractContextModel;
+import org.aimas.consert.ide.model.ContextEntityModel;
+import org.eclipse.core.resources.IResourceChangeEvent;
+import org.eclipse.core.resources.IResourceChangeListener;
+import org.eclipse.core.resources.ResourcesPlugin;
+import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.swt.SWT;
-import org.eclipse.swt.events.KeyEvent;
-import org.eclipse.swt.events.KeyListener;
 import org.eclipse.swt.events.ModifyEvent;
 import org.eclipse.swt.events.ModifyListener;
 import org.eclipse.swt.layout.GridData;
@@ -18,20 +25,27 @@ import org.eclipse.ui.forms.IManagedForm;
 import org.eclipse.ui.forms.editor.FormPage;
 import org.eclipse.ui.forms.widgets.FormToolkit;
 import org.eclipse.ui.forms.widgets.ScrolledForm;
+import org.eclipse.ui.part.FileEditorInput;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 
-public class FormView extends FormPage {
+public class FormView extends FormPage implements IResourceChangeListener {
 	private MultiPageEditor editor;
 	private ScrolledForm form;
 	private boolean isDirty;
+	private JsonNode rootNode;
+	private ObjectMapper mapper;
+	private Map<JsonNode, AbstractContextModel> map;
 
 	public FormView(MultiPageEditor editor) {
 		super(editor, "first", "FormView");
 		this.editor = editor;
 		isDirty = false;
+		map = new HashMap<JsonNode, AbstractContextModel>();
+		ResourcesPlugin.getWorkspace().addResourceChangeListener(this);
 	}
 
 	private String getContent() {
@@ -42,7 +56,7 @@ public class FormView extends FormPage {
 		return content;
 	}
 
-	public void createLabelAndText(String labelName, String textName) {
+	public void createLabelAndText(String labelName, String textName, JsonNode entity) {
 		Label nameLabel = new Label(form.getBody(), SWT.NONE);
 		nameLabel.setText(labelName);
 		Text nameText = new Text(form.getBody(), SWT.BORDER | SWT.SINGLE);
@@ -52,30 +66,18 @@ public class FormView extends FormPage {
 
 			@Override
 			public void modifyText(ModifyEvent e) {
-				if (nameText.getText().equals(textName))
-					isDirty = false;
-				else {
-					isDirty = true;
-					firePropertyChange(IEditorPart.PROP_DIRTY);
-					editor.editorDirtyStateChanged();
-				}
+				isDirty = true;
+				firePropertyChange(IEditorPart.PROP_DIRTY);
+				editor.editorDirtyStateChanged();
+
+				ContextEntityModel cem = (ContextEntityModel) map.get(entity);
+
+				if (labelName.equals(" Name: ")) {
+					cem.setName(nameText.getText());
+				} else if (labelName.equals(" Comment: "))
+					cem.setComment(nameText.getText());
+				map.put(entity, cem);
 			}
-		});
-
-		nameText.addKeyListener(new KeyListener() {
-
-			@Override
-			public void keyPressed(KeyEvent e) {
-			}
-
-			@Override
-			public void keyReleased(KeyEvent e) {
-				// isDirty = true;
-				// firePropertyChange(IEditorPart.PROP_DIRTY);
-				// } else
-				// isDirty = false;
-			}
-
 		});
 	}
 
@@ -86,7 +88,17 @@ public class FormView extends FormPage {
 
 	@Override
 	public void doSave(IProgressMonitor monitor) {
-		System.out.println("needs doSave functionality on formView and reload editor!");
+		IPath path = ((FileEditorInput) editor.getEditorInput()).getPath();
+		try {
+			((ObjectNode) rootNode).withArray("ContextEntities").removeAll();
+			for (AbstractContextModel cem : map.values()) {
+				System.out.println("[doSave] new map values: " + map.values());
+				((ObjectNode) rootNode).withArray("ContextEntities").add(mapper.valueToTree((ContextEntityModel) cem));
+			}
+			mapper.writeValue(new File(path.toString()), rootNode);
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
 		isDirty = false;
 		firePropertyChange(PROP_DIRTY);
 		editor.editorDirtyStateChanged();
@@ -102,38 +114,51 @@ public class FormView extends FormPage {
 		layout.numColumns = 2;
 
 		String content = getContent();
-		ObjectMapper mapper = new ObjectMapper();
+		if (content.isEmpty()) {
+			System.err.println("File is empty!");
+			return;
+		}
+
+		mapper = new ObjectMapper();
 		try {
-			if (!content.isEmpty()) {
-				JsonNode rootNode = mapper.readTree(content);
-				System.out.println("Form View parsed: " + rootNode.toString());
-				// if (rootNode.has("ContextAssertions")) {
-				// ArrayNode assertions = (ArrayNode)
-				// rootNode.get("ContextAssertions");
-				// for (JsonNode assertion : assertions) {
-				// String name = assertion.get("name").asText();
-				if (rootNode.has("ContextEntities")) {
-					JsonNode entities = (JsonNode) rootNode.get("ContextEntities");
-					if (entities.isArray()) {
-						for (JsonNode entity : entities) {
-							String name = entity.get("name").asText();
-							String comment = entity.get("comment").asText();
-							Label nameLabel = new Label(form.getBody(), SWT.NONE);
-							nameLabel.setText(" ContextEntitity: ");
-							new Label(form.getBody(), SWT.NONE);
-							createLabelAndText(" Name: ", name);
-							createLabelAndText(" Comment: ", comment);
-						}
-					}
-				}
-			}
+			rootNode = mapper.readTree(content);
 		} catch (JsonProcessingException e) {
 			e.printStackTrace();
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
 
-		form.reflow(true);
+		System.out.println("Form View parsed: " + rootNode.toString());
+		// if (rootNode.has("ContextAssertions")) {
+		// ArrayNode assertions = (ArrayNode)
+		// rootNode.get("ContextAssertions");
+		// for (JsonNode assertion : assertions) {
+		// String name = assertion.get("name").asText();
+		String nodeName = "ContextEntities";
+		if (rootNode.has(nodeName)) {
+			JsonNode entities = (JsonNode) rootNode.get(nodeName);
+			if (entities.isArray()) {
+				for (JsonNode entity : entities) {
+					try {
+						map.put(entity, mapper.treeToValue(entity, ContextEntityModel.class));
+					} catch (JsonProcessingException e) {
+						e.printStackTrace();
+					}
+					String name = entity.get("name").asText();
+					String comment = entity.get("comment").asText();
+					Label nameLabel = new Label(form.getBody(), SWT.NONE);
+					nameLabel.setText(" ContextEntitity: ");
+					new Label(form.getBody(), SWT.NONE);
+					createLabelAndText(" Name: ", name, entity);
+					createLabelAndText(" Comment: ", comment, entity);
+				}
+			}
+		}
+	}
+
+	@Override
+	public void resourceChanged(IResourceChangeEvent event) {
+		System.out.println("Reload formView");
 	}
 
 }

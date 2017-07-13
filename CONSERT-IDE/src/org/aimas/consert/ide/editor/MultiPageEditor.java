@@ -1,5 +1,8 @@
 package org.aimas.consert.ide.editor;
 
+import org.eclipse.core.resources.IResourceChangeEvent;
+import org.eclipse.core.resources.IResourceChangeListener;
+import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.jface.dialogs.ErrorDialog;
 import org.eclipse.ui.IEditorInput;
@@ -11,19 +14,23 @@ import org.eclipse.ui.editors.text.TextEditor;
 import org.eclipse.ui.forms.editor.FormEditor;
 import org.eclipse.ui.forms.editor.IFormPage;
 
-public class MultiPageEditor extends FormEditor {
+public class MultiPageEditor extends FormEditor implements IResourceChangeListener {
 	/** The text editor used in page 0. */
-	private TextEditor editor;
+	private JsonTextEditor textEditor;
 	/** The form editor used in page 1. */
 	private FormView formView;
 
+	public MultiPageEditor() {
+		ResourcesPlugin.getWorkspace().addResourceChangeListener(this);
+	}
+
 	public TextEditor getTextEditor() {
-		return editor;
+		return textEditor;
 	}
 
 	@Override
 	public boolean isDirty() {
-		return formView.isDirty() || editor.isDirty();
+		return formView.isDirty() || textEditor.isDirty();
 	}
 
 	@Override
@@ -31,15 +38,15 @@ public class MultiPageEditor extends FormEditor {
 		if (!(editorInput instanceof IFileEditorInput))
 			throw new PartInitException("Invalid Input: Must be IFileEditorInput");
 		super.init(site, editorInput);
+		formView = new FormView(this);
+		textEditor = new JsonTextEditor();
 	}
 
 	@Override
 	protected void addPages() {
 		try {
-			formView = new FormView(this);
 			addPage(formView);
-			editor = new TextEditor();
-			int index = addPage(editor, getEditorInput());
+			int index = addPage(textEditor, getEditorInput());
 			setPageText(index, "SourceView");
 		} catch (PartInitException e) {
 			ErrorDialog.openError(getSite().getShell(), "Error creating nested editors! ", null, e.getStatus());
@@ -51,7 +58,6 @@ public class MultiPageEditor extends FormEditor {
 	public void doSave(IProgressMonitor monitor) {
 		IFormPage page = getActivePageInstance();
 		if (page == null) {
-			System.out.println("saves the editor on disk, but needs to reload formView!");
 			getEditor(1).doSave(monitor);
 		} else {
 			((FormView) page).doSave(monitor);
@@ -70,6 +76,11 @@ public class MultiPageEditor extends FormEditor {
 	@Override
 	public boolean isSaveAsAllowed() {
 		return true;
+	}
+
+	@Override
+	public void resourceChanged(IResourceChangeEvent event) {
+		System.out.println("Reload MultiPageEditor");
 	}
 
 }
