@@ -1,5 +1,6 @@
 package org.aimas.consert.ide.model;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class ProjectWideModel {
@@ -17,6 +18,7 @@ public class ProjectWideModel {
 		if (instance == null) {
 			instance = new ProjectWideModel();
 		}
+		
 		return instance;
 	}
 
