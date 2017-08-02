@@ -36,7 +36,9 @@
                   relative="org.eclipse.jdt.ui.PackageExplorer"
                   visible="true">
             </view>
- 
+            
+            
+           
       </perspectiveExtension>
    </extension>
    <extension
@@ -126,5 +128,19 @@
             id="org.aimas.consert.ide.editor.ConsertEditor"
             name="ConsertEditor">
       </editor>
+   </extension>
+   <extension
+         point="org.eclipse.ui.views">
+      <view
+            category="org.aimas.consert.ide.category.view"
+            class="org.aimas.consert.ide.views.TreeViewerNew"
+            id="org.aimas.consert.ide.views.TreeViewerNew"
+            name="TreeViewerNew"
+            restorable="true">
+      </view>
+      <category
+            id="org.aimas.consert.ide.category.view"
+            name="CONSERT">
+      </category>
    </extension>
 </plugin>
