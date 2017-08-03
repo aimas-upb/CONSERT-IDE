@@ -2,6 +2,7 @@ package org.aimas.consert.ide.views;
 
 import java.util.ArrayList;
 import java.util.List;
+
 import org.aimas.consert.ide.model.AbstractContextModel;
 import org.aimas.consert.ide.model.ContextAssertionModel;
 import org.aimas.consert.ide.model.ContextEntityModel;
@@ -9,12 +10,6 @@ import org.aimas.consert.ide.model.ProjectWideModel;
 import org.eclipse.core.runtime.IAdaptable;
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.MenuManager;
-import org.eclipse.jface.dialogs.MessageDialog;
-import org.eclipse.jface.viewers.DoubleClickEvent;
-import org.eclipse.jface.viewers.IDoubleClickListener;
-import org.eclipse.jface.viewers.ISelection;
-import org.eclipse.jface.viewers.IStructuredContentProvider;
-import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.ITreeContentProvider;
 import org.eclipse.jface.viewers.LabelProvider;
 import org.eclipse.jface.viewers.TreeViewer;
@@ -24,14 +19,12 @@ import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Menu;
 import org.eclipse.ui.ISharedImages;
-import org.eclipse.ui.IWorkbenchPage;
 import org.eclipse.ui.PlatformUI;
-import org.eclipse.ui.ide.IDE;
 import org.eclipse.ui.part.ViewPart;
 
-public class TreeViewerNew extends ViewPart {
+public class TreeViewerNew extends ViewPart{
 	public static final String ID = "org.aimas.consert.ide.views.TreeViewerNew";
-	
+	private static TreeViewerNew instance;
 	private TreeViewer viewer;
 	private TreeParent invisibleRoot;
 
@@ -75,11 +68,11 @@ public class TreeViewerNew extends ViewPart {
 	}
 
 	class TreeParent extends TreeObject {
-		private ArrayList children;
+		private ArrayList<TreeObject> children;
 
 		public TreeParent(String name) {
 			super(name);
-			children = new ArrayList();
+			children = new ArrayList<TreeObject>();
 		}
 
 		public void addChild(TreeObject child) {
@@ -197,6 +190,14 @@ public class TreeViewerNew extends ViewPart {
 	}
 
 	public TreeViewerNew() {
+		instance = this;
+	}
+	
+	public static TreeViewerNew getInstance() {
+		if (instance == null) {
+			instance = new TreeViewerNew();
+		}
+		return instance;
 	}
 
 	public void createPartControl(Composite parent) {
