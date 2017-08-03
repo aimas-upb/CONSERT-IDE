@@ -3,10 +3,9 @@ package org.aimas.consert.ide.views;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.aimas.consert.ide.model.AbstractContextModel;
 import org.aimas.consert.ide.model.ContextAssertionModel;
 import org.aimas.consert.ide.model.ContextEntityModel;
-import org.aimas.consert.ide.model.ProjectWideModel;
+import org.aimas.consert.ide.model.ProjectModel;
 import org.eclipse.core.runtime.IAdaptable;
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.MenuManager;
@@ -32,7 +31,7 @@ public class TreeViewerNew extends ViewPart{
 
 		private String name;
 		private TreeParent parent;
-		private AbstractContextModel resource;
+		private Object resource;
 
 		public TreeObject(String name) {
 			this.name = name;
@@ -58,11 +57,11 @@ public class TreeViewerNew extends ViewPart{
 			return null;
 		}
 
-		protected AbstractContextModel getResource() {
+		protected Object getResource() {
 			return resource;
 		}
 
-		protected void setResource(AbstractContextModel resource) {
+		protected void setResource(Object resource) {
 			this.resource = resource;
 		}
 	}
@@ -155,7 +154,7 @@ public class TreeViewerNew extends ViewPart{
 	}
 
 	public void initialize() {
-		ProjectWideModel projectWideModel = ProjectWideModel.getInstance();
+		ProjectModel projectWideModel = ProjectModel.getInstance();
 		TreeParent root = new TreeParent("CONSERT Model elements");
 		try {
 			// create separate folders for ContextEntities and ContextAssertions

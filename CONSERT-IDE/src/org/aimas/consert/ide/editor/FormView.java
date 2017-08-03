@@ -5,7 +5,6 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.aimas.consert.ide.model.AbstractContextModel;
 import org.aimas.consert.ide.model.ContextEntityModel;
 import org.eclipse.core.resources.IResourceChangeEvent;
 import org.eclipse.core.resources.IResourceChangeListener;
@@ -38,13 +37,13 @@ public class FormView extends FormPage implements IResourceChangeListener {
 	private boolean isDirty;
 	private JsonNode rootNode;
 	private ObjectMapper mapper;
-	private Map<JsonNode, AbstractContextModel> map;
+	private Map<JsonNode, Object> map;
 
 	public FormView(MultiPageEditor editor) {
 		super(editor, "first", "FormView");
 		this.editor = editor;
 		isDirty = false;
-		map = new HashMap<JsonNode, AbstractContextModel>();
+		map = new HashMap<JsonNode, Object>();
 		ResourcesPlugin.getWorkspace().addResourceChangeListener(this);
 	}
 
@@ -91,7 +90,7 @@ public class FormView extends FormPage implements IResourceChangeListener {
 		IPath path = ((FileEditorInput) editor.getEditorInput()).getPath();
 		try {
 			((ObjectNode) rootNode).withArray("ContextEntities").removeAll();
-			for (AbstractContextModel cem : map.values()) {
+			for (Object cem : map.values()) {
 				System.out.println("[doSave] new map values: " + map.values());
 				((ObjectNode) rootNode).withArray("ContextEntities").add(mapper.valueToTree((ContextEntityModel) cem));
 			}

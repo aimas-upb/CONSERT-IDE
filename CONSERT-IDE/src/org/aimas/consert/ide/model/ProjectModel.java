@@ -3,22 +3,22 @@ package org.aimas.consert.ide.model;
 import java.util.ArrayList;
 import java.util.List;
 
-public class ProjectWideModel {
-	private static ProjectWideModel instance;
+public class ProjectModel {
+	private static ProjectModel instance;
 	private List<ContextEntityModel> entities;
 	private List<ContextAssertionModel> assertions;
 
 	/**
 	 * here to defeat instantiation
 	 */
-	private ProjectWideModel() {
+	private ProjectModel() {
 		entities = new ArrayList<ContextEntityModel>();
 		assertions = new ArrayList<ContextAssertionModel>();
 	}
 
-	public static ProjectWideModel getInstance() {
+	public static ProjectModel getInstance() {
 		if (instance == null) {
-			instance = new ProjectWideModel();
+			instance = new ProjectModel();
 		}
 		return instance;
 	}
