@@ -12,13 +12,14 @@ public class ProjectWideModel {
 	 * here to defeat instantiation
 	 */
 	private ProjectWideModel() {
+		entities = new ArrayList<ContextEntityModel>();
+		assertions = new ArrayList<ContextAssertionModel>();
 	}
 
 	public static ProjectWideModel getInstance() {
 		if (instance == null) {
 			instance = new ProjectWideModel();
 		}
-		
 		return instance;
 	}
 

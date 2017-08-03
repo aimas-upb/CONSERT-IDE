@@ -7,6 +7,7 @@ import java.io.IOException;
 import org.aimas.consert.ide.model.AbstractContextModel;
 import org.aimas.consert.ide.model.ContextAssertionModel;
 import org.aimas.consert.ide.model.ContextEntityModel;
+import org.aimas.consert.ide.model.ProjectWideModel;
 import org.eclipse.core.resources.IFolder;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.ResourcesPlugin;
@@ -19,6 +20,9 @@ public class JsonParser {
 	private static JsonParser instance;
 	private ObjectMapper mapper;
 
+	/**
+	 * here to defeat instantiation
+	 */
 	private JsonParser() {
 		mapper = new ObjectMapper();
 	}
@@ -46,8 +50,17 @@ public class JsonParser {
 
 			if (rootNode.has("ContextAssertions") && model instanceof ContextAssertionModel) {
 				((ObjectNode) rootNode).withArray("ContextAssertions").add(mapper.valueToTree(model));
+				for (JsonNode entity : rootNode.get("ContextAssertions"))
+					ProjectWideModel.getInstance()
+							.addAssertion(mapper.treeToValue(entity, ContextAssertionModel.class));
 			} else if (rootNode.has("ContextEntities") && model instanceof ContextEntityModel) {
 				((ObjectNode) rootNode).withArray("ContextEntities").add(mapper.valueToTree(model));
+				for (JsonNode entity : rootNode.get("ContextEntities"))
+					ProjectWideModel.getInstance()
+							.addEntity(mapper.treeToValue(entity, ContextEntityModel.class));
+			} else {
+				System.out.println("RootNode does not have this node");
+				return false;
 			}
 
 			mapper.writeValue(new File(folder.getFile("consert.txt").getLocation().toString()), rootNode);
@@ -56,7 +69,5 @@ public class JsonParser {
 			e.printStackTrace();
 		}
 		return true;
-
 	}
-
 }
