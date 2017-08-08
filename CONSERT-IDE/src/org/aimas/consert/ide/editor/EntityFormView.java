@@ -2,10 +2,9 @@ package org.aimas.consert.ide.editor;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.HashMap;
-import java.util.Map;
 
 import org.aimas.consert.ide.model.ContextEntityModel;
+import org.aimas.consert.ide.model.ProjectModel;
 import org.eclipse.core.resources.IResourceChangeEvent;
 import org.eclipse.core.resources.IResourceChangeListener;
 import org.eclipse.core.resources.ResourcesPlugin;
@@ -31,19 +30,17 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 
-public class FormView extends FormPage implements IResourceChangeListener {
+public class EntityFormView extends FormPage implements IResourceChangeListener {
 	private MultiPageEditor editor;
 	private ScrolledForm form;
 	private boolean isDirty;
 	private JsonNode rootNode;
 	private ObjectMapper mapper;
-	private Map<JsonNode, Object> map;
 
-	public FormView(MultiPageEditor editor) {
+	public EntityFormView(MultiPageEditor editor) {
 		super(editor, "first", "FormView");
 		this.editor = editor;
 		isDirty = false;
-		map = new HashMap<JsonNode, Object>();
 		ResourcesPlugin.getWorkspace().addResourceChangeListener(this);
 	}
 
@@ -55,7 +52,7 @@ public class FormView extends FormPage implements IResourceChangeListener {
 		return content;
 	}
 
-	public void createLabelAndText(String labelName, String textName, JsonNode entity) {
+	public void createLabelAndText(String labelName, String textName, ContextEntityModel cem) {
 		Label nameLabel = new Label(form.getBody(), SWT.NONE);
 		nameLabel.setText(labelName);
 		Text nameText = new Text(form.getBody(), SWT.BORDER | SWT.SINGLE);
@@ -69,13 +66,10 @@ public class FormView extends FormPage implements IResourceChangeListener {
 				firePropertyChange(IEditorPart.PROP_DIRTY);
 				editor.editorDirtyStateChanged();
 
-				ContextEntityModel cem = (ContextEntityModel) map.get(entity);
-
 				if (labelName.equals(" Name: ")) {
-					cem.setName(nameText.getText());
+					ProjectModel.getInstance().getEntityByName(cem.getName()).setName(nameText.getText());
 				} else if (labelName.equals(" Comment: "))
-					cem.setComment(nameText.getText());
-				map.put(entity, cem);
+					ProjectModel.getInstance().getEntityByName(cem.getName()).setComment(nameText.getText());
 			}
 		});
 	}
@@ -90,14 +84,17 @@ public class FormView extends FormPage implements IResourceChangeListener {
 		IPath path = ((FileEditorInput) editor.getEditorInput()).getPath();
 		try {
 			((ObjectNode) rootNode).withArray("ContextEntities").removeAll();
-			for (Object cem : map.values()) {
-				System.out.println("[doSave] new map values: " + map.values());
+			for (Object cem : ProjectModel.getInstance().getEntities()) {
+				System.out.println("[doSave] new map values: " + ProjectModel.getInstance().getEntities());
 				((ObjectNode) rootNode).withArray("ContextEntities").add(mapper.valueToTree((ContextEntityModel) cem));
 			}
 			mapper.writeValue(new File(path.toString()), rootNode);
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
+
+		/* TODO: Saving for assertion as well */
+
 		isDirty = false;
 		firePropertyChange(PROP_DIRTY);
 		editor.editorDirtyStateChanged();
@@ -138,18 +135,22 @@ public class FormView extends FormPage implements IResourceChangeListener {
 			JsonNode entities = (JsonNode) rootNode.get(nodeName);
 			if (entities.isArray()) {
 				for (JsonNode entity : entities) {
-					try {
-						map.put(entity, mapper.treeToValue(entity, ContextEntityModel.class));
-					} catch (JsonProcessingException e) {
-						e.printStackTrace();
-					}
+
 					String name = entity.get("name").asText();
 					String comment = entity.get("comment").asText();
 					Label nameLabel = new Label(form.getBody(), SWT.NONE);
 					nameLabel.setText(" ContextEntitity: ");
 					new Label(form.getBody(), SWT.NONE);
-					createLabelAndText(" Name: ", name, entity);
-					createLabelAndText(" Comment: ", comment, entity);
+
+					/* Populate model with entities */
+					try {
+						ContextEntityModel cem = mapper.treeToValue(entity, ContextEntityModel.class);
+						ProjectModel.getInstance().addEntity(cem);
+						createLabelAndText(" Name: ", name, cem);
+						createLabelAndText(" Comment: ", comment, cem);
+					} catch (JsonProcessingException e) {
+						e.printStackTrace();
+					}
 				}
 			}
 		}

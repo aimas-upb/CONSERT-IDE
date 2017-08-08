@@ -18,7 +18,7 @@ public class MultiPageEditor extends FormEditor implements IResourceChangeListen
 	/** The text editor used in page 0. */
 	private JsonTextEditor textEditor;
 	/** The form editor used in page 1. */
-	private FormView formView;
+	private EntityFormView formView;
 
 	public MultiPageEditor() {
 		ResourcesPlugin.getWorkspace().addResourceChangeListener(this);
@@ -38,7 +38,7 @@ public class MultiPageEditor extends FormEditor implements IResourceChangeListen
 		if (!(editorInput instanceof IFileEditorInput))
 			throw new PartInitException("Invalid Input: Must be IFileEditorInput");
 		super.init(site, editorInput);
-		formView = new FormView(this);
+		formView = new EntityFormView(this);
 		textEditor = new JsonTextEditor();
 	}
 
@@ -60,7 +60,7 @@ public class MultiPageEditor extends FormEditor implements IResourceChangeListen
 		if (page == null) {
 			getEditor(1).doSave(monitor);
 		} else {
-			((FormView) page).doSave(monitor);
+			((EntityFormView) page).doSave(monitor);
 		}
 
 	}
