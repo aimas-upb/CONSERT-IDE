@@ -145,7 +145,9 @@ public class EntityFormView extends FormPage implements IResourceChangeListener 
 					/* Populate model with entities */
 					try {
 						ContextEntityModel cem = mapper.treeToValue(entity, ContextEntityModel.class);
-						ProjectModel.getInstance().addEntity(cem);
+						if (!ProjectModel.getInstance().getEntities().contains(cem)) {
+							ProjectModel.getInstance().addEntity(cem);
+						}
 						createLabelAndText(" Name: ", name, cem);
 						createLabelAndText(" Comment: ", comment, cem);
 					} catch (JsonProcessingException e) {
