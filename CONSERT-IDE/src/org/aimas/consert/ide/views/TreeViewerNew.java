@@ -3,12 +3,18 @@ package org.aimas.consert.ide.views;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.aimas.consert.ide.editor.EditorInputWrapper;
+import org.aimas.consert.ide.editor.MultiPageEditor;
 import org.aimas.consert.ide.model.ContextAssertionModel;
 import org.aimas.consert.ide.model.ContextEntityModel;
 import org.aimas.consert.ide.model.ProjectModel;
 import org.eclipse.core.runtime.IAdaptable;
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.MenuManager;
+import org.eclipse.jface.viewers.DoubleClickEvent;
+import org.eclipse.jface.viewers.IDoubleClickListener;
+import org.eclipse.jface.viewers.ISelection;
+import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.ITreeContentProvider;
 import org.eclipse.jface.viewers.LabelProvider;
 import org.eclipse.jface.viewers.TreeViewer;
@@ -18,20 +24,22 @@ import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Menu;
 import org.eclipse.ui.ISharedImages;
+import org.eclipse.ui.IWorkbenchPage;
+import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.part.ViewPart;
 
-public class TreeViewerNew extends ViewPart{
+public class TreeViewerNew extends ViewPart {
 	public static final String ID = "org.aimas.consert.ide.views.TreeViewerNew";
 	private static TreeViewerNew instance;
 	private TreeViewer viewer;
 	private TreeParent invisibleRoot;
 
-	class TreeObject implements IAdaptable {
+	class TreeObject<T> implements IAdaptable {
 
 		private String name;
-		private TreeParent parent;
-		private Object resource;
+		private TreeParent<T> parent;
+		private T resource;
 
 		public TreeObject(String name) {
 			this.name = name;
@@ -41,11 +49,11 @@ public class TreeViewerNew extends ViewPart{
 			return name;
 		}
 
-		public void setParent(TreeParent parent) {
+		public void setParent(TreeParent<T> parent) {
 			this.parent = parent;
 		}
 
-		public TreeParent getParent() {
+		public TreeParent<T> getParent() {
 			return parent;
 		}
 
@@ -57,34 +65,34 @@ public class TreeViewerNew extends ViewPart{
 			return null;
 		}
 
-		protected Object getResource() {
+		protected T getResource() {
 			return resource;
 		}
 
-		protected void setResource(Object resource) {
+		protected void setResource(T resource) {
 			this.resource = resource;
 		}
 	}
 
-	class TreeParent extends TreeObject {
-		private ArrayList<TreeObject> children;
+	class TreeParent<T> extends TreeObject<T> {
+		private ArrayList<TreeObject<T>> children;
 
 		public TreeParent(String name) {
 			super(name);
-			children = new ArrayList<TreeObject>();
+			children = new ArrayList<TreeObject<T>>();
 		}
 
-		public void addChild(TreeObject child) {
+		public void addChild(TreeObject<T> child) {
 			children.add(child);
 			child.setParent(this);
 		}
 
-		public void removeChild(TreeObject child) {
+		public void removeChild(TreeObject<T> child) {
 			children.remove(child);
 			child.setParent(null);
 		}
 
-		public TreeObject[] getChildren() {
+		public TreeObject<T>[] getChildren() {
 			return (TreeObject[]) children.toArray(new TreeObject[children.size()]);
 		}
 
@@ -158,25 +166,28 @@ public class TreeViewerNew extends ViewPart{
 		TreeParent root = new TreeParent("CONSERT Model elements");
 		try {
 			// create separate folders for ContextEntities and ContextAssertions
-			TreeParent entitiesParent = new TreeParent("CONSERT ContextEntities");
+			TreeParent<ContextEntityModel> entitiesParent = new TreeParent<ContextEntityModel>(
+					"CONSERT ContextEntities");
 			root.addChild(entitiesParent);
-			TreeParent assertionsParent = new TreeParent("CONSERT ContextAssertions");
+			TreeParent<ContextAssertionModel> assertionsParent = new TreeParent<ContextAssertionModel>(
+					"CONSERT ContextAssertions");
 			root.addChild(assertionsParent);
-			
-			// get the list of entities and assertions from the projectWideModel instance
+
+			// get the list of entities and assertions from the projectWideModel
+			// instance
 			List<ContextEntityModel> entities = projectWideModel.getEntities();
 			List<ContextAssertionModel> assertions = projectWideModel.getAssertions();
-						
-			//add entities to the tree
+
+			// add entities to the tree
 			for (ContextEntityModel ent : entities) {
-				TreeObject obj = new TreeObject(ent.getName());
+				TreeObject<ContextEntityModel> obj = new TreeObject<ContextEntityModel>(ent.getName());
 				obj.setResource(ent);
 				entitiesParent.addChild(obj);
 			}
-			
-			//add assertions to the tree
+
+			// add assertions to the tree
 			for (ContextAssertionModel ass : assertions) {
-				TreeObject obj = new TreeObject(ass.getName());
+				TreeObject<ContextAssertionModel> obj = new TreeObject<ContextAssertionModel>(ass.getName());
 				obj.setResource(ass);
 				assertionsParent.addChild(obj);
 			}
@@ -191,7 +202,7 @@ public class TreeViewerNew extends ViewPart{
 	public TreeViewerNew() {
 		instance = this;
 	}
-	
+
 	public static TreeViewerNew getInstance() {
 		if (instance == null) {
 			instance = new TreeViewerNew();
@@ -205,33 +216,31 @@ public class TreeViewerNew extends ViewPart{
 		viewer.setLabelProvider(new ViewLabelProvider());
 		viewer.setInput(getViewSite());
 		hookContextMenu();
-		// hookDoubleCLickAction();
+		hookDoubleCLickAction();
 	}
 
-	// private void hookDoubleCLickAction() {
-	// viewer.addDoubleClickListener(new IDoubleClickListener() {
-	// public void doubleClick(DoubleClickEvent event) {
-	// ISelection selection = event.getSelection();
-	// Object obj = ((IStructuredSelection) selection).getFirstElement();
-	// if (!(obj instanceof TreeObject)) {
-	// return;
-	// } else {
-	// TreeObject tempObj = (TreeObject) obj;
-	// IFile ifile =
-	// ResourcesPlugin.getWorkspace().getRoot().getFile(tempObj.getResource().getFullPath());
-	// IWorkbenchPage dpage =
-	// TreeViewerNew.this.getViewSite().getWorkbenchWindow().getActivePage();
-	// if (dpage != null) {
-	// try {
-	// IDE.openEditor(dpage, ifile, true);
-	// } catch (Exception e) {
-	// // log exception
-	// }
-	// }
-	// }
-	// };
-	// });
-	// }
+	private void hookDoubleCLickAction() {
+		viewer.addDoubleClickListener(new IDoubleClickListener() {
+			public void doubleClick(DoubleClickEvent event) {
+				ISelection selection = event.getSelection();
+				Object obj = ((IStructuredSelection) selection).getFirstElement();
+				if (!(obj instanceof TreeObject)) {
+					return;
+				}
+
+				// get the page
+				IWorkbenchPage page = TreeViewerNew.this.getViewSite().getWorkbenchWindow().getActivePage();
+				try {
+					TreeObject treeObject = (TreeObject) obj;
+					System.out.println(treeObject.getName());
+					page.openEditor(new EditorInputWrapper(treeObject.getName()), MultiPageEditor.ID);
+				} catch (PartInitException e) {
+					throw new RuntimeException(e);
+				}
+			};
+		});
+
+	}
 
 	private void hookContextMenu() {
 		MenuManager menuMgr = new MenuManager("#PopupMenu");

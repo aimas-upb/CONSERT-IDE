@@ -10,7 +10,6 @@ import org.eclipse.core.resources.IResourceChangeListener;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
-import org.eclipse.jface.text.IDocument;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.ModifyEvent;
 import org.eclipse.swt.events.ModifyListener;
@@ -25,29 +24,25 @@ import org.eclipse.ui.forms.widgets.FormToolkit;
 import org.eclipse.ui.forms.widgets.ScrolledForm;
 import org.eclipse.ui.part.FileEditorInput;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 
-public class FormView extends FormPage implements IResourceChangeListener {
+public class EntityFormView extends FormPage implements IResourceChangeListener {
 	private MultiPageEditor editor;
 	private ScrolledForm form;
 	private boolean isDirty;
-	private JsonNode rootNode;
 	private ObjectMapper mapper;
 
-	public FormView(MultiPageEditor editor) {
-			super(editor, "first", "FormView");
-			this.editor = editor;
-			isDirty = false;
-			ResourcesPlugin.getWorkspace().addResourceChangeListener(this);
-		}
+	public EntityFormView(MultiPageEditor editor) {
+		super(editor, "first", "EntityFormView");
+		this.editor = editor;
+		isDirty = false;
+		ResourcesPlugin.getWorkspace().addResourceChangeListener(this);
+	}
 
 	private String getContent() {
-		IDocument doc = editor.getTextEditor().getDocumentProvider()
-				.getDocument(editor.getTextEditor().getEditorInput());
-		String content = doc.get();
+		String content = editor.getEditorInput().getName();
 		System.out.println(content);
 		return content;
 	}
@@ -83,6 +78,7 @@ public class FormView extends FormPage implements IResourceChangeListener {
 	public void doSave(IProgressMonitor monitor) {
 		IPath path = ((FileEditorInput) editor.getEditorInput()).getPath();
 		try {
+			JsonNode rootNode = ProjectModel.getInstance().getRootNode();
 			((ObjectNode) rootNode).withArray("ContextEntities").removeAll();
 			for (Object cem : ProjectModel.getInstance().getEntities()) {
 				System.out.println("[doSave] new map values: " + ProjectModel.getInstance().getEntities());
@@ -92,8 +88,6 @@ public class FormView extends FormPage implements IResourceChangeListener {
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
-
-		/* TODO: Saving for assertion as well */
 
 		isDirty = false;
 		firePropertyChange(PROP_DIRTY);
@@ -115,51 +109,20 @@ public class FormView extends FormPage implements IResourceChangeListener {
 			return;
 		}
 
+		ContextEntityModel cem = ProjectModel.getInstance().getEntityByName(content);
 		mapper = new ObjectMapper();
-		try {
-			rootNode = mapper.readTree(content);
-		} catch (JsonProcessingException e) {
-			e.printStackTrace();
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
+		JsonNode entity = mapper.valueToTree(cem);
 
-		System.out.println("Form View parsed: " + rootNode.toString());
-		// if (rootNode.has("ContextAssertions")) {
-		// ArrayNode assertions = (ArrayNode)
-		// rootNode.get("ContextAssertions");
-		// for (JsonNode assertion : assertions) {
-		// String name = assertion.get("name").asText();
-		String nodeName = "ContextEntities";
-		ProjectModel.getInstance().getEntities().clear();
-		ProjectModel.getInstance().setRootNode(rootNode);
-		if (rootNode.has(nodeName)) {
-			JsonNode entities = (JsonNode) rootNode.get(nodeName);
-			if (entities.isArray()) {
-				for (JsonNode entity : entities) {
+		System.out.println("Entity Form View parsed: " + entity.toString());
 
-					String name = entity.get("name").asText();
-					String comment = entity.get("comment").asText();
-					Label nameLabel = new Label(form.getBody(), SWT.NONE);
-					nameLabel.setText(" ContextEntitity: ");
-					new Label(form.getBody(), SWT.NONE);
+		String name = entity.get("name").asText();
+		String comment = entity.get("comment").asText();
+		Label nameLabel = new Label(form.getBody(), SWT.NONE);
+		nameLabel.setText(" ContextEntitity: ");
+		new Label(form.getBody(), SWT.NONE);
 
-					/* Populate model with entities */
-					try {
-						ContextEntityModel cem = mapper.treeToValue(entity, ContextEntityModel.class);
-						// if
-						// (!ProjectModel.getInstance().getEntities().contains(cem))
-						// {
-						ProjectModel.getInstance().addEntity(cem);
-						// }
-						createLabelAndText(" Name: ", name, cem);
-						createLabelAndText(" Comment: ", comment, cem);
-					} catch (JsonProcessingException e) {
-						e.printStackTrace();
-					}
-				}
-			}
-		}
+		createLabelAndText(" Name: ", name, cem);
+		createLabelAndText(" Comment: ", comment, cem);
 	}
 
 	@Override
