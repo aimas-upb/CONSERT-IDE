@@ -12,13 +12,15 @@ import org.eclipse.ui.IFileEditorInput;
 import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.editors.text.TextEditor;
 import org.eclipse.ui.forms.editor.FormEditor;
+import org.eclipse.ui.forms.editor.FormPage;
 import org.eclipse.ui.forms.editor.IFormPage;
 
 public class MultiPageEditor extends FormEditor implements IResourceChangeListener {
 	/** The text editor used in page 0. */
 	private JsonTextEditor textEditor;
 	/** The form editor used in page 1. */
-	private EntityFormView formView;
+	private FormPage formView;
+	public final static String ID = "org.aimas.consert.ide.editor.ConsertEditor";
 
 	public MultiPageEditor() {
 		ResourcesPlugin.getWorkspace().addResourceChangeListener(this);
@@ -35,11 +37,17 @@ public class MultiPageEditor extends FormEditor implements IResourceChangeListen
 
 	@Override
 	public void init(IEditorSite site, IEditorInput editorInput) throws PartInitException {
-		if (!(editorInput instanceof IFileEditorInput))
-			throw new PartInitException("Invalid Input: Must be IFileEditorInput");
 		super.init(site, editorInput);
-		formView = new EntityFormView(this);
-		textEditor = new JsonTextEditor();
+		if ((editorInput instanceof EditorInputWrapper)) {
+			formView = new EntityFormView(this);
+			textEditor = new JsonTextEditor();
+		}
+		else if ((editorInput instanceof IFileEditorInput)) {
+			formView = new FormView(this);
+			textEditor = new JsonTextEditor();
+		} else {
+			throw new PartInitException("Invalid Input: Must be IFileEditorInput");
+		}
 	}
 
 	@Override
@@ -49,7 +57,9 @@ public class MultiPageEditor extends FormEditor implements IResourceChangeListen
 			int index = addPage(textEditor, getEditorInput());
 			setPageText(index, "SourceView");
 		} catch (PartInitException e) {
-			ErrorDialog.openError(getSite().getShell(), "Error creating nested editors! ", null, e.getStatus());
+			ErrorDialog.openError(getSite().getShell(),
+					"Boss, error creating nested editors in L:60(MultiPageEditor.java) ", null,
+					e.getStatus());
 		}
 
 	}
