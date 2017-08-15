@@ -3,19 +3,18 @@ package org.aimas.consert.ide.views;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.aimas.consert.ide.editor.EditorInputWrapper;
 import org.aimas.consert.ide.editor.MultiPageEditor;
 import org.aimas.consert.ide.model.ContextAssertionModel;
 import org.aimas.consert.ide.model.ContextEntityModel;
 import org.aimas.consert.ide.model.ProjectModel;
-import org.aimas.consert.ide.views.TreeViewerNew.TreeObject;
-import org.aimas.consert.ide.views.TreeViewerNew.TreeParent;
-import org.eclipse.core.resources.IFile;
-import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.IAdaptable;
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.MenuManager;
 import org.eclipse.jface.viewers.DoubleClickEvent;
+import org.eclipse.jface.viewers.IDoubleClickListener;
 import org.eclipse.jface.viewers.ISelection;
+import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.ITreeContentProvider;
 import org.eclipse.jface.viewers.LabelProvider;
 import org.eclipse.jface.viewers.TreeViewer;
@@ -28,11 +27,7 @@ import org.eclipse.ui.ISharedImages;
 import org.eclipse.ui.IWorkbenchPage;
 import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.PlatformUI;
-import org.eclipse.ui.handlers.HandlerUtil;
-import org.eclipse.ui.ide.IDE;
 import org.eclipse.ui.part.ViewPart;
-import org.eclipse.jface.viewers.IDoubleClickListener;
-import org.eclipse.jface.viewers.IStructuredSelection;
 
 public class TreeViewerNew extends ViewPart {
 	public static final String ID = "org.aimas.consert.ide.views.TreeViewerNew";
@@ -231,17 +226,16 @@ public class TreeViewerNew extends ViewPart {
 				Object obj = ((IStructuredSelection) selection).getFirstElement();
 				if (!(obj instanceof TreeObject)) {
 					return;
-				} else {
+				}
 
-					// get the page
-					IWorkbenchPage page = TreeViewerNew.this.getViewSite().getWorkbenchWindow().getActivePage();
-					MultiPageEditor editor = new MultiPageEditor(obj);
-					try {
-						page.openEditor(editor, MultiPageEditor.ID);
-					} catch (PartInitException e) {
-						throw new RuntimeException(e);
-					}
-
+				// get the page
+				IWorkbenchPage page = TreeViewerNew.this.getViewSite().getWorkbenchWindow().getActivePage();
+				try {
+					TreeObject treeObject = (TreeObject) obj;
+					System.out.println(treeObject.getName());
+					page.openEditor(new EditorInputWrapper(treeObject.getName()), MultiPageEditor.ID);
+				} catch (PartInitException e) {
+					throw new RuntimeException(e);
 				}
 			};
 		});
