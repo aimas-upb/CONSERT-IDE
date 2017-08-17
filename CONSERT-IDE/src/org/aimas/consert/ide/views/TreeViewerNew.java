@@ -227,19 +227,15 @@ public class TreeViewerNew extends ViewPart {
 				if (!(obj instanceof TreeObject)) {
 					return;
 				}
-
 				// get the page
 				IWorkbenchPage page = TreeViewerNew.this.getViewSite().getWorkbenchWindow().getActivePage();
 				try {
-					TreeObject treeObject = (TreeObject) obj;
-					System.out.println(treeObject.getName());
-					page.openEditor(new EditorInputWrapper(treeObject.getName()), MultiPageEditor.ID);
+					page.openEditor(new EditorInputWrapper(((TreeObject) obj).getResource()), MultiPageEditor.ID);
 				} catch (PartInitException e) {
 					throw new RuntimeException(e);
 				}
 			};
 		});
-
 	}
 
 	private void hookContextMenu() {
@@ -259,5 +255,4 @@ public class TreeViewerNew extends ViewPart {
 	public void setFocus() {
 		viewer.getControl().setFocus();
 	}
-
 }
