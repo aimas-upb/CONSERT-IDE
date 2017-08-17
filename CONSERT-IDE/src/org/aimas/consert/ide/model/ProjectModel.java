@@ -3,13 +3,16 @@ package org.aimas.consert.ide.model;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.eclipse.core.runtime.IPath;
+
 import com.fasterxml.jackson.databind.JsonNode;
 
 public class ProjectModel {
+	private IPath path;
+	private JsonNode rootNode;
 	private static ProjectModel instance;
 	private List<ContextEntityModel> entities;
 	private List<ContextAssertionModel> assertions;
-	private JsonNode rootNode;
 
 	/**
 	 * here to defeat instantiation
@@ -24,6 +27,22 @@ public class ProjectModel {
 			instance = new ProjectModel();
 		}
 		return instance;
+	}
+
+	public void setRootNode(JsonNode rootNode) {
+		this.rootNode = rootNode;
+	}
+
+	public JsonNode getRootNode() {
+		return rootNode;
+	}
+
+	public void setPath(IPath path) {
+		this.path = path;
+	}
+
+	public IPath getPath() {
+		return path;
 	}
 
 	public List<ContextEntityModel> getEntities() {
@@ -67,13 +86,4 @@ public class ProjectModel {
 	public boolean removeEntity(ContextEntityModel cem) {
 		return entities.remove(cem);
 	}
-
-	public void setRootNode(JsonNode rootNode) {
-		this.rootNode = rootNode;
-	}
-
-	public JsonNode getRootNode() {
-		return rootNode;
-	}
-
 }
