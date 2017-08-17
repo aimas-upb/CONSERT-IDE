@@ -17,12 +17,12 @@ import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Text;
+import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.forms.IManagedForm;
 import org.eclipse.ui.forms.editor.FormPage;
 import org.eclipse.ui.forms.widgets.FormToolkit;
 import org.eclipse.ui.forms.widgets.ScrolledForm;
-import org.eclipse.ui.part.FileEditorInput;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -32,19 +32,12 @@ public class EntityFormView extends FormPage implements IResourceChangeListener 
 	private MultiPageEditor editor;
 	private ScrolledForm form;
 	private boolean isDirty;
-	private ObjectMapper mapper;
 
 	public EntityFormView(MultiPageEditor editor) {
 		super(editor, "first", "EntityFormView");
 		this.editor = editor;
 		isDirty = false;
 		ResourcesPlugin.getWorkspace().addResourceChangeListener(this);
-	}
-
-	private String getContent() {
-		String content = editor.getEditorInput().getName();
-		System.out.println(content);
-		return content;
 	}
 
 	public void createLabelAndText(String labelName, String textName, ContextEntityModel cem) {
@@ -76,8 +69,9 @@ public class EntityFormView extends FormPage implements IResourceChangeListener 
 
 	@Override
 	public void doSave(IProgressMonitor monitor) {
-		IPath path = ((FileEditorInput) editor.getEditorInput()).getPath();
+		IPath path = ProjectModel.getInstance().getPath();
 		try {
+			ObjectMapper mapper = new ObjectMapper();
 			JsonNode rootNode = ProjectModel.getInstance().getRootNode();
 			((ObjectNode) rootNode).withArray("ContextEntities").removeAll();
 			for (Object cem : ProjectModel.getInstance().getEntities()) {
@@ -98,25 +92,17 @@ public class EntityFormView extends FormPage implements IResourceChangeListener 
 	protected void createFormContent(IManagedForm managedForm) {
 		form = managedForm.getForm();
 		FormToolkit toolkit = managedForm.getToolkit();
-		form.setText(editor.getTextEditor().getEditorInput().getName());
+
+		IEditorInput ied = getEditorInput();
+		ContextEntityModel cem = (ContextEntityModel) ((EditorInputWrapper) ied).getModel();
+		form.setText(cem.getName());
 		GridLayout layout = new GridLayout();
 		form.getBody().setLayout(layout);
 		layout.numColumns = 2;
 
-		String content = getContent();
-		if (content.isEmpty()) {
-			System.err.println("File is empty!");
-			return;
-		}
-
-		ContextEntityModel cem = ProjectModel.getInstance().getEntityByName(content);
-		mapper = new ObjectMapper();
-		JsonNode entity = mapper.valueToTree(cem);
-
-		System.out.println("Entity Form View parsed: " + entity.toString());
-
-		String name = entity.get("name").asText();
-		String comment = entity.get("comment").asText();
+		System.out.println("Entity inside Entity Form View parsed: " + cem.toString());
+		String name = cem.getName();
+		String comment = cem.getComment();
 		Label nameLabel = new Label(form.getBody(), SWT.NONE);
 		nameLabel.setText(" ContextEntitity: ");
 		new Label(form.getBody(), SWT.NONE);
@@ -129,5 +115,4 @@ public class EntityFormView extends FormPage implements IResourceChangeListener 
 	public void resourceChanged(IResourceChangeEvent event) {
 		System.out.println("Reload formView");
 	}
-
 }
