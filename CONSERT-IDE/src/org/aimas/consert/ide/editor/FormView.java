@@ -5,12 +5,14 @@ import java.io.IOException;
 
 import org.aimas.consert.ide.model.ContextEntityModel;
 import org.aimas.consert.ide.model.ProjectModel;
+import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IResourceChangeEvent;
 import org.eclipse.core.resources.IResourceChangeListener;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.jface.text.IDocument;
+import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.ModifyEvent;
 import org.eclipse.swt.events.ModifyListener;
@@ -19,6 +21,7 @@ import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Text;
 import org.eclipse.ui.IEditorPart;
+import org.eclipse.ui.ISelectionService;
 import org.eclipse.ui.forms.IManagedForm;
 import org.eclipse.ui.forms.editor.FormPage;
 import org.eclipse.ui.forms.widgets.FormToolkit;
@@ -38,11 +41,11 @@ public class FormView extends FormPage implements IResourceChangeListener {
 	private ObjectMapper mapper;
 
 	public FormView(MultiPageEditor editor) {
-			super(editor, "first", "FormView");
-			this.editor = editor;
-			isDirty = false;
-			ResourcesPlugin.getWorkspace().addResourceChangeListener(this);
-		}
+		super(editor, "first", "FormView");
+		this.editor = editor;
+		isDirty = false;
+		ResourcesPlugin.getWorkspace().addResourceChangeListener(this);
+	}
 
 	private String getContent() {
 		IDocument doc = editor.getTextEditor().getDocumentProvider()
@@ -151,6 +154,12 @@ public class FormView extends FormPage implements IResourceChangeListener {
 						// (!ProjectModel.getInstance().getEntities().contains(cem))
 						// {
 						ProjectModel.getInstance().addEntity(cem);
+						/* set path to file consert.txt in ProjectModel */
+						ISelectionService service = getSite().getWorkbenchWindow().getSelectionService();
+						IStructuredSelection structured = (IStructuredSelection) service
+								.getSelection("org.eclipse.jdt.ui.PackageExplorer");
+						IFile file = (IFile) structured.getFirstElement();
+						ProjectModel.getInstance().setPath(file.getLocation());
 						// }
 						createLabelAndText(" Name: ", name, cem);
 						createLabelAndText(" Comment: ", comment, cem);
@@ -166,5 +175,4 @@ public class FormView extends FormPage implements IResourceChangeListener {
 	public void resourceChanged(IResourceChangeEvent event) {
 		System.out.println("Reload formView");
 	}
-
 }
