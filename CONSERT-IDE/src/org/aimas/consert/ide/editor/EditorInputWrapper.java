@@ -4,58 +4,22 @@ import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 
-import org.aimas.consert.ide.model.ContextEntityModel;
-import org.aimas.consert.ide.model.ProjectModel;
-import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IStorage;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.jface.resource.ImageDescriptor;
-import org.eclipse.ui.IFileEditorInput;
 import org.eclipse.ui.IPersistableElement;
+import org.eclipse.ui.IStorageEditorInput;
 
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
+public class EditorInputWrapper implements IStorageEditorInput {
+	private final Object model;
 
-public class EditorInputWrapper implements IFileEditorInput {
-	private final String name;
-
-	class StringStorage implements IStorage {
-		  @Override
-		  public InputStream getContents() throws CoreException {
-			ContextEntityModel cem = ProjectModel.getInstance().getEntityByName(name);
-			ObjectMapper mapper = new ObjectMapper();
-			JsonNode entity = mapper.valueToTree(cem);
-			return new ByteArrayInputStream(entity.toString().getBytes(StandardCharsets.UTF_8));
-		  }
-
-		@Override
-		public <T> T getAdapter(Class<T> adapter) {
-			// TODO Auto-generated method stub
-			return null;
-		}
-
-		@Override
-		public IPath getFullPath() {
-			// TODO Auto-generated method stub
-			return null;
-		}
-
-		@Override
-		public String getName() {
-			// TODO Auto-generated method stub
-			return null;
-		}
-
-		@Override
-		public boolean isReadOnly() {
-			// TODO Auto-generated method stub
-			return false;
-		}
+	public EditorInputWrapper(Object model) {
+		this.model = model;
 	}
-	
-	public EditorInputWrapper(String name) {
-		this.name = name;
+
+	public Object getModel() {
+		return model;
 	}
 
 	@Override
@@ -70,35 +34,26 @@ public class EditorInputWrapper implements IFileEditorInput {
 
 	@Override
 	public ImageDescriptor getImageDescriptor() {
-		// TODO Auto-generated method stub
 		return null;
 	}
 
 	@Override
 	public String getName() {
-		return name;
+		return this.getClass().getName();
 	}
 
 	@Override
 	public IPersistableElement getPersistable() {
-		// TODO Auto-generated method stub
 		return null;
 	}
 
 	@Override
 	public String getToolTipText() {
-		return "Displays a task";
+		return "Displays a EditorInputWrapper";
 	}
 
 	@Override
 	public <T> T getAdapter(Class<T> adapter) {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	@Override
-	public IFile getFile() {
-		// TODO Auto-generated method stub
 		return null;
 	}
 
@@ -111,8 +66,40 @@ public class EditorInputWrapper implements IFileEditorInput {
 		if (getClass() != obj.getClass())
 			return false;
 		EditorInputWrapper other = (EditorInputWrapper) obj;
-		if (name != other.name)
+		if (model != other.model)
 			return false;
 		return true;
+	}
+	
+	class StringStorage implements IStorage {
+
+		@Override
+		public InputStream getContents() throws CoreException {
+			return new ByteArrayInputStream(model.toString().getBytes(StandardCharsets.UTF_8));
+		}
+
+		@Override
+		public <T> T getAdapter(Class<T> adapter) {
+			return null;
+		}
+
+		@Override
+		public IPath getFullPath() {
+			return null;
+		}
+
+		@Override
+		public String getName() {
+			return this.getClass().getName();
+		}
+
+		@Override
+		public boolean isReadOnly() {
+			/*
+			 * This must be false, otherwise the editor can't edit the text
+			 * inside.
+			 */
+			return false;
+		}
 	}
 }

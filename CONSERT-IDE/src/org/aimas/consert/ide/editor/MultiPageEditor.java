@@ -16,10 +16,10 @@ import org.eclipse.ui.forms.editor.FormPage;
 import org.eclipse.ui.forms.editor.IFormPage;
 
 public class MultiPageEditor extends FormEditor implements IResourceChangeListener {
-	/** The text editor used in page 0. */
-	private JsonTextEditor textEditor;
-	/** The form editor used in page 1. */
+	/** The form editor used in page 0. */
 	private FormPage formView;
+	/** The text editor used in page 1. */
+	private JsonTextEditor textEditor;
 	public final static String ID = "org.aimas.consert.ide.editor.ConsertEditor";
 
 	public MultiPageEditor() {
@@ -41,8 +41,7 @@ public class MultiPageEditor extends FormEditor implements IResourceChangeListen
 		if ((editorInput instanceof EditorInputWrapper)) {
 			formView = new EntityFormView(this);
 			textEditor = new JsonTextEditor();
-		}
-		else if ((editorInput instanceof IFileEditorInput)) {
+		} else if ((editorInput instanceof IFileEditorInput)) {
 			formView = new FormView(this);
 			textEditor = new JsonTextEditor();
 		} else {
@@ -57,9 +56,9 @@ public class MultiPageEditor extends FormEditor implements IResourceChangeListen
 			int index = addPage(textEditor, getEditorInput());
 			setPageText(index, "SourceView");
 		} catch (PartInitException e) {
+			e.printStackTrace();
 			ErrorDialog.openError(getSite().getShell(),
-					"Boss, error creating nested editors in L:60(MultiPageEditor.java) ", null,
-					e.getStatus());
+					"Boss, error creating nested editors in L:60(MultiPageEditor.java) ", null, e.getStatus());
 		}
 
 	}
@@ -92,5 +91,4 @@ public class MultiPageEditor extends FormEditor implements IResourceChangeListen
 	public void resourceChanged(IResourceChangeEvent event) {
 		System.out.println("Reload MultiPageEditor");
 	}
-
 }
