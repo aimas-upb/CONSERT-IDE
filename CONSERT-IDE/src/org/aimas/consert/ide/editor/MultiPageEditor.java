@@ -1,8 +1,6 @@
 package org.aimas.consert.ide.editor;
 
-import org.aimas.consert.ide.editor.assertion.AssertionFormView;
 import org.aimas.consert.ide.editor.entity.EntityFormView;
-import org.aimas.consert.ide.model.ContextAssertionModel;
 import org.eclipse.core.resources.IResourceChangeEvent;
 import org.eclipse.core.resources.IResourceChangeListener;
 import org.eclipse.core.resources.ResourcesPlugin;
@@ -41,17 +39,12 @@ public class MultiPageEditor extends FormEditor implements IResourceChangeListen
 	@Override
 	public void init(IEditorSite site, IEditorInput editorInput) throws PartInitException {
 		super.init(site, editorInput);
-		if ((editorInput instanceof EditorInputWrapper)) {
-			Object model = ((EditorInputWrapper) editorInput).getModel();
-			if (model instanceof ContextAssertionModel) {
-				formView = new AssertionFormView(this);
-			}
-			textEditor = new JsonTextEditor();
-		} else if ((editorInput instanceof IFileEditorInput)) {
+		if ((editorInput instanceof IFileEditorInput)) {
 			formView = new FormView(this);
 			textEditor = new JsonTextEditor();
-		} else {
-			throw new PartInitException("Invalid Input: Must be EditorInputWrapper or IFileEditorInput");
+		} else if (!(editorInput instanceof EditorInputWrapper)) {
+			throw new PartInitException(
+					"Invalid Input in MultiPageEditor: Must be EditorInputWrapper or IFileEditorInput");
 		}
 	}
 
