@@ -32,15 +32,17 @@ public class EntityFormView extends FormPage implements IResourceChangeListener 
 	private MultiPageEditor editor;
 	private ScrolledForm form;
 	private boolean isDirty;
+	private ContextEntityModel cem;
+	public static final String ID = "org.aimas.consert.ide.editor.EntityFormView";
 
 	public EntityFormView(MultiPageEditor editor) {
-		super(editor, "first", "EntityFormView");
+		super(editor, ID, "EntityFormView");
 		this.editor = editor;
 		isDirty = false;
 		ResourcesPlugin.getWorkspace().addResourceChangeListener(this);
 	}
 
-	public void createLabelAndText(String labelName, String textName, ContextEntityModel cem) {
+	public void createLabelAndText(String labelName, String textName) {
 		Label nameLabel = new Label(form.getBody(), SWT.NONE);
 		nameLabel.setText(labelName);
 		Text nameText = new Text(form.getBody(), SWT.BORDER | SWT.SINGLE);
@@ -94,7 +96,7 @@ public class EntityFormView extends FormPage implements IResourceChangeListener 
 		FormToolkit toolkit = managedForm.getToolkit();
 
 		IEditorInput ied = getEditorInput();
-		ContextEntityModel cem = (ContextEntityModel) ((EditorInputWrapper) ied).getModel();
+		cem = (ContextEntityModel) ((EditorInputWrapper) ied).getModel();
 		form.setText(cem.getName());
 		GridLayout layout = new GridLayout();
 		form.getBody().setLayout(layout);
@@ -107,12 +109,12 @@ public class EntityFormView extends FormPage implements IResourceChangeListener 
 		nameLabel.setText(" ContextEntitity: ");
 		new Label(form.getBody(), SWT.NONE);
 
-		createLabelAndText(" Name: ", name, cem);
-		createLabelAndText(" Comment: ", comment, cem);
+		createLabelAndText(" Name: ", name);
+		createLabelAndText(" Comment: ", comment);
 	}
 
 	@Override
 	public void resourceChanged(IResourceChangeEvent event) {
-		System.out.println("Reload formView");
+		System.out.println("Reload EntityformView");
 	}
 }
