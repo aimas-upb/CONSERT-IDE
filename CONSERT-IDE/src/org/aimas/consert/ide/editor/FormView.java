@@ -3,6 +3,7 @@ package org.aimas.consert.ide.editor;
 import java.io.File;
 import java.io.IOException;
 
+import org.aimas.consert.ide.model.ContextAssertionModel;
 import org.aimas.consert.ide.model.ContextEntityModel;
 import org.aimas.consert.ide.model.ProjectModel;
 import org.eclipse.core.resources.IFile;
@@ -128,19 +129,18 @@ public class FormView extends FormPage implements IResourceChangeListener {
 		}
 
 		System.out.println("Form View parsed: " + rootNode.toString());
-		// if (rootNode.has("ContextAssertions")) {
-		// ArrayNode assertions = (ArrayNode)
-		// rootNode.get("ContextAssertions");
-		// for (JsonNode assertion : assertions) {
-		// String name = assertion.get("name").asText();
+		ProjectModel.getInstance().setRootNode(rootNode);
+
+		/*
+		 * This code populates the view and the model with the found ENTITIES
+		 * from the rootNode
+		 */
 		String nodeName = "ContextEntities";
 		ProjectModel.getInstance().getEntities().clear();
-		ProjectModel.getInstance().setRootNode(rootNode);
 		if (rootNode.has(nodeName)) {
 			JsonNode entities = (JsonNode) rootNode.get(nodeName);
 			if (entities.isArray()) {
 				for (JsonNode entity : entities) {
-
 					String name = entity.get("name").asText();
 					String comment = entity.get("comment").asText();
 					Label nameLabel = new Label(form.getBody(), SWT.NONE);
@@ -163,6 +163,34 @@ public class FormView extends FormPage implements IResourceChangeListener {
 						// }
 						createLabelAndText(" Name: ", name, cem);
 						createLabelAndText(" Comment: ", comment, cem);
+					} catch (JsonProcessingException e) {
+						e.printStackTrace();
+					}
+				}
+			}
+		}
+
+		/*
+		 * This code populates the view and the model with the found ASSERTIONS
+		 * from the rootNode
+		 */
+		nodeName = "ContextAssertions";
+		ProjectModel.getInstance().getAssertions().clear();
+		if (rootNode.has(nodeName)) {
+			JsonNode assertions = (JsonNode) rootNode.get(nodeName);
+			if (assertions.isArray()) {
+				for (JsonNode assertion : assertions) {
+//					String name = assertion.get("name").asText();
+//					String comment = assertion.get("comment").asText();
+//					String arrity = assertion.get("arrity").asText();
+//					
+//					
+//					Label nameLabel = new Label(form.getBody(), SWT.NONE);
+//					nameLabel.setText(" ContextAssertion: ");
+//					new Label(form.getBody(), SWT.NONE);
+					try {
+						ContextAssertionModel cam = mapper.treeToValue(assertion, ContextAssertionModel.class);
+						ProjectModel.getInstance().addAssertion(cam);
 					} catch (JsonProcessingException e) {
 						e.printStackTrace();
 					}

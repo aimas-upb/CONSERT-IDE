@@ -125,8 +125,22 @@
             default="true"
             extensions="txt"
             filenames="consert.txt"
-            id="org.aimas.consert.ide.editor.ConsertEditor"
-            name="ConsertEditor">
+            id="org.aimas.consert.ide.editor.MultiPageEditor"
+            name="ConsertMultiPageEditor">
+      </editor>
+      <editor
+            class="org.aimas.consert.ide.editor.entity.EntityMultiPageEditor"
+            contributorClass="org.aimas.consert.ide.editor.MultiPageEditorContributor"
+            default="false"
+            id="org.aimas.consert.ide.editor.entity.EntityMultiPageEditor"
+            name="ConsertEntityMultiPageEditor">
+      </editor>
+      <editor
+            class="org.aimas.consert.ide.editor.assertion.AssertionMultiPageEditor"
+            contributorClass="org.aimas.consert.ide.editor.MultiPageEditorContributor"
+            default="false"
+            id="org.aimas.consert.ide.editor.assertion.AssertionMultiPageEditor"
+            name="ContextAssertionMultiPageEditor">
       </editor>
    </extension>
    <extension
