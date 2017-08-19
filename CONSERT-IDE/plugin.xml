@@ -125,8 +125,14 @@
             default="true"
             extensions="txt"
             filenames="consert.txt"
-            id="org.aimas.consert.ide.editor.ConsertEditor"
-            name="ConsertEditor">
+            id="org.aimas.consert.ide.editor.MultiPageEditor"
+            name="ConsertMultiPageEditor">
+      </editor>
+      <editor
+            class="org.aimas.consert.ide.editor.entity.EntityMultiPageEditor"
+            default="false"
+            id="org.aimas.consert.ide.editor.entity.EntityMultiPageEditor"
+            name="ConsertEntityMultiPageEditor">
       </editor>
    </extension>
    <extension

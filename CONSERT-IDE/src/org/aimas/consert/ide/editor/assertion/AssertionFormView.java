@@ -1,7 +1,9 @@
-package org.aimas.consert.ide.editor;
+package org.aimas.consert.ide.editor.assertion;
 
 import java.util.List;
 
+import org.aimas.consert.ide.editor.EditorInputWrapper;
+import org.aimas.consert.ide.editor.MultiPageEditor;
 import org.aimas.consert.ide.model.ContextAssertionModel;
 import org.aimas.consert.ide.model.ContextEntityModel;
 import org.aimas.consert.ide.model.ProjectModel;

@@ -5,6 +5,7 @@ import java.util.List;
 
 import org.aimas.consert.ide.editor.EditorInputWrapper;
 import org.aimas.consert.ide.editor.MultiPageEditor;
+import org.aimas.consert.ide.editor.entity.EntityMultiPageEditor;
 import org.aimas.consert.ide.model.ContextAssertionModel;
 import org.aimas.consert.ide.model.ContextEntityModel;
 import org.aimas.consert.ide.model.ProjectModel;
@@ -230,7 +231,11 @@ public class TreeViewerNew extends ViewPart {
 				// get the page
 				IWorkbenchPage page = TreeViewerNew.this.getViewSite().getWorkbenchWindow().getActivePage();
 				try {
-					page.openEditor(new EditorInputWrapper(((TreeObject) obj).getResource()), MultiPageEditor.ID);
+					Object model = ((TreeObject) obj).getResource();
+					if (model instanceof ContextEntityModel) {
+						page.openEditor(new EditorInputWrapper((ContextEntityModel) model), EntityMultiPageEditor.ID);
+					} else
+						page.openEditor(new EditorInputWrapper(((TreeObject) obj).getResource()), MultiPageEditor.ID);
 				} catch (PartInitException e) {
 					throw new RuntimeException(e);
 				}

@@ -1,7 +1,8 @@
 package org.aimas.consert.ide.editor;
 
+import org.aimas.consert.ide.editor.assertion.AssertionFormView;
+import org.aimas.consert.ide.editor.entity.EntityFormView;
 import org.aimas.consert.ide.model.ContextAssertionModel;
-import org.aimas.consert.ide.model.ContextEntityModel;
 import org.eclipse.core.resources.IResourceChangeEvent;
 import org.eclipse.core.resources.IResourceChangeListener;
 import org.eclipse.core.resources.ResourcesPlugin;
@@ -19,10 +20,10 @@ import org.eclipse.ui.forms.editor.IFormPage;
 
 public class MultiPageEditor extends FormEditor implements IResourceChangeListener {
 	/** The form editor used in page 0. */
-	private FormPage formView;
+	protected FormPage formView;
 	/** The text editor used in page 1. */
-	private JsonTextEditor textEditor;
-	public final static String ID = "org.aimas.consert.ide.editor.ConsertEditor";
+	protected JsonTextEditor textEditor;
+	public final static String ID = "org.aimas.consert.ide.editor.MultiPageEditor";
 
 	public MultiPageEditor() {
 		ResourcesPlugin.getWorkspace().addResourceChangeListener(this);
@@ -42,9 +43,7 @@ public class MultiPageEditor extends FormEditor implements IResourceChangeListen
 		super.init(site, editorInput);
 		if ((editorInput instanceof EditorInputWrapper)) {
 			Object model = ((EditorInputWrapper) editorInput).getModel();
-			if (model instanceof ContextEntityModel) {
-				formView = new EntityFormView(this);
-			} else if (model instanceof ContextAssertionModel) {
+			if (model instanceof ContextAssertionModel) {
 				formView = new AssertionFormView(this);
 			}
 			textEditor = new JsonTextEditor();
@@ -67,7 +66,6 @@ public class MultiPageEditor extends FormEditor implements IResourceChangeListen
 			ErrorDialog.openError(getSite().getShell(),
 					"Boss, error creating nested editors in L:60(MultiPageEditor.java) ", null, e.getStatus());
 		}
-
 	}
 
 	@Override
@@ -78,7 +76,6 @@ public class MultiPageEditor extends FormEditor implements IResourceChangeListen
 		} else {
 			((EntityFormView) page).doSave(monitor);
 		}
-
 	}
 
 	@Override

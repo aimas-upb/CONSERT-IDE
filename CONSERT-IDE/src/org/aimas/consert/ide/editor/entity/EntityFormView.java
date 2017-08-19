@@ -1,8 +1,9 @@
-package org.aimas.consert.ide.editor;
+package org.aimas.consert.ide.editor.entity;
 
 import java.io.File;
 import java.io.IOException;
 
+import org.aimas.consert.ide.editor.EditorInputWrapper;
 import org.aimas.consert.ide.model.ContextEntityModel;
 import org.aimas.consert.ide.model.ProjectModel;
 import org.eclipse.core.resources.IResourceChangeEvent;
@@ -29,15 +30,15 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 
 public class EntityFormView extends FormPage implements IResourceChangeListener {
-	private MultiPageEditor editor;
+	private EntityMultiPageEditor editor;
 	private ScrolledForm form;
 	private boolean isDirty;
 	private ContextEntityModel cem;
 	public static final String ID = "org.aimas.consert.ide.editor.EntityFormView";
 
-	public EntityFormView(MultiPageEditor editor) {
-		super(editor, ID, "EntityFormView");
-		this.editor = editor;
+	public EntityFormView(EntityMultiPageEditor entityMultiPageEditor) {
+		super(entityMultiPageEditor, ID, "EntityFormView");
+		this.editor = entityMultiPageEditor;
 		isDirty = false;
 		ResourcesPlugin.getWorkspace().addResourceChangeListener(this);
 	}
