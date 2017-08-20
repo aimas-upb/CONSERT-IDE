@@ -50,13 +50,11 @@ public class JsonParser {
 			if (rootNode.has("ContextAssertions") && model instanceof ContextAssertionModel) {
 				((ObjectNode) rootNode).withArray("ContextAssertions").add(mapper.valueToTree(model));
 				for (JsonNode entity : rootNode.get("ContextAssertions"))
-					ProjectModel.getInstance()
-							.addAssertion(mapper.treeToValue(entity, ContextAssertionModel.class));
+					ProjectModel.getInstance().addAssertion(mapper.treeToValue(entity, ContextAssertionModel.class));
 			} else if (rootNode.has("ContextEntities") && model instanceof ContextEntityModel) {
 				((ObjectNode) rootNode).withArray("ContextEntities").add(mapper.valueToTree(model));
 				for (JsonNode entity : rootNode.get("ContextEntities"))
-					ProjectModel.getInstance()
-							.addEntity(mapper.treeToValue(entity, ContextEntityModel.class));
+					ProjectModel.getInstance().addEntity(mapper.treeToValue(entity, ContextEntityModel.class));
 			} else {
 				System.out.println("RootNode does not have this node");
 				return false;

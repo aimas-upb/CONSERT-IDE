@@ -95,9 +95,12 @@ public class AssertionFormView extends FormPage implements IResourceChangeListen
 				firePropertyChange(IEditorPart.PROP_DIRTY);
 				editor.editorDirtyStateChanged();
 
+				/*
+				 * This entity belongs to an assertion, and is not present in
+				 * the getEntities() of the ProjectModel!!!
+				 */
 				List<ContextEntityModel> entities = ProjectModel.getInstance().getAssertionByName(cam.getName())
 						.getEntities();
-
 				for (ContextEntityModel entity : entities) {
 					if (entity.equals(cem)) {
 						if (labelName.equals(" Name: ")) {

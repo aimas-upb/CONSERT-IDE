@@ -2,6 +2,7 @@ package org.aimas.consert.ide.editor;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.List;
 
 import org.aimas.consert.ide.model.ContextAssertionModel;
 import org.aimas.consert.ide.model.ContextEntityModel;
@@ -48,15 +49,136 @@ public class FormView extends FormPage implements IResourceChangeListener {
 		ResourcesPlugin.getWorkspace().addResourceChangeListener(this);
 	}
 
-	private String getContent() {
+	private void populateProjectModel() {
 		IDocument doc = editor.getTextEditor().getDocumentProvider()
 				.getDocument(editor.getTextEditor().getEditorInput());
 		String content = doc.get();
-		System.out.println(content);
-		return content;
+
+		if (content.isEmpty()) {
+			System.err.println("File is completely empty!");
+			return;
+		}
+
+		mapper = new ObjectMapper();
+		try {
+			rootNode = mapper.readTree(content);
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+
+		System.out.println("Form View parsed: " + rootNode.toString());
+		ProjectModel.getInstance().setRootNode(rootNode);
+		/* set path to file consert.txt in ProjectModel */
+		ISelectionService service = getSite().getWorkbenchWindow().getSelectionService();
+		IStructuredSelection structured = (IStructuredSelection) service
+				.getSelection("org.eclipse.jdt.ui.PackageExplorer");
+		IFile file = (IFile) structured.getFirstElement();
+		ProjectModel.getInstance().setPath(file.getLocation());
+
+		/*
+		 * This code populates the view and the model with the found ENTITIES
+		 * from the rootNode
+		 */
+		String nodeName = "ContextEntities";
+		ProjectModel.getInstance().getEntities().clear();
+		if (!rootNode.has(nodeName)) {
+			System.err.println("File does not have a ContextEntities JsonNode");
+			JsonNode entities = (JsonNode) rootNode.get(nodeName);
+			if (entities.isArray() && entities.size() > 0) {
+				for (JsonNode entity : entities) {
+					try {
+						/* Populate model with entities */
+						ContextEntityModel cem = mapper.treeToValue(entity, ContextEntityModel.class);
+						ProjectModel.getInstance().addEntity(cem);
+					} catch (JsonProcessingException e) {
+						e.printStackTrace();
+					}
+				}
+			} else {
+				System.err.println("JsonNode has no ContextEntities");
+			}
+		} else {
+			System.err.println("ContextEntities JsonNode has no entities");
+		}
+
+		/*
+		 * This code populates the view and the model with the found ASSERTIONS
+		 * from the rootNode
+		 */
+		nodeName = "ContextAssertions";
+		ProjectModel.getInstance().getAssertions().clear();
+		if (rootNode.has(nodeName)) {
+			JsonNode assertions = (JsonNode) rootNode.get(nodeName);
+			if (assertions.isArray() && assertions.size() > 0) {
+				for (JsonNode assertion : assertions) {
+					try {
+						/* Populate model with assertions */
+						ContextAssertionModel cam = mapper.treeToValue(assertion, ContextAssertionModel.class);
+						ProjectModel.getInstance().addAssertion(cam);
+					} catch (JsonProcessingException e) {
+						e.printStackTrace();
+					}
+				}
+			} else {
+				System.err.println("ContextAssertions JsonNode has no assertions");
+			}
+		} else {
+			System.err.println("File does not have a ContextAssertions JsonNode");
+		}
+
 	}
 
-	public void createLabelAndText(String labelName, String textName, ContextEntityModel cem) {
+	/*
+	 * this method is used for both entities that do not belong to an assertion
+	 * and entities that do, the difference is: those with no assertion are
+	 * being called with a NULL assertion
+	 */
+	public void createLabelAndTextForEntity(String labelName, String textName, ContextAssertionModel cam,
+			ContextEntityModel cem) {
+		Label nameLabel = new Label(form.getBody(), SWT.NONE);
+		nameLabel.setText(labelName);
+		Text nameText = new Text(form.getBody(), SWT.BORDER | SWT.SINGLE);
+		if (textName == null) {
+			textName = "";
+		}
+		nameText.setText(textName);
+		nameText.setLayoutData(new GridData(100, 10));
+		nameText.addModifyListener(new ModifyListener() {
+
+			@Override
+			public void modifyText(ModifyEvent e) {
+				isDirty = true;
+				firePropertyChange(IEditorPart.PROP_DIRTY);
+				editor.editorDirtyStateChanged();
+
+				/*
+				 * This entity belongs to an assertion, and is not present in
+				 * the getEntities() of the ProjectModel!!!
+				 */
+				if (cam == null) { // an entity with no assertion.
+					if (labelName.equals(" Name: ")) {
+						ProjectModel.getInstance().getEntityByName(cem.getName()).setName(nameText.getText());
+					} else if (labelName.equals(" Comment: ")) {
+						ProjectModel.getInstance().getEntityByName(cem.getName()).setComment(nameText.getText());
+					}
+				} else { // an entity that belongs to an assertion
+					List<ContextEntityModel> entities = ProjectModel.getInstance().getAssertionByName(cam.getName())
+							.getEntities();
+					for (ContextEntityModel entity : entities) {
+						if (entity.equals(cem)) {
+							if (labelName.equals(" Name: ")) {
+								entity.setName(nameText.getText());
+							} else if (labelName.equals(" Comment: ")) {
+								entity.setComment(nameText.getText());
+							}
+						}
+					}
+				}
+			}
+		});
+	}
+
+	public void createLabelAndTextForAssertion(String labelName, String textName, ContextAssertionModel cam) {
 		Label nameLabel = new Label(form.getBody(), SWT.NONE);
 		nameLabel.setText(labelName);
 		Text nameText = new Text(form.getBody(), SWT.BORDER | SWT.SINGLE);
@@ -71,9 +193,17 @@ public class FormView extends FormPage implements IResourceChangeListener {
 				editor.editorDirtyStateChanged();
 
 				if (labelName.equals(" Name: ")) {
-					ProjectModel.getInstance().getEntityByName(cem.getName()).setName(nameText.getText());
-				} else if (labelName.equals(" Comment: "))
-					ProjectModel.getInstance().getEntityByName(cem.getName()).setComment(nameText.getText());
+					ProjectModel.getInstance().getAssertionByName(cam.getName()).setName(nameText.getText());
+				} else if (labelName.equals(" Comment: ")) {
+					ProjectModel.getInstance().getAssertionByName(cam.getName()).setComment(nameText.getText());
+				} else if (labelName.equals(" Arity: ")) {
+					try {
+						ProjectModel.getInstance().getAssertionByName(cam.getName())
+								.setArity(Integer.parseInt((nameText.getText())));
+					} catch (NumberFormatException exp) {
+						System.err.print("Please Introduce an Integer Arity");
+					}
+				}
 			}
 		});
 	}
@@ -113,88 +243,33 @@ public class FormView extends FormPage implements IResourceChangeListener {
 		form.getBody().setLayout(layout);
 		layout.numColumns = 2;
 
-		String content = getContent();
-		if (content.isEmpty()) {
-			System.err.println("File is empty!");
-			return;
+		populateProjectModel();
+
+		Label entitiesNameLabel = new Label(form.getBody(), SWT.NONE);
+		entitiesNameLabel.setText(" ContextEntitities: ");
+		new Label(form.getBody(), SWT.NONE);
+
+		for (ContextEntityModel cem : ProjectModel.getInstance().getEntities()) {
+			createLabelAndTextForEntity(" Name: ", cem.getName(), null, cem);
+			createLabelAndTextForEntity(" Comment: ", cem.getComment(), null, cem);
 		}
 
-		mapper = new ObjectMapper();
-		try {
-			rootNode = mapper.readTree(content);
-		} catch (JsonProcessingException e) {
-			e.printStackTrace();
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
+		Label assertionsNameLabel = new Label(form.getBody(), SWT.NONE);
+		assertionsNameLabel.setText(" ContextAssertions: ");
+		new Label(form.getBody(), SWT.NONE);
 
-		System.out.println("Form View parsed: " + rootNode.toString());
-		ProjectModel.getInstance().setRootNode(rootNode);
+		for (ContextAssertionModel cam : ProjectModel.getInstance().getAssertions()) {
+			createLabelAndTextForAssertion(" Name: ", cam.getName(), cam);
+			createLabelAndTextForAssertion(" Comment: ", cam.getComment(), cam);
+			createLabelAndTextForAssertion(" Arity: ", Integer.toString(cam.getArity()), cam);
 
-		/*
-		 * This code populates the view and the model with the found ENTITIES
-		 * from the rootNode
-		 */
-		String nodeName = "ContextEntities";
-		ProjectModel.getInstance().getEntities().clear();
-		if (rootNode.has(nodeName)) {
-			JsonNode entities = (JsonNode) rootNode.get(nodeName);
-			if (entities.isArray()) {
-				for (JsonNode entity : entities) {
-					String name = entity.get("name").asText();
-					String comment = entity.get("comment").asText();
-					Label nameLabel = new Label(form.getBody(), SWT.NONE);
-					nameLabel.setText(" ContextEntitity: ");
-					new Label(form.getBody(), SWT.NONE);
+			Label entitiesPerAssertionLabel = new Label(form.getBody(), SWT.NONE);
+			entitiesPerAssertionLabel.setText(" ContextEntities: ");
+			new Label(form.getBody(), SWT.NONE);
 
-					/* Populate model with entities */
-					try {
-						ContextEntityModel cem = mapper.treeToValue(entity, ContextEntityModel.class);
-						// if
-						// (!ProjectModel.getInstance().getEntities().contains(cem))
-						// {
-						ProjectModel.getInstance().addEntity(cem);
-						/* set path to file consert.txt in ProjectModel */
-						ISelectionService service = getSite().getWorkbenchWindow().getSelectionService();
-						IStructuredSelection structured = (IStructuredSelection) service
-								.getSelection("org.eclipse.jdt.ui.PackageExplorer");
-						IFile file = (IFile) structured.getFirstElement();
-						ProjectModel.getInstance().setPath(file.getLocation());
-						// }
-						createLabelAndText(" Name: ", name, cem);
-						createLabelAndText(" Comment: ", comment, cem);
-					} catch (JsonProcessingException e) {
-						e.printStackTrace();
-					}
-				}
-			}
-		}
-
-		/*
-		 * This code populates the view and the model with the found ASSERTIONS
-		 * from the rootNode
-		 */
-		nodeName = "ContextAssertions";
-		ProjectModel.getInstance().getAssertions().clear();
-		if (rootNode.has(nodeName)) {
-			JsonNode assertions = (JsonNode) rootNode.get(nodeName);
-			if (assertions.isArray()) {
-				for (JsonNode assertion : assertions) {
-//					String name = assertion.get("name").asText();
-//					String comment = assertion.get("comment").asText();
-//					String arrity = assertion.get("arrity").asText();
-//					
-//					
-//					Label nameLabel = new Label(form.getBody(), SWT.NONE);
-//					nameLabel.setText(" ContextAssertion: ");
-//					new Label(form.getBody(), SWT.NONE);
-					try {
-						ContextAssertionModel cam = mapper.treeToValue(assertion, ContextAssertionModel.class);
-						ProjectModel.getInstance().addAssertion(cam);
-					} catch (JsonProcessingException e) {
-						e.printStackTrace();
-					}
-				}
+			for (ContextEntityModel entity : cam.getEntities()) {
+				createLabelAndTextForEntity(" Name: ", entity.getName(), cam, entity);
+				createLabelAndTextForEntity(" Comment: ", entity.getComment(), cam, entity);
 			}
 		}
 	}
