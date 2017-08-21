@@ -1,7 +1,6 @@
 package org.aimas.consert.ide.editor.assertion;
 
 import org.aimas.consert.ide.editor.EditorInputWrapper;
-import org.aimas.consert.ide.editor.JsonTextEditor;
 import org.aimas.consert.ide.editor.MultiPageEditor;
 import org.eclipse.core.resources.IResourceChangeEvent;
 import org.eclipse.ui.IEditorInput;
@@ -18,7 +17,7 @@ public class AssertionMultiPageEditor extends MultiPageEditor {
 			throw new PartInitException("Invalid Input in AssertionMultiPageEditor: Must be EditorInputWrapper");
 		}
 		formView = new AssertionFormView(this);
-		textEditor = new JsonTextEditor();
+		textEditor = new AssertionTextEditor();
 	}
 
 	@Override
