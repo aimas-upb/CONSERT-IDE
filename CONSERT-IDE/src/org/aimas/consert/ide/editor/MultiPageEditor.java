@@ -1,6 +1,5 @@
 package org.aimas.consert.ide.editor;
 
-import org.aimas.consert.ide.editor.entity.EntityFormView;
 import org.eclipse.core.resources.IResourceChangeEvent;
 import org.eclipse.core.resources.IResourceChangeListener;
 import org.eclipse.core.resources.ResourcesPlugin;
@@ -67,7 +66,7 @@ public class MultiPageEditor extends FormEditor implements IResourceChangeListen
 		if (page == null) {
 			getEditor(1).doSave(monitor);
 		} else {
-			((EntityFormView) page).doSave(monitor);
+			page.doSave(monitor);
 		}
 	}
 

@@ -1,5 +1,7 @@
 package org.aimas.consert.ide.editor.assertion;
 
+import java.io.File;
+import java.io.IOException;
 import java.util.List;
 
 import org.aimas.consert.ide.editor.EditorInputWrapper;
@@ -10,6 +12,8 @@ import org.aimas.consert.ide.model.ProjectModel;
 import org.eclipse.core.resources.IResourceChangeEvent;
 import org.eclipse.core.resources.IResourceChangeListener;
 import org.eclipse.core.resources.ResourcesPlugin;
+import org.eclipse.core.runtime.IPath;
+import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.ModifyEvent;
 import org.eclipse.swt.events.ModifyListener;
@@ -24,28 +28,22 @@ import org.eclipse.ui.forms.editor.FormPage;
 import org.eclipse.ui.forms.widgets.FormToolkit;
 import org.eclipse.ui.forms.widgets.ScrolledForm;
 
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ObjectNode;
+
 public class AssertionFormView extends FormPage implements IResourceChangeListener {
 	private MultiPageEditor editor;
 	private ScrolledForm form;
 	private boolean isDirty;
 	private ContextAssertionModel cam;
-	public static final String ID = "org.aimas.consert.ide.editor.AssertionFormView";
+	public static final String ID = "org.aimas.consert.ide.editor.assertion.AssertionFormView";
 
 	public AssertionFormView(MultiPageEditor editor) {
 		super(editor, ID, "EntityFormView");
 		this.editor = editor;
 		isDirty = false;
 		ResourcesPlugin.getWorkspace().addResourceChangeListener(this);
-	}
-
-	@Override
-	public boolean isDirty() {
-		return isDirty;
-	}
-
-	@Override
-	public void resourceChanged(IResourceChangeEvent event) {
-		System.out.println("Reload AssertionformView");
 	}
 
 	public void createLabelAndText(String labelName, String textName) {
@@ -115,6 +113,36 @@ public class AssertionFormView extends FormPage implements IResourceChangeListen
 	}
 
 	@Override
+	public boolean isDirty() {
+		return isDirty;
+	}
+
+	@Override
+	public void doSave(IProgressMonitor monitor) {
+		IPath path = ProjectModel.getInstance().getPath();
+		ObjectMapper mapper = new ObjectMapper();
+		JsonNode rootNode = ProjectModel.getInstance().getRootNode();
+
+		/* Saving all assertions as well. */
+		((ObjectNode) rootNode).withArray("ContextAssertions").removeAll();
+		for (ContextAssertionModel cam : ProjectModel.getInstance().getAssertions()) {
+			((ObjectNode) rootNode).withArray("ContextAssertions").add(mapper.valueToTree(cam));
+		}
+		System.out.println("[doSave] maped new assertions into Json: " + ProjectModel.getInstance().getAssertions());
+
+		/* Write on disk the new Json into File, replacing the old one. */
+		try {
+			mapper.writeValue(new File(path.toString()), rootNode);
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+
+		isDirty = false;
+		firePropertyChange(PROP_DIRTY);
+		editor.editorDirtyStateChanged();
+	}
+
+	@Override
 	protected void createFormContent(IManagedForm managedForm) {
 		form = managedForm.getForm();
 		FormToolkit toolkit = managedForm.getToolkit();
@@ -144,5 +172,10 @@ public class AssertionFormView extends FormPage implements IResourceChangeListen
 			createLabelAndTextForEntity(" Name: ", entity.getName(), entity);
 			createLabelAndTextForEntity(" Comment: ", entity.getComment(), entity);
 		}
+	}
+
+	@Override
+	public void resourceChanged(IResourceChangeEvent event) {
+		System.out.println("Reload AssertionformView");
 	}
 }
