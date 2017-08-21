@@ -39,9 +39,10 @@ public class FormView extends FormPage implements IResourceChangeListener {
 	private MultiPageEditor editor;
 	private ScrolledForm form;
 	private boolean isDirty;
+	public static final String ID = "org.aimas.consert.ide.editor.FormView";
 
 	public FormView(MultiPageEditor editor) {
-		super(editor, "first", "FormView");
+		super(editor, ID, "FormView");
 		this.editor = editor;
 		isDirty = false;
 		ResourcesPlugin.getWorkspace().addResourceChangeListener(this);
@@ -211,18 +212,30 @@ public class FormView extends FormPage implements IResourceChangeListener {
 		IPath path = ((FileEditorInput) editor.getEditorInput()).getPath();
 		ObjectMapper mapper = new ObjectMapper();
 		JsonNode rootNode = ProjectModel.getInstance().getRootNode();
+
+		/*
+		 * Saving all entities, because the formView does not track them
+		 * individually, so it does not know which changed and which didn't.
+		 */
 		((ObjectNode) rootNode).withArray("ContextEntities").removeAll();
-		for (Object cem : ProjectModel.getInstance().getEntities()) {
-			System.out.println("[doSave] new map values: " + ProjectModel.getInstance().getEntities());
-			((ObjectNode) rootNode).withArray("ContextEntities").add(mapper.valueToTree((ContextEntityModel) cem));
+		for (ContextEntityModel cem : ProjectModel.getInstance().getEntities()) {
+			((ObjectNode) rootNode).withArray("ContextEntities").add(mapper.valueToTree(cem));
 		}
+		System.out.println("[doSave] maped new entities into Json: " + ProjectModel.getInstance().getEntities());
+
+		/* Saving all assertions as well. */
+		((ObjectNode) rootNode).withArray("ContextAssertions").removeAll();
+		for (ContextAssertionModel cam : ProjectModel.getInstance().getAssertions()) {
+			((ObjectNode) rootNode).withArray("ContextAssertions").add(mapper.valueToTree(cam));
+		}
+		System.out.println("[doSave] maped new assertions into Json: " + ProjectModel.getInstance().getAssertions());
+
+		/* Write on disk the new Json into File, replacing the old one. */
 		try {
 			mapper.writeValue(new File(path.toString()), rootNode);
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
-
-		/* TODO: Saving for assertion as well */
 
 		isDirty = false;
 		firePropertyChange(PROP_DIRTY);

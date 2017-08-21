@@ -34,7 +34,7 @@ public class EntityFormView extends FormPage implements IResourceChangeListener 
 	private ScrolledForm form;
 	private boolean isDirty;
 	private ContextEntityModel cem;
-	public static final String ID = "org.aimas.consert.ide.editor.EntityFormView";
+	public static final String ID = "org.aimas.consert.ide.editor.entity.EntityFormView";
 
 	public EntityFormView(EntityMultiPageEditor entityMultiPageEditor) {
 		super(entityMultiPageEditor, ID, "EntityFormView");
@@ -73,14 +73,21 @@ public class EntityFormView extends FormPage implements IResourceChangeListener 
 	@Override
 	public void doSave(IProgressMonitor monitor) {
 		IPath path = ProjectModel.getInstance().getPath();
+		ObjectMapper mapper = new ObjectMapper();
+		JsonNode rootNode = ProjectModel.getInstance().getRootNode();
+
+		/*
+		 * Saving all entities, because the formView does not track them
+		 * individually, so it does not know which changed and which didn't.
+		 */
+		((ObjectNode) rootNode).withArray("ContextEntities").removeAll();
+		for (ContextEntityModel cem : ProjectModel.getInstance().getEntities()) {
+			((ObjectNode) rootNode).withArray("ContextEntities").add(mapper.valueToTree(cem));
+		}
+		System.out.println("[doSave] maped new entities into Json: " + ProjectModel.getInstance().getEntities());
+
+		/* Write on disk the new Json into File, replacing the old one. */
 		try {
-			ObjectMapper mapper = new ObjectMapper();
-			JsonNode rootNode = ProjectModel.getInstance().getRootNode();
-			((ObjectNode) rootNode).withArray("ContextEntities").removeAll();
-			for (Object cem : ProjectModel.getInstance().getEntities()) {
-				System.out.println("[doSave] new map values: " + ProjectModel.getInstance().getEntities());
-				((ObjectNode) rootNode).withArray("ContextEntities").add(mapper.valueToTree((ContextEntityModel) cem));
-			}
 			mapper.writeValue(new File(path.toString()), rootNode);
 		} catch (IOException e) {
 			e.printStackTrace();
