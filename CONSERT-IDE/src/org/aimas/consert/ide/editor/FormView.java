@@ -39,8 +39,6 @@ public class FormView extends FormPage implements IResourceChangeListener {
 	private MultiPageEditor editor;
 	private ScrolledForm form;
 	private boolean isDirty;
-	private JsonNode rootNode;
-	private ObjectMapper mapper;
 
 	public FormView(MultiPageEditor editor) {
 		super(editor, "first", "FormView");
@@ -49,7 +47,7 @@ public class FormView extends FormPage implements IResourceChangeListener {
 		ResourcesPlugin.getWorkspace().addResourceChangeListener(this);
 	}
 
-	private void populateProjectModel() {
+	private void populateProjectModel() throws JsonProcessingException, IOException {
 		IDocument doc = editor.getTextEditor().getDocumentProvider()
 				.getDocument(editor.getTextEditor().getEditorInput());
 		String content = doc.get();
@@ -59,12 +57,8 @@ public class FormView extends FormPage implements IResourceChangeListener {
 			return;
 		}
 
-		mapper = new ObjectMapper();
-		try {
-			rootNode = mapper.readTree(content);
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
+		ObjectMapper mapper = new ObjectMapper();
+		JsonNode rootNode = mapper.readTree(content);
 
 		System.out.println("Form View parsed: " + rootNode.toString());
 		ProjectModel.getInstance().setRootNode(rootNode);
@@ -81,8 +75,7 @@ public class FormView extends FormPage implements IResourceChangeListener {
 		 */
 		String nodeName = "ContextEntities";
 		ProjectModel.getInstance().getEntities().clear();
-		if (!rootNode.has(nodeName)) {
-			System.err.println("File does not have a ContextEntities JsonNode");
+		if (rootNode.has(nodeName)) {
 			JsonNode entities = (JsonNode) rootNode.get(nodeName);
 			if (entities.isArray() && entities.size() > 0) {
 				for (JsonNode entity : entities) {
@@ -95,10 +88,10 @@ public class FormView extends FormPage implements IResourceChangeListener {
 					}
 				}
 			} else {
-				System.err.println("JsonNode has no ContextEntities");
+				System.err.println("ContextEntities JsonNode has no entities");
 			}
 		} else {
-			System.err.println("ContextEntities JsonNode has no entities");
+			System.err.println("File does not have a ContextEntities JsonNode");
 		}
 
 		/*
@@ -216,12 +209,14 @@ public class FormView extends FormPage implements IResourceChangeListener {
 	@Override
 	public void doSave(IProgressMonitor monitor) {
 		IPath path = ((FileEditorInput) editor.getEditorInput()).getPath();
+		ObjectMapper mapper = new ObjectMapper();
+		JsonNode rootNode = ProjectModel.getInstance().getRootNode();
+		((ObjectNode) rootNode).withArray("ContextEntities").removeAll();
+		for (Object cem : ProjectModel.getInstance().getEntities()) {
+			System.out.println("[doSave] new map values: " + ProjectModel.getInstance().getEntities());
+			((ObjectNode) rootNode).withArray("ContextEntities").add(mapper.valueToTree((ContextEntityModel) cem));
+		}
 		try {
-			((ObjectNode) rootNode).withArray("ContextEntities").removeAll();
-			for (Object cem : ProjectModel.getInstance().getEntities()) {
-				System.out.println("[doSave] new map values: " + ProjectModel.getInstance().getEntities());
-				((ObjectNode) rootNode).withArray("ContextEntities").add(mapper.valueToTree((ContextEntityModel) cem));
-			}
 			mapper.writeValue(new File(path.toString()), rootNode);
 		} catch (IOException e) {
 			e.printStackTrace();
@@ -243,7 +238,11 @@ public class FormView extends FormPage implements IResourceChangeListener {
 		form.getBody().setLayout(layout);
 		layout.numColumns = 2;
 
-		populateProjectModel();
+		try {
+			populateProjectModel();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
 
 		Label entitiesNameLabel = new Label(form.getBody(), SWT.NONE);
 		entitiesNameLabel.setText(" ContextEntitities: ");
