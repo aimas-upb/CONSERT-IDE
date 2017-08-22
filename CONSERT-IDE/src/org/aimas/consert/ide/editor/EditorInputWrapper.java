@@ -12,7 +12,7 @@ import org.eclipse.ui.IPersistableElement;
 import org.eclipse.ui.IStorageEditorInput;
 
 public class EditorInputWrapper implements IStorageEditorInput {
-	private final Object model;
+	private Object model;
 
 	public EditorInputWrapper(Object model) {
 		this.model = model;
