@@ -7,6 +7,7 @@ import java.io.IOException;
 import org.aimas.consert.ide.model.ContextAssertionModel;
 import org.aimas.consert.ide.model.ContextEntityModel;
 import org.aimas.consert.ide.model.ProjectModel;
+import org.aimas.consert.ide.model.WorkspaceModel;
 import org.eclipse.core.resources.IFolder;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.ResourcesPlugin;
@@ -34,6 +35,8 @@ public class JsonParser {
 	}
 
 	public boolean appendToFile(String projectName, Object model) {
+		WorkspaceModel instance = WorkspaceModel.getInstance();
+		ProjectModel projectModel = instance.getProjectModel(projectName);
 		IProject project = ResourcesPlugin.getWorkspace().getRoot().getProject(projectName);
 		IFolder folder = project.getFolder("origin");
 		if (!project.exists()) {
@@ -50,11 +53,11 @@ public class JsonParser {
 			if (rootNode.has("ContextAssertions") && model instanceof ContextAssertionModel) {
 				((ObjectNode) rootNode).withArray("ContextAssertions").add(mapper.valueToTree(model));
 				for (JsonNode entity : rootNode.get("ContextAssertions"))
-					ProjectModel.getInstance().addAssertion(mapper.treeToValue(entity, ContextAssertionModel.class));
+					projectModel.addAssertion(mapper.treeToValue(entity, ContextAssertionModel.class));
 			} else if (rootNode.has("ContextEntities") && model instanceof ContextEntityModel) {
 				((ObjectNode) rootNode).withArray("ContextEntities").add(mapper.valueToTree(model));
 				for (JsonNode entity : rootNode.get("ContextEntities"))
-					ProjectModel.getInstance().addEntity(mapper.treeToValue(entity, ContextEntityModel.class));
+					projectModel.addEntity(mapper.treeToValue(entity, ContextEntityModel.class));
 			} else {
 				System.out.println("RootNode does not have this node");
 				return false;

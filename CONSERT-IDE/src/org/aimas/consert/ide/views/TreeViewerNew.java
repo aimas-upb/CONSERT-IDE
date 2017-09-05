@@ -9,7 +9,10 @@ import org.aimas.consert.ide.editor.entity.EntityMultiPageEditor;
 import org.aimas.consert.ide.model.ContextAssertionModel;
 import org.aimas.consert.ide.model.ContextEntityModel;
 import org.aimas.consert.ide.model.ProjectModel;
+import org.aimas.consert.ide.model.WorkspaceModel;
+import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.IAdaptable;
+import org.eclipse.core.runtime.IPath;
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.MenuManager;
 import org.eclipse.jface.viewers.DoubleClickEvent;
@@ -26,6 +29,7 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Menu;
 import org.eclipse.ui.ISharedImages;
 import org.eclipse.ui.IWorkbenchPage;
+import org.eclipse.ui.IWorkbenchWindow;
 import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.part.ViewPart;
@@ -163,41 +167,71 @@ public class TreeViewerNew extends ViewPart {
 	}
 
 	public void initialize() {
-		ProjectModel projectWideModel = ProjectModel.getInstance();
-		TreeParent root = new TreeParent("CONSERT Model elements");
-		try {
-			// create separate folders for ContextEntities and ContextAssertions
-			TreeParent<ContextEntityModel> entitiesParent = new TreeParent<ContextEntityModel>(
-					"CONSERT ContextEntities");
-			root.addChild(entitiesParent);
-			TreeParent<ContextAssertionModel> assertionsParent = new TreeParent<ContextAssertionModel>(
-					"CONSERT ContextAssertions");
-			root.addChild(assertionsParent);
-
-			// get the list of entities and assertions from the projectWideModel
-			// instance
-			List<ContextEntityModel> entities = projectWideModel.getEntities();
-			List<ContextAssertionModel> assertions = projectWideModel.getAssertions();
-
-			// add entities to the tree
-			for (ContextEntityModel ent : entities) {
-				TreeObject<ContextEntityModel> obj = new TreeObject<ContextEntityModel>(ent.getName());
-				obj.setResource(ent);
-				entitiesParent.addChild(obj);
-			}
-
-			// add assertions to the tree
-			for (ContextAssertionModel ass : assertions) {
-				TreeObject<ContextAssertionModel> obj = new TreeObject<ContextAssertionModel>(ass.getName());
-				obj.setResource(ass);
-				assertionsParent.addChild(obj);
-			}
-
-		} catch (Exception e) {
-			// log exception
-		}
+		WorkspaceModel workspaceModel = WorkspaceModel.getInstance();
+		workspaceModel.refreshWorkspace();
+		ArrayList<ProjectModel> projects = workspaceModel.getProjectModels();
+		
+//		  IWorkbenchWindow window = PlatformUI.getWorkbench().getActiveWorkbenchWindow();
+//		    if (window != null)
+//		    {
+//		        IStructuredSelection selection = (IStructuredSelection) window.getSelectionService().getSelection();
+//		        Object firstElement = selection.getFirstElement();
+//		        if (firstElement instanceof IAdaptable)
+//		        {
+//		            IProject project = (IProject)((IAdaptable)firstElement).getAdapter(IProject.class);
+//		            IPath path = project.getFullPath();
+//		            System.out.println(path);
+//		        }
+//		    }
+//		 IWorkbenchWindow window = PlatformUI.getWorkbench().getActiveWorkbenchWindow();
+//		 IStructuredSelection selection = (IStructuredSelection) window.getSelectionService().getSelection();
+//		 System.out.println("Got selection");
+	
+//		 System.out.println(selection.toString());
+//		    IWorkbenchPage activePage = window.getActivePage();
+//		    ISelection selection = activePage.getSelection();
+//		    if (selection != null) {
+//		        System.out.println("Got selection");
+//		    }
+		
 		invisibleRoot = new TreeParent("");
-		invisibleRoot.addChild(root);
+		for (ProjectModel project : projects){
+			System.out.println(project.getName());
+			TreeParent root = new TreeParent(project.getName());
+			try {
+				// create separate folders for ContextEntities and ContextAssertions
+				TreeParent<ContextEntityModel> entitiesParent = new TreeParent<ContextEntityModel>(
+						"CONSERT ContextEntities");
+				root.addChild(entitiesParent);
+				TreeParent<ContextAssertionModel> assertionsParent = new TreeParent<ContextAssertionModel>(
+						"CONSERT ContextAssertions");
+				root.addChild(assertionsParent);
+
+				// get the list of entities and assertions from the projectWideModel
+				// instance
+				List<ContextEntityModel> entities = project.getEntities();
+				List<ContextAssertionModel> assertions = project.getAssertions();
+
+				// add entities to the tree
+				for (ContextEntityModel ent : entities) {
+					TreeObject<ContextEntityModel> obj = new TreeObject<ContextEntityModel>(ent.getName());
+					obj.setResource(ent);
+					entitiesParent.addChild(obj);
+				}
+
+				// add assertions to the tree
+				for (ContextAssertionModel ass : assertions) {
+					TreeObject<ContextAssertionModel> obj = new TreeObject<ContextAssertionModel>(ass.getName());
+					obj.setResource(ass);
+					assertionsParent.addChild(obj);
+				}
+
+			} catch (Exception e) {
+				// log exception
+			}
+			invisibleRoot.addChild(root);
+		}
+		
 	}
 
 	public TreeViewerNew() {
