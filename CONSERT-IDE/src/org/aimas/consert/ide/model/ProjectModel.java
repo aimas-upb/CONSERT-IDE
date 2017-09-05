@@ -10,24 +10,21 @@ import com.fasterxml.jackson.databind.JsonNode;
 public class ProjectModel {
 	private IPath path;
 	private JsonNode rootNode;
-	private static ProjectModel instance;
+	public String projectName;
 	private List<ContextEntityModel> entities;
 	private List<ContextAssertionModel> assertions;
-
-	/**
-	 * here to defeat instantiation
-	 */
-	private ProjectModel() {
-		entities = new ArrayList<ContextEntityModel>();
-		assertions = new ArrayList<ContextAssertionModel>();
+	
+	public ProjectModel (String projectName){
+		this.projectName = projectName;
+		this.entities = new ArrayList<ContextEntityModel>();
+		this.assertions = new ArrayList<ContextAssertionModel>();
+	}
+	
+	public String getName(){
+		return this.projectName;
 	}
 
-	public static ProjectModel getInstance() {
-		if (instance == null) {
-			instance = new ProjectModel();
-		}
-		return instance;
-	}
+	
 
 	public void setRootNode(JsonNode rootNode) {
 		this.rootNode = rootNode;
