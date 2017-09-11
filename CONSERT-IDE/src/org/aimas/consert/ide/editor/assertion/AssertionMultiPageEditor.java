@@ -17,7 +17,7 @@ public class AssertionMultiPageEditor extends MultiPageEditor {
 			throw new PartInitException("Invalid Input in AssertionMultiPageEditor: Must be EditorInputWrapper");
 		}
 		formView = new AssertionFormView(this);
-		textEditor = new AssertionTextEditor();
+		textEditor = new AssertionTextEditor(this);
 	}
 
 	@Override

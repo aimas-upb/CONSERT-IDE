@@ -30,6 +30,10 @@ public class MultiPageEditor extends FormEditor implements IResourceChangeListen
 		return textEditor;
 	}
 
+	public FormPage getFormView() {
+		return formView;
+	}
+
 	@Override
 	public boolean isDirty() {
 		return formView.isDirty() || textEditor.isDirty();

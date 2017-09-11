@@ -13,18 +13,24 @@ import org.eclipse.ui.IStorageEditorInput;
 
 public class EditorInputWrapper implements IStorageEditorInput {
 	private Object model;
+	private StringStorage storage;
 
 	public EditorInputWrapper(Object model) {
 		this.model = model;
+		storage = new StringStorage();
 	}
 
 	public Object getModel() {
 		return model;
 	}
 
+	public void setModel(Object model) {
+		this.model = model;
+	}
+
 	@Override
 	public IStorage getStorage() throws CoreException {
-		return new StringStorage();
+		return storage;
 	}
 
 	@Override
