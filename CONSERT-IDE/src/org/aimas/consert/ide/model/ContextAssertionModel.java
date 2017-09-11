@@ -54,6 +54,6 @@ public class ContextAssertionModel {
 
 	public String toString() {
 		return "{\"name\":\"" + getName() + "\",\"comment\":\"" + getComment() + "\",\"arity\":\"" + getArity()
-				+ "\",\"entities\":\"" + getEntities() + "\"}";
+				+ "\",\"entities\":" + getEntities() + "}";
 	}
 }
