@@ -17,7 +17,7 @@ public class EntityMultiPageEditor extends MultiPageEditor {
 			throw new PartInitException("Invalid Input in EntityMultiPageEditor: Must be EditorInputWrapper");
 		}
 		formView = new EntityFormView(this);
-		textEditor = new EntityTextEditor();
+		textEditor = new EntityTextEditor(this);
 	}
 
 	@Override

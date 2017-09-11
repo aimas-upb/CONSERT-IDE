@@ -264,4 +264,8 @@ public class TreeViewerNew extends ViewPart {
 	public void setFocus() {
 		viewer.getControl().setFocus();
 	}
+
+	public TreeViewer getView() {
+		return viewer;
+	}
 }
