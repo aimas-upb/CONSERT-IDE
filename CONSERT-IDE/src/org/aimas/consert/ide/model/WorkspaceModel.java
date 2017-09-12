@@ -3,6 +3,7 @@ package org.aimas.consert.ide.model;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.aimas.consert.ide.views.TreeViewerNew;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IFolder;
 import org.eclipse.core.resources.IProject;
@@ -10,6 +11,7 @@ import org.eclipse.core.resources.IProjectDescription;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.IWorkspace;
 import org.eclipse.core.resources.ResourcesPlugin;
+import org.eclipse.jface.viewers.ISelection;
 
 public class WorkspaceModel {
 	private static WorkspaceModel instance;
@@ -41,7 +43,7 @@ public class WorkspaceModel {
 
 	public ArrayList<String> refreshWorkspace() {
 		ArrayList<String> result = new ArrayList<String>();
-		this.projects.clear();
+		//this.projects.clear();
 		
 		try {
 			IWorkspace workspace = ResourcesPlugin.getWorkspace();
@@ -51,6 +53,7 @@ public class WorkspaceModel {
 				if ( projects[i].isOpen() && projects[i].hasNature("consertperspective.projectNature")){
 					IProjectDescription description = projects[i].getDescription();
 					result.add(description.getName());
+					System.out.println("am gasit " + description.getName());
 					ProjectModel project = new ProjectModel(description.getName());
 					this.projects.add(project);
 				}
@@ -74,7 +77,7 @@ public class WorkspaceModel {
 		} catch (Exception e) {
 			System.out.println(e);
 		}
-
+		System.out.println(projects.toString());
 		return result;
 	}
 

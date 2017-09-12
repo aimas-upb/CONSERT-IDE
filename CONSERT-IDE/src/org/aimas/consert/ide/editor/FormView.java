@@ -53,8 +53,7 @@ public class FormView extends FormPage implements IResourceChangeListener {
 	}
 
 	private void populateProjectModel() throws JsonProcessingException, IOException {	
-		WorkspaceModel instance = WorkspaceModel.getInstance();
-		this.projectModel = instance.getProjectModel("test"); 	
+		projectModel = WorkspaceModel.getInstance().getProjectModel("MyProj"); 	
 		
 		IDocument doc = editor.getTextEditor().getDocumentProvider()
 				.getDocument(editor.getTextEditor().getEditorInput());
@@ -76,6 +75,7 @@ public class FormView extends FormPage implements IResourceChangeListener {
 		IStructuredSelection structured = (IStructuredSelection) service
 				.getSelection("org.eclipse.jdt.ui.PackageExplorer");
 		IFile file = (IFile) structured.getFirstElement();
+		System.out.println(file.getName());
 		this.projectModel.setPath(file.getLocation());
 
 		/*
@@ -127,7 +127,6 @@ public class FormView extends FormPage implements IResourceChangeListener {
 		} else {
 			System.err.println("File does not have a ContextAssertions JsonNode");
 		}
-
 	}
 
 	/*

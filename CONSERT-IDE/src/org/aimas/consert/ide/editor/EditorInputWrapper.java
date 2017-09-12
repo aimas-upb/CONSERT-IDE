@@ -4,6 +4,7 @@ import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 
+import org.aimas.consert.ide.model.ProjectModel;
 import org.eclipse.core.resources.IStorage;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
@@ -14,6 +15,15 @@ import org.eclipse.ui.IStorageEditorInput;
 public class EditorInputWrapper implements IStorageEditorInput {
 	private Object model;
 	private StringStorage storage;
+	private ProjectModel pm;
+
+	public ProjectModel getPm() {
+		return pm;
+	}
+
+	public void setPm(ProjectModel pm) {
+		this.pm = pm;
+	}
 
 	public EditorInputWrapper(Object model) {
 		this.model = model;

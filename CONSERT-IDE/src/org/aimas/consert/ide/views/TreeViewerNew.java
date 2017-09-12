@@ -212,6 +212,8 @@ public class TreeViewerNew extends ViewPart {
 				List<ContextEntityModel> entities = project.getEntities();
 				List<ContextAssertionModel> assertions = project.getAssertions();
 
+				System.out.println(project.getEntities());
+				
 				// add entities to the tree
 				for (ContextEntityModel ent : entities) {
 					TreeObject<ContextEntityModel> obj = new TreeObject<ContextEntityModel>(ent.getName());
@@ -262,15 +264,20 @@ public class TreeViewerNew extends ViewPart {
 				if (!(obj instanceof TreeObject)) {
 					return;
 				}
+				TreeObject obj2 = (TreeObject) obj;
+				ProjectModel pm = WorkspaceModel.getInstance().getProjectModel(obj2.getParent().getParent().getName());
 				// get the page
 				IWorkbenchPage page = TreeViewerNew.this.getViewSite().getWorkbenchWindow().getActivePage();
 				try {
 					Object model = ((TreeObject) obj).getResource();
 					if (model instanceof ContextEntityModel) {
-						page.openEditor(new EditorInputWrapper((ContextEntityModel) model), EntityMultiPageEditor.ID);
+						EditorInputWrapper eiw = new EditorInputWrapper((ContextEntityModel) model);
+						eiw.setPm(pm);
+						page.openEditor(eiw, EntityMultiPageEditor.ID);
 					} else if (model instanceof ContextAssertionModel) {
-						page.openEditor(new EditorInputWrapper((ContextAssertionModel) model),
-								AssertionMultiPageEditor.ID);
+						EditorInputWrapper eiw = new EditorInputWrapper((ContextAssertionModel) model);
+						eiw.setPm(pm);
+						page.openEditor(eiw, AssertionMultiPageEditor.ID);
 					} else {
 						System.err.println("Model is nor Entity nor Assertion!");
 					}

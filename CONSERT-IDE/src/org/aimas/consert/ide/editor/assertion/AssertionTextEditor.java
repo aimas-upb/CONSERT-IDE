@@ -6,6 +6,7 @@ import org.aimas.consert.ide.editor.EditorInputWrapper;
 import org.aimas.consert.ide.editor.JsonTextEditor;
 import org.aimas.consert.ide.model.ContextAssertionModel;
 import org.aimas.consert.ide.model.ProjectModel;
+import org.aimas.consert.ide.model.WorkspaceModel;
 import org.eclipse.core.resources.IResourceChangeEvent;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.ui.texteditor.IDocumentProvider;
@@ -35,8 +36,8 @@ public class AssertionTextEditor extends JsonTextEditor {
 		try {
 			mapper.enable(DeserializationFeature.ACCEPT_SINGLE_VALUE_AS_ARRAY);
 			ContextAssertionModel newModel = mapper.readValue(content, ContextAssertionModel.class);
-			ProjectModel.getInstance().getAssertions().remove(((EditorInputWrapper) getEditorInput()).getModel());
-			ProjectModel.getInstance().getAssertions().add(newModel);
+			WorkspaceModel.getInstance().getProjectModel(((EditorInputWrapper) getEditorInput()).getPm().getName()).getAssertions().remove(((EditorInputWrapper) getEditorInput()).getModel());
+			WorkspaceModel.getInstance().getProjectModel(((EditorInputWrapper) getEditorInput()).getPm().getName()).getAssertions().add(newModel);
 			// TreeViewerNew.getInstance().getView().setInput(TreeViewerNew.getInstance().getViewSite());
 			// TreeViewerNew.getInstance().getView().refresh();
 			((AssertionFormView) parentEditor.getFormView()).doSave(monitor);
