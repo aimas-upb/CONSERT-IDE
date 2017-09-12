@@ -51,83 +51,98 @@ public class FormView extends FormPage implements IResourceChangeListener {
 		isDirty = false;
 		ResourcesPlugin.getWorkspace().addResourceChangeListener(this);
 	}
-
-	private void populateProjectModel() throws JsonProcessingException, IOException {	
-		projectModel = WorkspaceModel.getInstance().getProjectModel("MyProj"); 	
-		
-		IDocument doc = editor.getTextEditor().getDocumentProvider()
-				.getDocument(editor.getTextEditor().getEditorInput());
-		String content = doc.get();
-
-		if (content.isEmpty()) {
-			System.err.println("File is completely empty!");
-			return;
-		}
-
-		ObjectMapper mapper = new ObjectMapper();
-		JsonNode rootNode = mapper.readTree(content);
-
-		System.out.println("Form View parsed: " + rootNode.toString());
-		
-		this.projectModel.setRootNode(rootNode);
-		/* set path to file consert.txt in ProjectModel */
+	
+	/**
+	 * Metoda este apelata la crearea content-ului formularului si seteaza proiectul 
+	 * corespunzator fisierului "consert.txt" care a fost accesat.
+	 */
+	private void setProjectModel(){
 		ISelectionService service = getSite().getWorkbenchWindow().getSelectionService();
 		IStructuredSelection structured = (IStructuredSelection) service
 				.getSelection("org.eclipse.jdt.ui.PackageExplorer");
 		IFile file = (IFile) structured.getFirstElement();
-		System.out.println(file.getName());
-		this.projectModel.setPath(file.getLocation());
-
-		/*
-		 * This code populates the view and the model with the found ENTITIES
-		 * from the rootNode
-		 */
-		String nodeName = "ContextEntities";
-		this.projectModel.getEntities().clear();
-		if (rootNode.has(nodeName)) {
-			JsonNode entities = (JsonNode) rootNode.get(nodeName);
-			if (entities.isArray() && entities.size() > 0) {
-				for (JsonNode entity : entities) {
-					try {
-						/* Populate model with entities */
-						ContextEntityModel cem = mapper.treeToValue(entity, ContextEntityModel.class);
-						this.projectModel.addEntity(cem);
-					} catch (JsonProcessingException e) {
-						e.printStackTrace();
-					}
-				}
-			} else {
-				System.err.println("ContextEntities JsonNode has no entities");
-			}
-		} else {
-			System.err.println("File does not have a ContextEntities JsonNode");
-		}
-
-		/*
-		 * This code populates the view and the model with the found ASSERTIONS
-		 * from the rootNode
-		 */
-		nodeName = "ContextAssertions";
-		this.projectModel.getAssertions().clear();
-		if (rootNode.has(nodeName)) {
-			JsonNode assertions = (JsonNode) rootNode.get(nodeName);
-			if (assertions.isArray() && assertions.size() > 0) {
-				for (JsonNode assertion : assertions) {
-					try {
-						/* Populate model with assertions */
-						ContextAssertionModel cam = mapper.treeToValue(assertion, ContextAssertionModel.class);
-						this.projectModel.addAssertion(cam);
-					} catch (JsonProcessingException e) {
-						e.printStackTrace();
-					}
-				}
-			} else {
-				System.err.println("ContextAssertions JsonNode has no assertions");
-			}
-		} else {
-			System.err.println("File does not have a ContextAssertions JsonNode");
-		}
+		String[] parts = file.getFullPath().toString().substring(1).split("\\/");
+		String projectName = parts[0];
+		System.out.println(projectName);
+		this.projectModel = WorkspaceModel.getInstance().getProjectModel(projectName);
 	}
+
+//	private void populateProjectModel() throws JsonProcessingException, IOException {	
+//		projectModel = WorkspaceModel.getInstance().getProjectModel("MyProj"); 	
+//		
+//		IDocument doc = editor.getTextEditor().getDocumentProvider()
+//				.getDocument(editor.getTextEditor().getEditorInput());
+//		String content = doc.get();
+//
+//		if (content.isEmpty()) {
+//			System.err.println("File is completely empty!");
+//			return;
+//		}
+//
+//		ObjectMapper mapper = new ObjectMapper();
+//		JsonNode rootNode = mapper.readTree(content);
+//
+//		System.out.println("Form View parsed: " + rootNode.toString());
+//		
+//		this.projectModel.setRootNode(rootNode);
+//		/* set path to file consert.txt in ProjectModel */
+//		ISelectionService service = getSite().getWorkbenchWindow().getSelectionService();
+//		IStructuredSelection structured = (IStructuredSelection) service
+//				.getSelection("org.eclipse.jdt.ui.PackageExplorer");
+//		IFile file = (IFile) structured.getFirstElement();
+//		System.out.println(file.getName());
+//		this.projectModel.setPath(file.getLocation());
+//
+//		/*
+//		 * This code populates the view and the model with the found ENTITIES
+//		 * from the rootNode
+//		 */
+//		String nodeName = "ContextEntities";
+//		this.projectModel.getEntities().clear();
+//		if (rootNode.has(nodeName)) {
+//			JsonNode entities = (JsonNode) rootNode.get(nodeName);
+//			if (entities.isArray() && entities.size() > 0) {
+//				for (JsonNode entity : entities) {
+//					try {
+//						/* Populate model with entities */
+//						ContextEntityModel cem = mapper.treeToValue(entity, ContextEntityModel.class);
+//						this.projectModel.addEntity(cem);
+//					} catch (JsonProcessingException e) {
+//						e.printStackTrace();
+//					}
+//				}
+//			} else {
+//				System.err.println("ContextEntities JsonNode has no entities");
+//			}
+//		} else {
+//			System.err.println("File does not have a ContextEntities JsonNode");
+//		}
+//
+//		/*
+//		 * This code populates the view and the model with the found ASSERTIONS
+//		 * from the rootNode
+//		 */
+//		nodeName = "ContextAssertions";
+//		this.projectModel.getAssertions().clear();
+//		if (rootNode.has(nodeName)) {
+//			JsonNode assertions = (JsonNode) rootNode.get(nodeName);
+//			if (assertions.isArray() && assertions.size() > 0) {
+//				for (JsonNode assertion : assertions) {
+//					try {
+//						/* Populate model with assertions */
+//						ContextAssertionModel cam = mapper.treeToValue(assertion, ContextAssertionModel.class);
+//						this.projectModel.addAssertion(cam);
+//					} catch (JsonProcessingException e) {
+//						e.printStackTrace();
+//					}
+//				}
+//			} else {
+//				System.err.println("ContextAssertions JsonNode has no assertions");
+//			}
+//		} else {
+//			System.err.println("File does not have a ContextAssertions JsonNode");
+//		}
+//	}
 
 	/*
 	 * this method is used for both entities that do not belong to an assertion
@@ -258,11 +273,11 @@ public class FormView extends FormPage implements IResourceChangeListener {
 		form.getBody().setLayout(layout);
 		layout.numColumns = 2;
 
-		try {
-			populateProjectModel();
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
+//		try {
+			this.setProjectModel();
+//		} catch (Exception e) {
+//			e.printStackTrace();
+//		}
 
 		Label entitiesNameLabel = new Label(form.getBody(), SWT.NONE);
 		entitiesNameLabel.setText(" ContextEntitities: ");

@@ -1,7 +1,9 @@
 package org.aimas.consert.ide.views;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Set;
 
 import org.aimas.consert.ide.editor.EditorInputWrapper;
 import org.aimas.consert.ide.editor.assertion.AssertionMultiPageEditor;
@@ -169,7 +171,7 @@ public class TreeViewerNew extends ViewPart {
 	public void initialize() {
 		WorkspaceModel workspaceModel = WorkspaceModel.getInstance();
 		workspaceModel.refreshWorkspace();
-		ArrayList<ProjectModel> projects = workspaceModel.getProjectModels();
+		HashMap<String, ProjectModel> projects = workspaceModel.getProjectModels();
 		
 //		  IWorkbenchWindow window = PlatformUI.getWorkbench().getActiveWorkbenchWindow();
 //		    if (window != null)
@@ -195,7 +197,9 @@ public class TreeViewerNew extends ViewPart {
 //		    }
 		
 		invisibleRoot = new TreeParent("");
-		for (ProjectModel project : projects){
+
+		for (HashMap.Entry<String, ProjectModel> entry : projects.entrySet()){
+			ProjectModel project = entry.getValue();
 			System.out.println(project.getName());
 			TreeParent root = new TreeParent(project.getName());
 			try {
