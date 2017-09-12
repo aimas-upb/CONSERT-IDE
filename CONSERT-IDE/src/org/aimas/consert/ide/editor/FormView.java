@@ -53,6 +53,8 @@ public class FormView extends FormPage implements IResourceChangeListener {
 	}
 
 	private void populateProjectModel() throws JsonProcessingException, IOException {	
+		WorkspaceModel instance = WorkspaceModel.getInstance();
+		this.projectModel = instance.getProjectModel("test"); 	
 		
 		IDocument doc = editor.getTextEditor().getDocumentProvider()
 				.getDocument(editor.getTextEditor().getEditorInput());
@@ -67,6 +69,7 @@ public class FormView extends FormPage implements IResourceChangeListener {
 		JsonNode rootNode = mapper.readTree(content);
 
 		System.out.println("Form View parsed: " + rootNode.toString());
+		
 		this.projectModel.setRootNode(rootNode);
 		/* set path to file consert.txt in ProjectModel */
 		ISelectionService service = getSite().getWorkbenchWindow().getSelectionService();

@@ -41,7 +41,7 @@ public class WorkspaceModel {
 
 	public ArrayList<String> refreshWorkspace() {
 		ArrayList<String> result = new ArrayList<String>();
-		
+		this.projects.clear();
 		
 		try {
 			IWorkspace workspace = ResourcesPlugin.getWorkspace();
