@@ -3,7 +3,6 @@ package org.aimas.consert.ide.views;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Set;
 
 import org.aimas.consert.ide.editor.EditorInputWrapper;
 import org.aimas.consert.ide.editor.assertion.AssertionMultiPageEditor;
@@ -12,9 +11,7 @@ import org.aimas.consert.ide.model.ContextAssertionModel;
 import org.aimas.consert.ide.model.ContextEntityModel;
 import org.aimas.consert.ide.model.ProjectModel;
 import org.aimas.consert.ide.model.WorkspaceModel;
-import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.IAdaptable;
-import org.eclipse.core.runtime.IPath;
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.MenuManager;
 import org.eclipse.jface.viewers.DoubleClickEvent;
@@ -211,21 +208,21 @@ public class TreeViewerNew extends ViewPart {
 						"CONSERT ContextAssertions");
 				root.addChild(assertionsParent);
 
-				// get the list of entities and assertions from the projectWideModel
-				// instance
+				/* get the list of entities and assertions from the projectWideModel
+				 instance */
 				List<ContextEntityModel> entities = project.getEntities();
 				List<ContextAssertionModel> assertions = project.getAssertions();
 
 				System.out.println(project.getEntities());
 				
-				// add entities to the tree
+				/* add entities to the tree */
 				for (ContextEntityModel ent : entities) {
 					TreeObject<ContextEntityModel> obj = new TreeObject<ContextEntityModel>(ent.getName());
 					obj.setResource(ent);
 					entitiesParent.addChild(obj);
 				}
 
-				// add assertions to the tree
+				/* add assertions to the tree */
 				for (ContextAssertionModel ass : assertions) {
 					TreeObject<ContextAssertionModel> obj = new TreeObject<ContextAssertionModel>(ass.getName());
 					obj.setResource(ass);
@@ -233,7 +230,7 @@ public class TreeViewerNew extends ViewPart {
 				}
 
 			} catch (Exception e) {
-				// log exception
+				/* log exception */
 			}
 			invisibleRoot.addChild(root);
 		}
@@ -268,9 +265,10 @@ public class TreeViewerNew extends ViewPart {
 				if (!(obj instanceof TreeObject)) {
 					return;
 				}
-				TreeObject obj2 = (TreeObject) obj;
-				ProjectModel pm = WorkspaceModel.getInstance().getProjectModel(obj2.getParent().getParent().getName());
-				// get the page
+				/* get the ProjectModel associated to this selection*/
+				TreeObject treeObject = (TreeObject) obj;
+				ProjectModel pm = WorkspaceModel.getInstance().getProjectModel(treeObject.getParent().getParent().getName());
+				/* get the page */
 				IWorkbenchPage page = TreeViewerNew.this.getViewSite().getWorkbenchWindow().getActivePage();
 				try {
 					Object model = ((TreeObject) obj).getResource();

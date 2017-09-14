@@ -1,5 +1,6 @@
 package org.aimas.consert.ide.wizards.pages;
 
+import org.aimas.consert.ide.model.ProjectModel;
 import org.eclipse.jface.wizard.WizardPage;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.KeyEvent;
@@ -9,6 +10,9 @@ import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Text;
+import org.eclipse.ui.IViewReference;
+import org.eclipse.ui.IWorkbenchPage;
+import org.eclipse.ui.PlatformUI;
 
 public class WizardNewEntityPage extends WizardPage {
 	private Text textName;
@@ -18,9 +22,12 @@ public class WizardNewEntityPage extends WizardPage {
 	private Label labelName;
 	private Text textComment;
 	private Composite container;
+	private String projectName;
+	
 
-	public WizardNewEntityPage(String pageName) {
+	public WizardNewEntityPage(String pageName, String projectName) {
 		super(pageName);
+		this.projectName = projectName;
 	}
 
 	@Override
@@ -33,9 +40,10 @@ public class WizardNewEntityPage extends WizardPage {
 		// project name
 		labelprojectName = new Label(container, SWT.NONE);
 		labelprojectName.setText("Project Name");
+		String projectName = this.projectName;
+		this.textprojectName = new Text(container, SWT.BORDER | SWT.SINGLE);
+		this.textprojectName.setText(projectName);
 
-		textprojectName = new Text(container, SWT.BORDER | SWT.SINGLE);
-		textprojectName.setText("");
 		textprojectName.addKeyListener(new KeyListener() {
 
 			@Override
@@ -112,5 +120,7 @@ public class WizardNewEntityPage extends WizardPage {
 	public String getTextComment() {
 		return textComment.getText();
 	}
+	
+	
 
 }

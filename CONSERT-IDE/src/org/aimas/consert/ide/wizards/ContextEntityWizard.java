@@ -1,8 +1,12 @@
 package org.aimas.consert.ide.wizards;
 
 import org.aimas.consert.ide.model.ContextEntityModel;
+import org.aimas.consert.ide.model.WorkspaceModel;
 import org.aimas.consert.ide.utils.JsonParser;
 import org.aimas.consert.ide.wizards.pages.WizardNewEntityPage;
+import org.eclipse.core.resources.IProject;
+import org.eclipse.core.resources.IResource;
+import org.eclipse.core.runtime.IAdaptable;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.wizard.Wizard;
 import org.eclipse.ui.INewWizard;
@@ -27,7 +31,8 @@ public class ContextEntityWizard extends Wizard implements INewWizard {
 	@Override
 	public void addPages() {
 		super.addPages();
-		_pageOne = new WizardNewEntityPage(org.aimas.consert.ide.wizards.NewWizardMessages.ScratchEntity);
+		String projectName = WorkspaceModel.getInstance().getCurrentActiveProject(this.selection);
+		_pageOne = new WizardNewEntityPage(org.aimas.consert.ide.wizards.NewWizardMessages.ScratchEntity, projectName);
 		_pageOne.setDescription(
 				org.aimas.consert.ide.wizards.NewWizardMessages.ConsertProjectWizard_ConsertProjectWizard_Create_something_custom);
 		_pageOne.setTitle(org.aimas.consert.ide.wizards.NewWizardMessages.ScratchEntity);
@@ -43,5 +48,6 @@ public class ContextEntityWizard extends Wizard implements INewWizard {
 		/* finish means adding in the consert.txt file the required fields */
 		return JsonParser.getInstance().appendToFile(projectName, model);
 	}
+	
 
 }

@@ -26,9 +26,11 @@ public class WizardNewAssertionPage extends WizardPage {
 	private Label labelArity;
 	private Text textEntities;
 	private Label labelEntities;
+	private String projectName;
 
-	public WizardNewAssertionPage(String pageName) {
+	public WizardNewAssertionPage(String pageName, String projectName) {
 		super(pageName);
+		this.projectName = projectName;
 	}
 
 	@Override
@@ -42,8 +44,9 @@ public class WizardNewAssertionPage extends WizardPage {
 		labelprojectName = new Label(container, SWT.NONE);
 		labelprojectName.setText("Project Name");
 
-		textprojectName = new Text(container, SWT.BORDER | SWT.SINGLE);
-		textprojectName.setText("");
+		String projectName = this.projectName;
+		this.textprojectName = new Text(container, SWT.BORDER | SWT.SINGLE);
+		this.textprojectName.setText(projectName);
 		textprojectName.addKeyListener(new KeyListener() {
 
 			@Override

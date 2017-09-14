@@ -5,6 +5,7 @@ import java.util.List;
 
 import org.aimas.consert.ide.model.ContextAssertionModel;
 import org.aimas.consert.ide.model.ContextEntityModel;
+import org.aimas.consert.ide.model.WorkspaceModel;
 import org.aimas.consert.ide.utils.JsonParser;
 import org.aimas.consert.ide.wizards.pages.WizardNewAssertionPage;
 import org.eclipse.jface.viewers.IStructuredSelection;
@@ -31,7 +32,8 @@ public class ContextAssertionWizard extends Wizard implements INewWizard {
 	@Override
 	public void addPages() {
 		super.addPages();
-		_pageOne = new WizardNewAssertionPage(org.aimas.consert.ide.wizards.NewWizardMessages.ScratchAssertion);
+		String projectName = WorkspaceModel.getInstance().getCurrentActiveProject(this.selection);
+		_pageOne = new WizardNewAssertionPage(org.aimas.consert.ide.wizards.NewWizardMessages.ScratchAssertion, projectName);
 		_pageOne.setDescription(
 				org.aimas.consert.ide.wizards.NewWizardMessages.ConsertProjectWizard_ConsertProjectWizard_Create_something_custom);
 		_pageOne.setTitle(org.aimas.consert.ide.wizards.NewWizardMessages.ScratchEntity);
