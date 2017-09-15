@@ -5,7 +5,7 @@ import java.util.List;
 
 import org.aimas.consert.ide.model.ContextAssertionModel;
 import org.aimas.consert.ide.model.ContextEntityModel;
-import org.aimas.consert.ide.utils.JsonParser;
+import org.aimas.consert.ide.model.ProjectModel;
 import org.aimas.consert.ide.wizards.pages.WizardNewAssertionPage;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.wizard.Wizard;
@@ -48,7 +48,7 @@ public class ContextAssertionWizard extends Wizard implements INewWizard {
 		model.setEntities(getEntities(_pageOne.getTextEntities()));
 
 		/* finish means adding in the consert.txt file the required fields */
-		return JsonParser.getInstance().appendToFile(projectName, model);
+		return ProjectModel.getInstance().appendToFile(projectName, model);
 	}
 
 	private List<ContextEntityModel> getEntities(String textEntities) {
@@ -61,5 +61,4 @@ public class ContextAssertionWizard extends Wizard implements INewWizard {
 		}
 		return entities;
 	}
-
 }
