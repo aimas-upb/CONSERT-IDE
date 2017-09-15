@@ -1,11 +1,15 @@
 package org.aimas.consert.ide.model;
 
+import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
 import org.eclipse.core.runtime.IPath;
 
 import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 
 public class ProjectModel {
 	private IPath path;
@@ -85,5 +89,32 @@ public class ProjectModel {
 
 	public boolean removeEntity(ContextEntityModel cem) {
 		return entities.remove(cem);
+	}
+
+	public void saveOnDisk() {
+		ObjectMapper mapper = new ObjectMapper();
+
+		/*
+		 * Saving all entities, because the formView does not track them
+		 * individually, so it does not know which changed and which didn't.
+		 */
+		((ObjectNode) rootNode).withArray("ContextEntities").removeAll();
+		for (ContextEntityModel cem : getEntities()) {
+			((ObjectNode) rootNode).withArray("ContextEntities").add(mapper.valueToTree(cem));
+		}
+		System.out.println("[doSave] maped new entities into Json: " + getEntities());
+
+		/* Saving all assertions as well. */
+		((ObjectNode) rootNode).withArray("ContextAssertions").removeAll();
+		for (ContextAssertionModel cam : getAssertions()) {
+			((ObjectNode) rootNode).withArray("ContextAssertions").add(mapper.valueToTree(cam));
+		}
+		System.out.println("[doSave] maped new assertions into Json: " + getAssertions());
+		/* Write on disk the new Json into File, replacing the old one. */
+		try {
+			mapper.writeValue(new File(path.toString()), rootNode);
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
 	}
 }
