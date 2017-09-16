@@ -1,7 +1,7 @@
 package org.aimas.consert.ide.wizards;
 
 import org.aimas.consert.ide.model.ContextEntityModel;
-import org.aimas.consert.ide.utils.JsonParser;
+import org.aimas.consert.ide.model.ProjectModel;
 import org.aimas.consert.ide.wizards.pages.WizardNewEntityPage;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.wizard.Wizard;
@@ -41,7 +41,6 @@ public class ContextEntityWizard extends Wizard implements INewWizard {
 		model.setName(_pageOne.getTextName());
 		model.setComment(_pageOne.getTextComment());
 		/* finish means adding in the consert.txt file the required fields */
-		return JsonParser.getInstance().appendToFile(projectName, model);
+		return ProjectModel.getInstance().saveNewModelOnDisk(projectName, model);
 	}
-
 }
