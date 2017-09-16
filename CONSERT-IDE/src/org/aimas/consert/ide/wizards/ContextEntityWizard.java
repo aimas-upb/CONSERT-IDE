@@ -41,6 +41,6 @@ public class ContextEntityWizard extends Wizard implements INewWizard {
 		model.setName(_pageOne.getTextName());
 		model.setComment(_pageOne.getTextComment());
 		/* finish means adding in the consert.txt file the required fields */
-		return ProjectModel.getInstance().appendToFile(projectName, model);
+		return ProjectModel.getInstance().saveNewModelOnDisk(projectName, model);
 	}
 }

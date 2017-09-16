@@ -48,7 +48,7 @@ public class ContextAssertionWizard extends Wizard implements INewWizard {
 		model.setEntities(getEntities(_pageOne.getTextEntities()));
 
 		/* finish means adding in the consert.txt file the required fields */
-		return ProjectModel.getInstance().appendToFile(projectName, model);
+		return ProjectModel.getInstance().saveNewModelOnDisk(projectName, model);
 	}
 
 	private List<ContextEntityModel> getEntities(String textEntities) {

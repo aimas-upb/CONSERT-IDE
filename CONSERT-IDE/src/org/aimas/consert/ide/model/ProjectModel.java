@@ -21,11 +21,13 @@ public class ProjectModel {
 	private static ProjectModel instance;
 	private List<ContextEntityModel> entities;
 	private List<ContextAssertionModel> assertions;
+	private static ObjectMapper mapper;
 
 	/**
 	 * here to defeat instantiation
 	 */
 	private ProjectModel() {
+		mapper = new ObjectMapper();
 		entities = new ArrayList<ContextEntityModel>();
 		assertions = new ArrayList<ContextAssertionModel>();
 	}
@@ -95,36 +97,44 @@ public class ProjectModel {
 		return entities.remove(cem);
 	}
 
-	public void saveOnDisk() {
-		ObjectMapper mapper = new ObjectMapper();
+	public void saveJsonOnDisk() {
+		updateEntitiesJsonNode();
+		updateAssertionsJsonNode();
+		writeJsonOnDisk();
+	}
 
-		/*
-		 * Saving all entities, because the formView does not track them
-		 * individually, so it does not know which changed and which didn't.
-		 */
-		((ObjectNode) rootNode).withArray("ContextEntities").removeAll();
-		for (ContextEntityModel cem : getEntities()) {
-			((ObjectNode) rootNode).withArray("ContextEntities").add(mapper.valueToTree(cem));
-		}
-		System.out.println("[doSave] maped new entities into Json: " + getEntities());
-
-		/* Saving all assertions as well. */
-		((ObjectNode) rootNode).withArray("ContextAssertions").removeAll();
-		for (ContextAssertionModel cam : getAssertions()) {
-			((ObjectNode) rootNode).withArray("ContextAssertions").add(mapper.valueToTree(cam));
-		}
-		System.out.println("[doSave] maped new assertions into Json: " + getAssertions());
-		/* Write on disk the new Json into File, replacing the old one. */
+	/** Write the new Json into File on disk, replacing the old one. */
+	public void writeJsonOnDisk() {
 		try {
-			mapper.writeValue(new File(path.toString()), rootNode);
+			mapper.writeValue(new File(getPath().toString()), getRootNode());
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
 	}
 
-	public boolean appendToFile(String projectName, Object model) {
-		ObjectMapper mapper = new ObjectMapper();
+	/**
+	 * Save all entities since the formView does not track them individually, so
+	 * it does not know which changed and which didn't.
+	 */
+	public void updateEntitiesJsonNode() {
+		((ObjectNode) getRootNode()).withArray("ContextEntities").removeAll();
+		for (ContextEntityModel cem : getEntities()) {
+			((ObjectNode) getRootNode()).withArray("ContextEntities").add(mapper.valueToTree(cem));
+		}
+		System.out.println("Updated new entities into Json: " + getEntities());
+	}
 
+	/** Saving all assertions as well. */
+	public void updateAssertionsJsonNode() {
+		((ObjectNode) getRootNode()).withArray("ContextAssertions").removeAll();
+		for (ContextAssertionModel cam : getAssertions()) {
+			((ObjectNode) getRootNode()).withArray("ContextAssertions").add(mapper.valueToTree(cam));
+		}
+		System.out.println("Updated new assertions into Json: " + getAssertions());
+	}
+
+	/** Save newly created Context Model Element on empty Json File */
+	public boolean saveNewModelOnDisk(String projectName, Object model) {
 		IProject project = ResourcesPlugin.getWorkspace().getRoot().getProject(projectName);
 		IFolder folder = project.getFolder("origin");
 		if (!project.exists()) {
@@ -132,7 +142,7 @@ public class ProjectModel {
 			return false;
 		}
 
-		// Convert object to JSON string and save into file directly
+		/* Convert object to JSON string and save into file directly */
 		try {
 			FileInputStream in = new FileInputStream(folder.getFile("consert.txt").getLocation().toFile());
 			JsonNode rootNode = mapper.readTree(in);
@@ -141,11 +151,11 @@ public class ProjectModel {
 			if (rootNode.has("ContextAssertions") && model instanceof ContextAssertionModel) {
 				((ObjectNode) rootNode).withArray("ContextAssertions").add(mapper.valueToTree(model));
 				for (JsonNode entity : rootNode.get("ContextAssertions"))
-					ProjectModel.getInstance().addAssertion(mapper.treeToValue(entity, ContextAssertionModel.class));
+					addAssertion(mapper.treeToValue(entity, ContextAssertionModel.class));
 			} else if (rootNode.has("ContextEntities") && model instanceof ContextEntityModel) {
 				((ObjectNode) rootNode).withArray("ContextEntities").add(mapper.valueToTree(model));
 				for (JsonNode entity : rootNode.get("ContextEntities"))
-					ProjectModel.getInstance().addEntity(mapper.treeToValue(entity, ContextEntityModel.class));
+					addEntity(mapper.treeToValue(entity, ContextEntityModel.class));
 			} else {
 				System.out.println("RootNode does not have this node");
 				return false;

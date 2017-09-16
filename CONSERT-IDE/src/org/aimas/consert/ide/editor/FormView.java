@@ -206,7 +206,7 @@ public class FormView extends FormPage implements IResourceChangeListener {
 
 	@Override
 	public void doSave(IProgressMonitor monitor) {
-		ProjectModel.getInstance().saveOnDisk();
+		ProjectModel.getInstance().saveJsonOnDisk();
 		isDirty = false;
 		firePropertyChange(PROP_DIRTY);
 		editor.editorDirtyStateChanged();
