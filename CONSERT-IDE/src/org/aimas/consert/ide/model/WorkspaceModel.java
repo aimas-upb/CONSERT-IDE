@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.HashMap;
 
+import org.aimas.consert.ide.views.TreeObject;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IFolder;
 import org.eclipse.core.resources.IProject;
@@ -236,27 +237,60 @@ public class WorkspaceModel {
 		}
 	}
 
-	public IResource extractSelection(IStructuredSelection selection) {
+	/**
+	 * 
+	 * @param selection
+	 * @return
+	 */
+	public String extractSelection(IStructuredSelection selection) {
 		Object element = selection.getFirstElement();
-		if (element instanceof IResource)
-			return (IResource) element;
-		if (!(element instanceof IAdaptable))
-			return null;
-		IAdaptable adaptable = (IAdaptable) element;
-		Object adapter = adaptable.getAdapter(IResource.class);
-		return (IResource) adapter;
+		Object selected;
+		if (element instanceof IResource){
+			IProject project = ((IResource) element).getProject();
+			return project.getName();
+		}
+		
+		if (element instanceof TreeObject){
+			TreeObject treeObject = (TreeObject) element;
+			return ((TreeObject) element).getProjectName();
+			
+		}
+		
+		if (element instanceof IAdaptable){
+			IAdaptable adaptable = (IAdaptable) element;
+			Object adapter = adaptable.getAdapter(IResource.class);
+			IProject project = ((IResource) element).getProject();
+			return project.getName();
+		}
+	
+			return null;	
+		
 	}
 
+	/**
+	 * 
+	 * @param selection
+	 * @return projectName
+	 * Method used in ContextModel element creation wizards
+	 */
 	public String getCurrentActiveProject(IStructuredSelection selection) {
-		if (selection == null) {
-			return new String("");
+		return this.extractSelection(selection);
+	}
+	
+	/**
+	 * 
+	 * @param file
+	 * @return ProjectModel 
+	 * Method used when opening a file from ProjectExplorer to determine the ProjectModel 
+	 * corresponding to the opened file 
+	 */
+	public ProjectModel getCurrentActiveProject(IFile file) {
+		if(file != null){
+			String projectName = file.getProject().getName();
+			System.out.println(projectName);
+			return WorkspaceModel.getInstance().getProjectModel(projectName);
 		}
-		IResource extractedSel = this.extractSelection(selection);
-		if (extractedSel == null) {
-			return new String("");
-		}
-		IProject project = extractedSel.getProject();
-		return project.getName();
+		return null;
 	}
 
 }

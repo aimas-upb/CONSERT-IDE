@@ -61,11 +61,7 @@ public class FormView extends FormPage implements IResourceChangeListener {
 		IStructuredSelection structured = (IStructuredSelection) service
 				.getSelection("org.eclipse.jdt.ui.PackageExplorer");
 		IFile file = (IFile) structured.getFirstElement();
-		if(file != null){
-			String projectName = file.getProject().getName();
-			System.out.println(projectName);
-			projectModel = WorkspaceModel.getInstance().getProjectModel(projectName);
-		}
+		projectModel = WorkspaceModel.getInstance().getCurrentActiveProject(file);
 	}
 
 	/*

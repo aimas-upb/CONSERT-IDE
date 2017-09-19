@@ -42,50 +42,11 @@ public class TreeViewerNew extends ViewPart {
 	private TreeViewer viewer;
 	private TreeParent invisibleRoot;
 
-	class TreeObject<T> implements IAdaptable {
-
-		private String name;
-		private TreeParent<T> parent;
-		private T resource;
-
-		public TreeObject(String name) {
-			this.name = name;
-		}
-
-		public String getName() {
-			return name;
-		}
-
-		public void setParent(TreeParent<T> parent) {
-			this.parent = parent;
-		}
-
-		public TreeParent<T> getParent() {
-			return parent;
-		}
-
-		public String toString() {
-			return getName();
-		}
-
-		public Object getAdapter(Class key) {
-			return null;
-		}
-
-		protected T getResource() {
-			return resource;
-		}
-
-		protected void setResource(T resource) {
-			this.resource = resource;
-		}
-	}
-
 	class TreeParent<T> extends TreeObject<T> {
 		private ArrayList<TreeObject<T>> children;
 
-		public TreeParent(String name) {
-			super(name);
+		public TreeParent(String name, String projectName) {
+			super(name, projectName);
 			children = new ArrayList<TreeObject<T>>();
 		}
 
@@ -173,19 +134,18 @@ public class TreeViewerNew extends ViewPart {
 		workspaceModel.refreshWorkspace();
 		HashMap<String, ProjectModel> projects = workspaceModel.getProjectModels();
 		
-		invisibleRoot = new TreeParent("");
+		invisibleRoot = new TreeParent("", "");
 
 		for (HashMap.Entry<String, ProjectModel> entry : projects.entrySet()){
 			ProjectModel project = entry.getValue();
-			System.out.println(project.getName());
-			TreeParent root = new TreeParent(project.getName());
+			TreeParent root = new TreeParent(project.getName(), project.getName());
 			try {
 				// create separate folders for ContextEntities and ContextAssertions
 				TreeParent<ContextEntityModel> entitiesParent = new TreeParent<ContextEntityModel>(
-						"CONSERT ContextEntities");
+						"CONSERT ContextEntities", project.getName());
 				root.addChild(entitiesParent);
 				TreeParent<ContextAssertionModel> assertionsParent = new TreeParent<ContextAssertionModel>(
-						"CONSERT ContextAssertions");
+						"CONSERT ContextAssertions", project.getName());
 				root.addChild(assertionsParent);
 
 				/* get the list of entities and assertions from the projectWideModel
@@ -197,14 +157,14 @@ public class TreeViewerNew extends ViewPart {
 				
 				/* add entities to the tree */
 				for (ContextEntityModel ent : entities) {
-					TreeObject<ContextEntityModel> obj = new TreeObject<ContextEntityModel>(ent.getName());
+					TreeObject<ContextEntityModel> obj = new TreeObject<ContextEntityModel>(ent.getName(), project.getName());
 					obj.setResource(ent);
 					entitiesParent.addChild(obj);
 				}
 
 				/* add assertions to the tree */
 				for (ContextAssertionModel ass : assertions) {
-					TreeObject<ContextAssertionModel> obj = new TreeObject<ContextAssertionModel>(ass.getName());
+					TreeObject<ContextAssertionModel> obj = new TreeObject<ContextAssertionModel>(ass.getName(), project.getName());
 					obj.setResource(ass);
 					assertionsParent.addChild(obj);
 				}
@@ -241,6 +201,8 @@ public class TreeViewerNew extends ViewPart {
 		viewer.addDoubleClickListener(new IDoubleClickListener() {
 			public void doubleClick(DoubleClickEvent event) {
 				ISelection selection = event.getSelection();
+				System.out.println("Current active project: ");
+				System.out.println(WorkspaceModel.getInstance().getCurrentActiveProject((IStructuredSelection)selection));
 				Object obj = ((IStructuredSelection) selection).getFirstElement();
 				if (!(obj instanceof TreeObject)) {
 					return;
