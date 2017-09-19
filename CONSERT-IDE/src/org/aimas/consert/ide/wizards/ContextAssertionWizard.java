@@ -19,7 +19,7 @@ public class ContextAssertionWizard extends Wizard implements INewWizard {
 
 	public ContextAssertionWizard() {
 		super();
-		setWindowTitle(org.aimas.consert.ide.wizards.NewWizardMessages.ScratchAssertion);
+		setWindowTitle(NewWizardMessages.NewContextAssertionTitle);
 	}
 
 	@Override
@@ -31,10 +31,9 @@ public class ContextAssertionWizard extends Wizard implements INewWizard {
 	@Override
 	public void addPages() {
 		super.addPages();
-		_pageOne = new WizardNewAssertionPage(org.aimas.consert.ide.wizards.NewWizardMessages.ScratchAssertion);
-		_pageOne.setDescription(
-				org.aimas.consert.ide.wizards.NewWizardMessages.ConsertProjectWizard_ConsertProjectWizard_Create_something_custom);
-		_pageOne.setTitle(org.aimas.consert.ide.wizards.NewWizardMessages.ScratchEntity);
+		_pageOne = new WizardNewAssertionPage(NewWizardMessages.NewContextAssertionWizard);
+		_pageOne.setDescription(NewWizardMessages.NewContextAssertionDescription);
+		_pageOne.setTitle(NewWizardMessages.NewContextAssertionTitle);
 		addPage(_pageOne);
 	}
 

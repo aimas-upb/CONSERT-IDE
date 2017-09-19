@@ -15,7 +15,7 @@ public class ContextEntityWizard extends Wizard implements INewWizard {
 
 	public ContextEntityWizard() {
 		super();
-		setWindowTitle(org.aimas.consert.ide.wizards.NewWizardMessages.ScratchEntity);
+		setWindowTitle(NewWizardMessages.NewContextEntityTitle);
 	}
 
 	@Override
@@ -27,10 +27,9 @@ public class ContextEntityWizard extends Wizard implements INewWizard {
 	@Override
 	public void addPages() {
 		super.addPages();
-		_pageOne = new WizardNewEntityPage(org.aimas.consert.ide.wizards.NewWizardMessages.ScratchEntity);
-		_pageOne.setDescription(
-				org.aimas.consert.ide.wizards.NewWizardMessages.ConsertProjectWizard_ConsertProjectWizard_Create_something_custom);
-		_pageOne.setTitle(org.aimas.consert.ide.wizards.NewWizardMessages.ScratchEntity);
+		_pageOne = new WizardNewEntityPage(NewWizardMessages.NewContextEntityWizard);
+		_pageOne.setDescription(NewWizardMessages.NewContextEntityDescription);
+		_pageOne.setTitle(NewWizardMessages.NewContextEntityTitle);
 		addPage(_pageOne);
 	}
 
@@ -40,6 +39,7 @@ public class ContextEntityWizard extends Wizard implements INewWizard {
 		ContextEntityModel model = new ContextEntityModel();
 		model.setName(_pageOne.getTextName());
 		model.setComment(_pageOne.getTextComment());
+
 		/* finish means adding in the consert.txt file the required fields */
 		return ProjectModel.getInstance().saveNewModelOnDisk(projectName, model);
 	}

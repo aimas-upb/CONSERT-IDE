@@ -19,17 +19,17 @@ public class ConsertProjectImportWizard extends Wizard implements IImportWizard 
 	private IWorkbench workbench;
 	private WizardExternalProjectImportPage _pageOne;
 
+	public ConsertProjectImportWizard() {
+		super();
+		setWindowTitle(NewWizardMessages.ImportConsertProjectTitle);
+	}
+
 	@Override
 	public void addPages() {
 		_pageOne = new WizardExternalProjectImportPage();
-		_pageOne.setDescription("this allows you to import an exisiting consert project");
-		_pageOne.setTitle("import consert project");
+		_pageOne.setDescription(NewWizardMessages.ImportConsertProjectDescription);
+		_pageOne.setTitle(NewWizardMessages.ImportConsertProjectTitle);
 		addPage(_pageOne);
-	}
-
-	public ConsertProjectImportWizard() {
-		super();
-		setWindowTitle(" Consert Project Import Wizard ");
 	}
 
 	@Override
@@ -61,5 +61,4 @@ public class ConsertProjectImportWizard extends Wizard implements IImportWizard 
 		}
 		return true;
 	}
-
 }

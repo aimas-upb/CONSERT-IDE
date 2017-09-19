@@ -112,5 +112,4 @@ public class WizardNewEntityPage extends WizardPage {
 	public String getTextComment() {
 		return textComment.getText();
 	}
-
 }
