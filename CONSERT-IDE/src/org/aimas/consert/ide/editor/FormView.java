@@ -64,7 +64,7 @@ public class FormView extends FormPage implements IResourceChangeListener {
 		if(file != null){
 			String projectName = file.getProject().getName();
 			System.out.println(projectName);
-			this.projectModel = WorkspaceModel.getInstance().getProjectModel(projectName);
+			projectModel = WorkspaceModel.getInstance().getProjectModel(projectName);
 		}
 	}
 
@@ -242,10 +242,10 @@ public class FormView extends FormPage implements IResourceChangeListener {
 		IResourceDelta affected[] = rootDelta.getAffectedChildren();
 		for (int i = 0; i < affected.length; i++) {
 			System.out.println(affected[i].getResource().getName());
-			this.projectName = affected[i].getResource().getName();
+			projectName = affected[i].getResource().getName();
 		}
 		WorkspaceModel instance = WorkspaceModel.getInstance();
-		this.projectModel = instance.getProjectModel(this.projectName);
+		projectModel = instance.getProjectModel(projectName);
 
 		System.out.println("Reload formView");
 	}

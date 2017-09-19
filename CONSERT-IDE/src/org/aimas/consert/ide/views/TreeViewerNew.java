@@ -11,7 +11,9 @@ import org.aimas.consert.ide.model.ContextAssertionModel;
 import org.aimas.consert.ide.model.ContextEntityModel;
 import org.aimas.consert.ide.model.ProjectModel;
 import org.aimas.consert.ide.model.WorkspaceModel;
+import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.IAdaptable;
+import org.eclipse.core.runtime.IPath;
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.MenuManager;
 import org.eclipse.jface.viewers.DoubleClickEvent;
@@ -19,6 +21,7 @@ import org.eclipse.jface.viewers.IDoubleClickListener;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.ITreeContentProvider;
+import org.eclipse.jface.viewers.ITreeViewerListener;
 import org.eclipse.jface.viewers.LabelProvider;
 import org.eclipse.jface.viewers.TreeViewer;
 import org.eclipse.jface.viewers.Viewer;
@@ -170,29 +173,6 @@ public class TreeViewerNew extends ViewPart {
 		workspaceModel.refreshWorkspace();
 		HashMap<String, ProjectModel> projects = workspaceModel.getProjectModels();
 		
-//		  IWorkbenchWindow window = PlatformUI.getWorkbench().getActiveWorkbenchWindow();
-//		    if (window != null)
-//		    {
-//		        IStructuredSelection selection = (IStructuredSelection) window.getSelectionService().getSelection();
-//		        Object firstElement = selection.getFirstElement();
-//		        if (firstElement instanceof IAdaptable)
-//		        {
-//		            IProject project = (IProject)((IAdaptable)firstElement).getAdapter(IProject.class);
-//		            IPath path = project.getFullPath();
-//		            System.out.println(path);
-//		        }
-//		    }
-//		 IWorkbenchWindow window = PlatformUI.getWorkbench().getActiveWorkbenchWindow();
-//		 IStructuredSelection selection = (IStructuredSelection) window.getSelectionService().getSelection();
-//		 System.out.println("Got selection");
-	
-//		 System.out.println(selection.toString());
-//		    IWorkbenchPage activePage = window.getActivePage();
-//		    ISelection selection = activePage.getSelection();
-//		    if (selection != null) {
-//		        System.out.println("Got selection");
-//		    }
-		
 		invisibleRoot = new TreeParent("");
 
 		for (HashMap.Entry<String, ProjectModel> entry : projects.entrySet()){
@@ -303,6 +283,7 @@ public class TreeViewerNew extends ViewPart {
 		refresh.setText("Refresh");
 		menuMgr.add(refresh);
 	}
+	
 
 	public void setFocus() {
 		viewer.getControl().setFocus();

@@ -23,5 +23,6 @@ Require-Bundle: org.eclipse.ui,
  org.eclipse.ui.editors,
  org.eclipse.jface.text,
  org.eclipse.ui.forms;bundle-version="3.7.1",
- org.eclipse.ui.workbench
+ org.eclipse.ui.workbench,
+ org.eclipse.equinox.registry
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8

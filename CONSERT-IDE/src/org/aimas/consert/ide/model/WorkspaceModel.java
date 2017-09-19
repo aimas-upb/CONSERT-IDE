@@ -1,4 +1,5 @@
 package org.aimas.consert.ide.model;
+
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -52,19 +53,33 @@ public class WorkspaceModel {
 	 * Metoda pentru initializare workspace
 	 */
 	public void initializeWorkspace() {
-		this.projects = new HashMap<String, ProjectModel>();
+		projects = new HashMap<String, ProjectModel>();
 		try {
 			IWorkspace workspace = ResourcesPlugin.getWorkspace();
-			IProject[] projects = workspace.getRoot().getProjects();
+			IProject[] projectsInWorkspace = workspace.getRoot().getProjects();
 
-			for (int i = 0; i < projects.length; i++) {
-				if (projects[i].isOpen() && projects[i].hasNature("consertperspective.projectNature")) {
-					IProjectDescription description = projects[i].getDescription();
+			for (int i = 0; i < projectsInWorkspace.length; i++) {/*
+																	 * iterate
+																	 * through
+																	 * all
+																	 * projects
+																	 * in
+																	 * Workspace
+																	 */
+				/*
+				 * if the project is open and has the nature
+				 * "consertperspective"
+				 */
+				if (projectsInWorkspace[i].isOpen()
+						&& projectsInWorkspace[i].hasNature("consertperspective.projectNature")) {
+					IProjectDescription description = projectsInWorkspace[i].getDescription();
 					String projectName = description.getName();
 					ProjectModel project = new ProjectModel(projectName);
-					this.projects.put(projectName, project);
+					projects.put(projectName, project);
+					/* Update on the current ProjectModel */
+					IResource[] folderResources = projectsInWorkspace[i].members();
+					this.updateProjectModels(projectName, folderResources);
 				}
-
 			}
 
 		} catch (Exception e) {
@@ -74,67 +89,86 @@ public class WorkspaceModel {
 
 	}
 
-	/* This method iterates through all projects in Workspace, 
-	 * adds new projects if it is the case, and refreshes the model 
-	 * for each of the projects in WorkspaceModel.
+	/*
+	 * Method for updating project model for the project with the name received as parameter
+	 */
+	public void updateProjectModels(String projectName, IResource[] folderResources) {
+		for (int j = 0; j < folderResources.length; j++) {
+			try {
+				if (folderResources[j] instanceof IFolder) {
+					IFolder resource = (IFolder) folderResources[j];
+					if (resource.getName().equalsIgnoreCase("origin")) {
+						IResource[] fileResources = resource.members();
+						for (int k = 0; k < fileResources.length; k++) {
+							if (fileResources[k] instanceof IFile && fileResources[k].getName().equals("consert.txt")) {
+								TextFileDocumentProvider provider = new TextFileDocumentProvider();
+								IDocument document = provider.getDocument((IFile) fileResources[k]);
+								this.populateProjectModel(projects.get(projectName), document,
+										(IFile) fileResources[k]);
+							}
+						}
+
+					}
+				}
+			} catch (Exception e) {
+				System.out.println("Excepetion at updating ProjectModel");
+			}
+		}
+
+	}
+
+	/*
+	 * This method iterates through all projects in Workspace, adds new projects
+	 * if it is the case, and refreshes the model for each of the projects in
+	 * WorkspaceModel.
 	 */
 	public void refreshWorkspace() {
 		try {
 			IWorkspace workspace = ResourcesPlugin.getWorkspace();
-			IProject[] projects = workspace.getRoot().getProjects();
+			IProject[] projectsInWorkspace = workspace.getRoot().getProjects();
 
-			for (int i = 0; i < projects.length; i++) { /* iterate through all projects in Workspace */
-				/* if the project is open and has the nature "consertperspective" */
-				if (projects[i].isOpen() && projects[i].hasNature("consertperspective.projectNature")) {
-					IProjectDescription description = projects[i].getDescription();
+			for (int i = 0; i < projectsInWorkspace.length; i++) { 
+				/*
+				 * if the project is open and has the nature
+				 * "consertperspective"
+				 */
+				if (projectsInWorkspace[i].isOpen()
+						&& projectsInWorkspace[i].hasNature("consertperspective.projectNature")) {
+					IProjectDescription description = projectsInWorkspace[i].getDescription();
 					String projectName = description.getName();
-					/* if the current project is not already in WorkspaceModel, we add the project */
-					if(!this.projects.containsKey(projectName)){
+					/*
+					 * if the current project is not already in WorkspaceModel,
+					 * we add the project
+					 */
+					if (!projects.containsKey(projectName)) {
 						ProjectModel project = new ProjectModel(projectName);
-						this.projects.put(projectName, project);
+						projects.put(projectName, project);
 					}
-					/* Update on the current ProjectModel */		
-					 IResource[] folderResources = projects[i].members();
-					 for (int j = 0; j < folderResources.length; j++) {
-						 if (folderResources[j] instanceof IFolder) {
-							 IFolder resource = (IFolder) folderResources[j];
-							 if (resource.getName().equalsIgnoreCase("origin")) {
-								 IResource[] fileResources = resource.members();
-								 for (int k = 0; k < fileResources.length; k++) {
-									 if (fileResources[k] instanceof IFile && fileResources[k].getName().equals("consert.txt")) {
-										TextFileDocumentProvider provider = new TextFileDocumentProvider();
-										IDocument document = provider.getDocument((IFile)fileResources[k]);
-										this.populateProjectModel(this.projects.get(projectName), document, (IFile)fileResources[k]);
-									 }
-								 }
-						
-							 }
-						 }
-					 }
+					/* Update on the current ProjectModel */
+					IResource[] folderResources = projectsInWorkspace[i].members();
+					this.updateProjectModels(projectName, folderResources);
 				}
 			}
 
 		} catch (Exception e) {
 			System.out.println(e);
 		}
-		System.out.println(projects.toString());
 
 	}
 
 	private void populateProjectModel(ProjectModel projectModel, IDocument document, IFile file)
 			throws JsonProcessingException, IOException, CoreException {
-		
-		/* get string content from file*/
+
+		/* get string content from file */
 		InputStream is = file.getContents();
 		ByteArrayOutputStream result = new ByteArrayOutputStream();
 		byte[] buffer = new byte[1024];
 		int length;
 		while ((length = is.read(buffer)) != -1) {
-		    result.write(buffer, 0, length);
+			result.write(buffer, 0, length);
 		}
 		String content = result.toString("UTF-8");
-		
-	
+
 		if (content.isEmpty()) {
 			System.err.println("File is completely empty!");
 			return;
@@ -201,31 +235,28 @@ public class WorkspaceModel {
 			System.err.println("File does not have a ContextAssertions JsonNode");
 		}
 	}
-	
-	
-	public IResource extractSelection(IStructuredSelection selection){
-		 Object element = selection.getFirstElement();
-		    if (element instanceof IResource)
-		        return (IResource) element;
-		    if (!(element instanceof IAdaptable))
-		        return null;
-		    IAdaptable adaptable = (IAdaptable)element;
-		    Object adapter = adaptable.getAdapter(IResource.class);
-		    return (IResource) adapter;
+
+	public IResource extractSelection(IStructuredSelection selection) {
+		Object element = selection.getFirstElement();
+		if (element instanceof IResource)
+			return (IResource) element;
+		if (!(element instanceof IAdaptable))
+			return null;
+		IAdaptable adaptable = (IAdaptable) element;
+		Object adapter = adaptable.getAdapter(IResource.class);
+		return (IResource) adapter;
 	}
-	
-	public String getCurrentActiveProject(IStructuredSelection selection){
-		if(selection == null){
+
+	public String getCurrentActiveProject(IStructuredSelection selection) {
+		if (selection == null) {
 			return new String("");
 		}
 		IResource extractedSel = this.extractSelection(selection);
-		if(extractedSel == null){
+		if (extractedSel == null) {
 			return new String("");
 		}
 		IProject project = extractedSel.getProject();
 		return project.getName();
 	}
-	
-	
 
 }
