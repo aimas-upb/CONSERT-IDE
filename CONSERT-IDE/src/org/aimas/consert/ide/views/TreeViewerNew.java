@@ -40,7 +40,7 @@ public class TreeViewerNew extends ViewPart {
 	public static final String ID = "org.aimas.consert.ide.views.TreeViewerNew";
 	private static TreeViewerNew instance;
 	private TreeViewer viewer;
-	private TreeParent invisibleRoot;
+	private TreeParent<?> invisibleRoot;
 
 	class TreeParent<T> extends TreeObject<T> {
 		private ArrayList<TreeObject<T>> children;
@@ -250,16 +250,15 @@ public class TreeViewerNew extends ViewPart {
 			public void run() {
 				ISelection selection = viewer.getSelection();
 				String projectName = WorkspaceModel.getInstance().getCurrentActiveProject((IStructuredSelection)selection);
-				IWizard wizard = new ContextAssertionWizard();
+				IWizard wizard = new ContextAssertionWizard(projectName);
 				WizardDialog dialog = new WizardDialog(PlatformUI.getWorkbench().getActiveWorkbenchWindow().getShell(),
 						wizard);
 				if (dialog.open() == Window.OK) {
-					initialize();
 					viewer.refresh();
 				}
 			}
 		};
-		addAssertion.setText("addNewAssertion");
+		addAssertion.setText("NewContextAssertion");
 		menuMgr.add(addAssertion);
 	}
 
@@ -272,18 +271,15 @@ public class TreeViewerNew extends ViewPart {
 			public void run() {
 				ISelection selection = viewer.getSelection();
 				String projectName = WorkspaceModel.getInstance().getCurrentActiveProject((IStructuredSelection)selection);
-				System.out.println("Selectie tree: ");
-				System.out.println(projectName);
 				IWizard wizard = new ContextEntityWizard(projectName);
 				WizardDialog dialog = new WizardDialog(PlatformUI.getWorkbench().getActiveWorkbenchWindow().getShell(),
 						wizard);
 				if (dialog.open() == Window.OK) {
-//					initialize();
 					viewer.refresh();
 				}
 			}
 		};
-		addEntity.setText("addNewEntity");
+		addEntity.setText("NewContextEntity");
 		menuMgr.add(addEntity);
 	}
 

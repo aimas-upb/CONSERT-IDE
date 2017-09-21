@@ -22,16 +22,19 @@ public class ProjectModel {
 	private List<ContextEntityModel> entities;
 	private List<ContextAssertionModel> assertions;
 	private static ObjectMapper mapper;
-	
-	public ProjectModel (String projectName){
-		this.projectName = projectName;
-		this.mapper = new ObjectMapper();
-		this.entities = new ArrayList<ContextEntityModel>();
-		this.assertions = new ArrayList<ContextAssertionModel>();
+
+	static {
+		mapper = new ObjectMapper();
 	}
-	
-	public String getName(){
-		return this.projectName;
+
+	public ProjectModel(String projectName) {
+		this.projectName = projectName;
+		entities = new ArrayList<ContextEntityModel>();
+		assertions = new ArrayList<ContextAssertionModel>();
+	}
+
+	public String getName() {
+		return projectName;
 	}
 
 	public void setRootNode(JsonNode rootNode) {
@@ -129,7 +132,7 @@ public class ProjectModel {
 	}
 
 	/** Save newly created Context Model Element on empty Json File */
-	public boolean saveNewModelOnDisk(String projectName, Object model) {
+	public boolean saveNewModelOnDisk(Object model) {
 		IProject project = ResourcesPlugin.getWorkspace().getRoot().getProject(projectName);
 		IFolder folder = project.getFolder("origin");
 		if (!project.exists()) {

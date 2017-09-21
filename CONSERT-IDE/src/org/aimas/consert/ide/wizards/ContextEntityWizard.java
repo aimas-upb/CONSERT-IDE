@@ -33,8 +33,8 @@ public class ContextEntityWizard extends Wizard implements INewWizard {
 	@Override
 	public void addPages() {
 		super.addPages();
-		if(this.projectName == null){
-			this.projectName = WorkspaceModel.getInstance().getCurrentActiveProject(this.selection);
+		if (projectName == null) {
+			projectName = WorkspaceModel.getInstance().getCurrentActiveProject(this.selection);
 		}
 		_pageOne = new WizardNewEntityPage(NewWizardMessages.NewContextEntityWizard, projectName);
 		_pageOne.setDescription(NewWizardMessages.NewContextEntityDescription);
@@ -44,12 +44,11 @@ public class ContextEntityWizard extends Wizard implements INewWizard {
 
 	@Override
 	public boolean performFinish() {
-		String projectName = _pageOne.getProjectName();
 		ContextEntityModel model = new ContextEntityModel();
 		model.setName(_pageOne.getTextName());
 		model.setComment(_pageOne.getTextComment());
 
 		/* finish means adding in the consert.txt file the required fields */
-		return WorkspaceModel.getInstance().getProjectModel(projectName).saveNewModelOnDisk(projectName, model);
+		return WorkspaceModel.getInstance().getProjectModel(projectName).saveNewModelOnDisk(model);
 	}
 }

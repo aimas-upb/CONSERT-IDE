@@ -15,10 +15,16 @@ import org.eclipse.ui.IWorkbench;
 public class ContextAssertionWizard extends Wizard implements INewWizard {
 	private IWorkbench workbench;
 	private IStructuredSelection selection;
+	private String projectName;
 	private WizardNewAssertionPage _pageOne;
 
 	public ContextAssertionWizard() {
+		this(null);
+	}
+
+	public ContextAssertionWizard(String projectName) {
 		super();
+		this.projectName = projectName;
 		setWindowTitle(NewWizardMessages.NewContextAssertionTitle);
 	}
 
@@ -31,7 +37,9 @@ public class ContextAssertionWizard extends Wizard implements INewWizard {
 	@Override
 	public void addPages() {
 		super.addPages();
-		String projectName = WorkspaceModel.getInstance().getCurrentActiveProject(this.selection);
+		if (projectName == null) {
+			projectName = WorkspaceModel.getInstance().getCurrentActiveProject(this.selection);
+		}
 		_pageOne = new WizardNewAssertionPage(NewWizardMessages.NewContextAssertionWizard, projectName);
 		_pageOne.setDescription(NewWizardMessages.NewContextAssertionDescription);
 		_pageOne.setTitle(NewWizardMessages.NewContextAssertionTitle);
@@ -40,7 +48,6 @@ public class ContextAssertionWizard extends Wizard implements INewWizard {
 
 	@Override
 	public boolean performFinish() {
-		String projectName = _pageOne.getProjectName();
 		ContextAssertionModel model = new ContextAssertionModel();
 		model.setName(_pageOne.getTextName());
 		model.setComment(_pageOne.getTextComment());
@@ -48,7 +55,7 @@ public class ContextAssertionWizard extends Wizard implements INewWizard {
 		model.setEntities(getEntities(_pageOne.getTextEntities()));
 
 		/* finish means adding in the consert.txt file the required fields */
-		return WorkspaceModel.getInstance().getProjectModel(projectName).saveNewModelOnDisk(projectName, model);
+		return WorkspaceModel.getInstance().getProjectModel(projectName).saveNewModelOnDisk(model);
 	}
 
 	private List<ContextEntityModel> getEntities(String textEntities) {
