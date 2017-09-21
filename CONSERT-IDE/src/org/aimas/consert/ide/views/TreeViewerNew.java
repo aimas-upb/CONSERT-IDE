@@ -1,8 +1,8 @@
 package org.aimas.consert.ide.views;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.aimas.consert.ide.editor.EditorInputWrapper;
 import org.aimas.consert.ide.editor.assertion.AssertionMultiPageEditor;
@@ -65,9 +65,8 @@ public class TreeViewerNew extends ViewPart {
 		}
 
 		public boolean hasChildren() {
-			return children.size() > 0;
+			return !children.isEmpty();
 		}
-
 	}
 
 	class ViewContentProvider implements ITreeContentProvider {
@@ -126,21 +125,21 @@ public class TreeViewerNew extends ViewPart {
 				imageKey = ISharedImages.IMG_OBJ_FOLDER;
 			return PlatformUI.getWorkbench().getSharedImages().getImage(imageKey);
 		}
-
 	}
 
 	public void initialize() {
 		WorkspaceModel workspaceModel = WorkspaceModel.getInstance();
 		workspaceModel.refreshWorkspace();
-		HashMap<String, ProjectModel> projects = workspaceModel.getProjectModels();
-		
+		Map<String, ProjectModel> projects = workspaceModel.getProjectModels();
+
 		invisibleRoot = new TreeParent("", "");
 
-		for (HashMap.Entry<String, ProjectModel> entry : projects.entrySet()){
+		for (Map.Entry<String, ProjectModel> entry : projects.entrySet()) {
 			ProjectModel project = entry.getValue();
 			TreeParent root = new TreeParent(project.getName(), project.getName());
 			try {
-				// create separate folders for ContextEntities and ContextAssertions
+				// create separate folders for ContextEntities and
+				// ContextAssertions
 				TreeParent<ContextEntityModel> entitiesParent = new TreeParent<ContextEntityModel>(
 						"CONSERT ContextEntities", project.getName());
 				root.addChild(entitiesParent);
@@ -148,23 +147,27 @@ public class TreeViewerNew extends ViewPart {
 						"CONSERT ContextAssertions", project.getName());
 				root.addChild(assertionsParent);
 
-				/* get the list of entities and assertions from the projectWideModel
-				 instance */
+				/*
+				 * get the list of entities and assertions from the
+				 * projectWideModel instance
+				 */
 				List<ContextEntityModel> entities = project.getEntities();
 				List<ContextAssertionModel> assertions = project.getAssertions();
 
 				System.out.println(project.getEntities());
-				
+
 				/* add entities to the tree */
 				for (ContextEntityModel ent : entities) {
-					TreeObject<ContextEntityModel> obj = new TreeObject<ContextEntityModel>(ent.getName(), project.getName());
+					TreeObject<ContextEntityModel> obj = new TreeObject<ContextEntityModel>(ent.getName(),
+							project.getName());
 					obj.setResource(ent);
 					entitiesParent.addChild(obj);
 				}
 
 				/* add assertions to the tree */
 				for (ContextAssertionModel ass : assertions) {
-					TreeObject<ContextAssertionModel> obj = new TreeObject<ContextAssertionModel>(ass.getName(), project.getName());
+					TreeObject<ContextAssertionModel> obj = new TreeObject<ContextAssertionModel>(ass.getName(),
+							project.getName());
 					obj.setResource(ass);
 					assertionsParent.addChild(obj);
 				}
@@ -174,7 +177,6 @@ public class TreeViewerNew extends ViewPart {
 			}
 			invisibleRoot.addChild(root);
 		}
-		
 	}
 
 	public TreeViewerNew() {
@@ -201,26 +203,27 @@ public class TreeViewerNew extends ViewPart {
 		viewer.addDoubleClickListener(new IDoubleClickListener() {
 			public void doubleClick(DoubleClickEvent event) {
 				ISelection selection = event.getSelection();
-				System.out.println("Current active project: ");
-				System.out.println(WorkspaceModel.getInstance().getCurrentActiveProject((IStructuredSelection)selection));
-				Object obj = ((IStructuredSelection) selection).getFirstElement();
-				if (!(obj instanceof TreeObject)) {
+				Object object = ((IStructuredSelection) selection).getFirstElement();
+
+				if (!(object instanceof TreeObject)) {
 					return;
 				}
-				/* get the ProjectModel associated to this selection*/
-				TreeObject treeObject = (TreeObject) obj;
-				ProjectModel pm = WorkspaceModel.getInstance().getProjectModel(treeObject.getParent().getParent().getName());
-				/* get the page */
-				IWorkbenchPage page = TreeViewerNew.this.getViewSite().getWorkbenchWindow().getActivePage();
+
+				TreeObject treeObject = (TreeObject) object;
+				Object model = treeObject.getResource();
+				/* get the ProjectModel associated to this selection */
+				ProjectModel projectModel = WorkspaceModel.getInstance()
+						.getProjectModel(treeObject.getParent().getParent().getName());
+				IWorkbenchPage page = getViewSite().getWorkbenchWindow().getActivePage();
+
 				try {
-					Object model = ((TreeObject) obj).getResource();
 					if (model instanceof ContextEntityModel) {
 						EditorInputWrapper eiw = new EditorInputWrapper((ContextEntityModel) model);
-						eiw.setPm(pm);
+						eiw.setProjectModel(projectModel);
 						page.openEditor(eiw, EntityMultiPageEditor.ID);
 					} else if (model instanceof ContextAssertionModel) {
 						EditorInputWrapper eiw = new EditorInputWrapper((ContextAssertionModel) model);
-						eiw.setPm(pm);
+						eiw.setProjectModel(projectModel);
 						page.openEditor(eiw, AssertionMultiPageEditor.ID);
 					} else {
 						System.err.println("Model is nor Entity nor Assertion!");
@@ -249,11 +252,13 @@ public class TreeViewerNew extends ViewPart {
 		Action addAssertion = new Action() {
 			public void run() {
 				ISelection selection = viewer.getSelection();
-				String projectName = WorkspaceModel.getInstance().getCurrentActiveProject((IStructuredSelection)selection);
+				String projectName = WorkspaceModel.getInstance()
+						.getCurrentActiveProject((IStructuredSelection) selection);
 				IWizard wizard = new ContextAssertionWizard(projectName);
 				WizardDialog dialog = new WizardDialog(PlatformUI.getWorkbench().getActiveWorkbenchWindow().getShell(),
 						wizard);
 				if (dialog.open() == Window.OK) {
+					initialize();
 					viewer.refresh();
 				}
 			}
@@ -270,11 +275,13 @@ public class TreeViewerNew extends ViewPart {
 		Action addEntity = new Action() {
 			public void run() {
 				ISelection selection = viewer.getSelection();
-				String projectName = WorkspaceModel.getInstance().getCurrentActiveProject((IStructuredSelection)selection);
+				String projectName = WorkspaceModel.getInstance()
+						.getCurrentActiveProject((IStructuredSelection) selection);
 				IWizard wizard = new ContextEntityWizard(projectName);
 				WizardDialog dialog = new WizardDialog(PlatformUI.getWorkbench().getActiveWorkbenchWindow().getShell(),
 						wizard);
 				if (dialog.open() == Window.OK) {
+					initialize();
 					viewer.refresh();
 				}
 			}
@@ -293,7 +300,6 @@ public class TreeViewerNew extends ViewPart {
 		refresh.setText("Refresh");
 		menuMgr.add(refresh);
 	}
-	
 
 	public void setFocus() {
 		viewer.getControl().setFocus();

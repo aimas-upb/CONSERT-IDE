@@ -5,7 +5,6 @@ import java.io.IOException;
 import org.aimas.consert.ide.editor.EditorInputWrapper;
 import org.aimas.consert.ide.editor.JsonTextEditor;
 import org.aimas.consert.ide.model.ContextEntityModel;
-import org.aimas.consert.ide.model.ProjectModel;
 import org.aimas.consert.ide.model.WorkspaceModel;
 import org.eclipse.core.resources.IResourceChangeEvent;
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -35,10 +34,12 @@ public class EntityTextEditor extends JsonTextEditor {
 		try {
 			mapper.enable(DeserializationFeature.ACCEPT_SINGLE_VALUE_AS_ARRAY);
 			ContextEntityModel newModel = mapper.readValue(newContent, ContextEntityModel.class);
-			WorkspaceModel.getInstance().getProjectModel(((EditorInputWrapper) getEditorInput()).getPm().getName()).getEntities().remove(((EditorInputWrapper) getEditorInput()).getModel());
-			WorkspaceModel.getInstance().getProjectModel(((EditorInputWrapper) getEditorInput()).getPm().getName()).getEntities().add(newModel);
-			// TreeViewerNew.getInstance().getView().setInput(TreeViewerNew.getInstance().getViewSite());
-			// TreeViewerNew.getInstance().getView().refresh();
+			WorkspaceModel.getInstance()
+					.getProjectModel(((EditorInputWrapper) getEditorInput()).getProjectModel().getName()).getEntities()
+					.remove(((EditorInputWrapper) getEditorInput()).getModel());
+			WorkspaceModel.getInstance()
+					.getProjectModel(((EditorInputWrapper) getEditorInput()).getProjectModel().getName()).getEntities()
+					.add(newModel);
 			((EntityFormView) parentEditor.getFormView()).doSave(monitor);
 			super.doSave(monitor);
 		} catch (IOException e) {

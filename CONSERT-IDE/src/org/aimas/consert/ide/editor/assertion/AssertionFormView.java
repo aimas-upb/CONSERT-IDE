@@ -63,8 +63,7 @@ public class AssertionFormView extends FormPage implements IResourceChangeListen
 					projectModel.getAssertionByName(cam.getName()).setComment(nameText.getText());
 				} else if (labelName.equals(" Arity: ")) {
 					try {
-						projectModel.getAssertionByName(cam.getName())
-								.setArity(Integer.parseInt((nameText.getText())));
+						projectModel.getAssertionByName(cam.getName()).setArity(Integer.parseInt((nameText.getText())));
 					} catch (NumberFormatException exp) {
 						System.err.print("Please Introduce an Integer Arity");
 					}
@@ -94,8 +93,7 @@ public class AssertionFormView extends FormPage implements IResourceChangeListen
 				 * This entity belongs to an assertion, and is not present in
 				 * the getEntities() of the ProjectModel!!!
 				 */
-				List<ContextEntityModel> entities = projectModel.getAssertionByName(cam.getName())
-						.getEntities();
+				List<ContextEntityModel> entities = projectModel.getAssertionByName(cam.getName()).getEntities();
 				for (ContextEntityModel entity : entities) {
 					if (entity.equals(cem)) {
 						if (labelName.equals(" Name: ")) {
@@ -158,13 +156,13 @@ public class AssertionFormView extends FormPage implements IResourceChangeListen
 	@Override
 	public void resourceChanged(IResourceChangeEvent event) {
 		IResourceDelta rootDelta = event.getDelta();
-		IResourceDelta affected[]= rootDelta.getAffectedChildren();
-		for(int i=0;i<affected.length;i++){
+		IResourceDelta affected[] = rootDelta.getAffectedChildren();
+		for (int i = 0; i < affected.length; i++) {
 			System.out.println(affected[i].getResource().getName());
 			this.projectName = affected[i].getResource().getName();
 		}
 		WorkspaceModel instance = WorkspaceModel.getInstance();
-		this.projectModel = instance.getProjectModel(this.projectName); 	
+		this.projectModel = instance.getProjectModel(this.projectName);
 		System.out.println("Reload AssertionformView");
 	}
 }

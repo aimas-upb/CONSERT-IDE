@@ -1,9 +1,9 @@
 package org.aimas.consert.ide.model;
 
-import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.HashMap;
+import java.util.Map;
 
 import org.aimas.consert.ide.views.TreeObject;
 import org.eclipse.core.resources.IFile;
@@ -17,10 +17,6 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IAdaptable;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.viewers.IStructuredSelection;
-import org.eclipse.ui.ISelectionService;
-import org.eclipse.ui.IViewReference;
-import org.eclipse.ui.IWorkbenchPage;
-import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.editors.text.TextFileDocumentProvider;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -29,7 +25,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 public class WorkspaceModel {
 	private static WorkspaceModel instance;
-	private HashMap<String, ProjectModel> projects = new HashMap<String, ProjectModel>();
+	private Map<String, ProjectModel> projects = new HashMap<>();
 
 	private WorkspaceModel() {
 		projects = new HashMap<String, ProjectModel>();
@@ -42,16 +38,16 @@ public class WorkspaceModel {
 		return instance;
 	}
 
-	public HashMap<String, ProjectModel> getProjectModels() {
-		return this.projects;
+	public Map<String, ProjectModel> getProjectModels() {
+		return projects;
 	}
 
 	public ProjectModel getProjectModel(String projectName) {
-		return this.projects.get(projectName);
+		return projects.get(projectName);
 	}
 
 	/**
-	 * Metoda pentru initializare workspace
+	 * Initialize Workspace Model
 	 */
 	public void initializeWorkspace() {
 		projects = new HashMap<String, ProjectModel>();
@@ -59,14 +55,8 @@ public class WorkspaceModel {
 			IWorkspace workspace = ResourcesPlugin.getWorkspace();
 			IProject[] projectsInWorkspace = workspace.getRoot().getProjects();
 
-			for (int i = 0; i < projectsInWorkspace.length; i++) {/*
-																	 * iterate
-																	 * through
-																	 * all
-																	 * projects
-																	 * in
-																	 * Workspace
-																	 */
+			/* iterate through all projects in Workspace */
+			for (int i = 0; i < projectsInWorkspace.length; i++) {
 				/*
 				 * if the project is open and has the nature
 				 * "consertperspective"
@@ -79,19 +69,19 @@ public class WorkspaceModel {
 					projects.put(projectName, project);
 					/* Update on the current ProjectModel */
 					IResource[] folderResources = projectsInWorkspace[i].members();
-					this.updateProjectModels(projectName, folderResources);
+					updateProjectModels(projectName, folderResources);
 				}
 			}
 
 		} catch (Exception e) {
-			System.out.println(e);
+			e.printStackTrace();
 		}
 		System.out.println(projects.toString());
-
 	}
 
 	/*
-	 * Method for updating project model for the project with the name received as parameter
+	 * Method for updating project model for the project with the name received
+	 * as parameter
 	 */
 	public void updateProjectModels(String projectName, IResource[] folderResources) {
 		for (int j = 0; j < folderResources.length; j++) {
@@ -104,18 +94,16 @@ public class WorkspaceModel {
 							if (fileResources[k] instanceof IFile && fileResources[k].getName().equals("consert.txt")) {
 								TextFileDocumentProvider provider = new TextFileDocumentProvider();
 								IDocument document = provider.getDocument((IFile) fileResources[k]);
-								this.populateProjectModel(projects.get(projectName), document,
-										(IFile) fileResources[k]);
+								populateProjectModel(projects.get(projectName), document, (IFile) fileResources[k]);
 							}
 						}
 
 					}
 				}
 			} catch (Exception e) {
-				System.out.println("Excepetion at updating ProjectModel");
+				e.printStackTrace();
 			}
 		}
-
 	}
 
 	/*
@@ -128,7 +116,7 @@ public class WorkspaceModel {
 			IWorkspace workspace = ResourcesPlugin.getWorkspace();
 			IProject[] projectsInWorkspace = workspace.getRoot().getProjects();
 
-			for (int i = 0; i < projectsInWorkspace.length; i++) { 
+			for (int i = 0; i < projectsInWorkspace.length; i++) {
 				/*
 				 * if the project is open and has the nature
 				 * "consertperspective"
@@ -147,43 +135,26 @@ public class WorkspaceModel {
 					}
 					/* Update on the current ProjectModel */
 					IResource[] folderResources = projectsInWorkspace[i].members();
-					this.updateProjectModels(projectName, folderResources);
+					updateProjectModels(projectName, folderResources);
 				}
 			}
 
 		} catch (Exception e) {
-			System.out.println(e);
+			e.printStackTrace();
 		}
-
 	}
 
 	private void populateProjectModel(ProjectModel projectModel, IDocument document, IFile file)
 			throws JsonProcessingException, IOException, CoreException {
 
-		/* get string content from file */
+		/* get string content from file, first refreshed on disk */
+		file.refreshLocal(IFile.DEPTH_INFINITE, null);
 		InputStream is = file.getContents();
-//		ByteArrayOutputStream result = new ByteArrayOutputStream();
-//		byte[] buffer = new byte[1024];
-//		int length;
-//		while ((length = is.read(buffer)) != -1) {
-//			result.write(buffer, 0, length);
-//		}
-//		String content = result.toString("UTF-8");
-//
-//		if (content.isEmpty()) {
-//			System.err.println("File is completely empty!");
-//			return;
-//		}
-
 		ObjectMapper mapper = new ObjectMapper();
 		JsonNode rootNode = mapper.readTree(is);
 
-		System.out.println("Form View parsed: " + rootNode.toString());
-
 		projectModel.setRootNode(rootNode);
 		/* set path to file consert.txt in ProjectModel */
-
-		System.out.println(file.getName());
 		projectModel.setPath(file.getLocation());
 
 		/*
@@ -240,59 +211,34 @@ public class WorkspaceModel {
 	/**
 	 * 
 	 * @param selection
-	 * @return
+	 * @return projectName Method used in ContextModel element creation wizards
 	 */
-	public String extractSelection(IStructuredSelection selection) {
+	public String getCurrentActiveProject(IStructuredSelection selection) {
 		Object element = selection.getFirstElement();
-		Object selected;
-		
-		if (element instanceof TreeObject){
-			TreeObject treeObject = (TreeObject) element;
-			return ((TreeObject) element).getProjectName();
-			
+
+		if (element instanceof TreeObject) {
+			return ((TreeObject<?>) element).getProjectName();
 		}
-		
-		if (element instanceof IResource){
-			IProject project = ((IResource) element).getProject();
-			return project.getName();
+
+		/* Every IResource is an IAdaptable */
+		if (element instanceof IAdaptable) {
+			return ((IProject) ((IResource) element).getProject()).getName();
 		}
-		
-		
-		if (element instanceof IAdaptable){
-			IAdaptable adaptable = (IAdaptable) element;
-			Object adapter = adaptable.getAdapter(IResource.class);
-			IProject project = ((IResource) element).getProject();
-			return project.getName();
-		}
-	
-			return "";	
-		
+
+		return "";
 	}
 
 	/**
 	 * 
-	 * @param selection
-	 * @return projectName
-	 * Method used in ContextModel element creation wizards
-	 */
-	public String getCurrentActiveProject(IStructuredSelection selection) {
-		return this.extractSelection(selection);
-	}
-	
-	/**
-	 * 
 	 * @param file
-	 * @return ProjectModel 
-	 * Method used when opening a file from ProjectExplorer to determine the ProjectModel 
-	 * corresponding to the opened file 
+	 * @return ProjectModel Method used when opening a file from ProjectExplorer
+	 *         to determine the ProjectModel corresponding to the opened file
 	 */
 	public ProjectModel getCurrentActiveProject(IFile file) {
-		if(file != null){
+		if (file != null) {
 			String projectName = file.getProject().getName();
-			System.out.println(projectName);
 			return WorkspaceModel.getInstance().getProjectModel(projectName);
 		}
 		return null;
 	}
-
 }

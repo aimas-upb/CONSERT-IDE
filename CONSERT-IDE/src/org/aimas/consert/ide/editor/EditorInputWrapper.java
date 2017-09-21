@@ -15,14 +15,14 @@ import org.eclipse.ui.IStorageEditorInput;
 public class EditorInputWrapper implements IStorageEditorInput {
 	private Object model;
 	private StringStorage storage;
-	private ProjectModel pm;
+	private ProjectModel projectModel;
 
-	public ProjectModel getPm() {
-		return pm;
+	public ProjectModel getProjectModel() {
+		return projectModel;
 	}
 
-	public void setPm(ProjectModel pm) {
-		this.pm = pm;
+	public void setProjectModel(ProjectModel projectModel) {
+		this.projectModel = projectModel;
 	}
 
 	public EditorInputWrapper(Object model) {
@@ -86,7 +86,7 @@ public class EditorInputWrapper implements IStorageEditorInput {
 			return false;
 		return true;
 	}
-	
+
 	class StringStorage implements IStorage {
 
 		@Override
