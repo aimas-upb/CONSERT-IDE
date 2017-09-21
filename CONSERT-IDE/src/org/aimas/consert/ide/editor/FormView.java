@@ -1,6 +1,5 @@
 package org.aimas.consert.ide.editor;
 
-import java.io.IOException;
 import java.util.List;
 
 import org.aimas.consert.ide.model.ContextAssertionModel;
@@ -13,7 +12,6 @@ import org.eclipse.core.resources.IResourceChangeListener;
 import org.eclipse.core.resources.IResourceDelta;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.IProgressMonitor;
-import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.ModifyEvent;
@@ -28,10 +26,6 @@ import org.eclipse.ui.forms.IManagedForm;
 import org.eclipse.ui.forms.editor.FormPage;
 import org.eclipse.ui.forms.widgets.FormToolkit;
 import org.eclipse.ui.forms.widgets.ScrolledForm;
-
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 
 public class FormView extends FormPage implements IResourceChangeListener {
 	private MultiPageEditor editor;
@@ -49,8 +43,8 @@ public class FormView extends FormPage implements IResourceChangeListener {
 	}
 
 	/*
-	 * This method is called when the form content is created and sets
-	 * the project model corresponding to the file "consert.txt" which was accessed.
+	 * This method is called when the form content is created and sets the
+	 * project model corresponding to the file "consert.txt" which was accessed.
 	 */
 	private void setProjectModel() {
 		ISelectionService service = getSite().getWorkbenchWindow().getSelectionService();
@@ -160,45 +154,41 @@ public class FormView extends FormPage implements IResourceChangeListener {
 		form.getBody().setLayout(layout);
 		layout.numColumns = 2;
 
-		try {
-			this.setProjectModel();
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-
-		if (projectModel != null) {
-			Label entitiesNameLabel = new Label(form.getBody(), SWT.NONE);
-			entitiesNameLabel.setText(" ContextEntitities: ");
-			new Label(form.getBody(), SWT.NONE);
-
-			for (ContextEntityModel cem : projectModel.getEntities()) {
-				createLabelAndTextForEntity(" Name: ", cem.getName(), null, cem);
-				createLabelAndTextForEntity(" Comment: ", cem.getComment(), null, cem);
-			}
-
-			Label assertionsNameLabel = new Label(form.getBody(), SWT.NONE);
-			assertionsNameLabel.setText(" ContextAssertions: ");
-			new Label(form.getBody(), SWT.NONE);
-
-			for (ContextAssertionModel cam : projectModel.getAssertions()) {
-				createLabelAndTextForAssertion(" Name: ", cam.getName(), cam);
-				createLabelAndTextForAssertion(" Comment: ", cam.getComment(), cam);
-				createLabelAndTextForAssertion(" Arity: ", Integer.toString(cam.getArity()), cam);
-
-				Label entitiesPerAssertionLabel = new Label(form.getBody(), SWT.NONE);
-				entitiesPerAssertionLabel.setText(" ContextEntities: ");
-				new Label(form.getBody(), SWT.NONE);
-
-				for (ContextEntityModel entity : cam.getEntities()) {
-					createLabelAndTextForEntity(" Name: ", entity.getName(), cam, entity);
-					createLabelAndTextForEntity(" Comment: ", entity.getComment(), cam, entity);
-				}
-			}
-		} else {
+		/* sets the projectModel to this FormView */
+		setProjectModel();
+		if (projectModel == null) {
 			Label emptyForm = new Label(form.getBody(), SWT.NONE);
 			emptyForm.setText("Project Model not loaded yet! Please close the form and reopen.");
+			return;
 		}
 
+		Label entitiesNameLabel = new Label(form.getBody(), SWT.NONE);
+		entitiesNameLabel.setText(" ContextEntitities: ");
+		new Label(form.getBody(), SWT.NONE);
+
+		for (ContextEntityModel cem : projectModel.getEntities()) {
+			createLabelAndTextForEntity(" Name: ", cem.getName(), null, cem);
+			createLabelAndTextForEntity(" Comment: ", cem.getComment(), null, cem);
+		}
+
+		Label assertionsNameLabel = new Label(form.getBody(), SWT.NONE);
+		assertionsNameLabel.setText(" ContextAssertions: ");
+		new Label(form.getBody(), SWT.NONE);
+
+		for (ContextAssertionModel cam : projectModel.getAssertions()) {
+			createLabelAndTextForAssertion(" Name: ", cam.getName(), cam);
+			createLabelAndTextForAssertion(" Comment: ", cam.getComment(), cam);
+			createLabelAndTextForAssertion(" Arity: ", Integer.toString(cam.getArity()), cam);
+
+			Label entitiesPerAssertionLabel = new Label(form.getBody(), SWT.NONE);
+			entitiesPerAssertionLabel.setText(" ContextEntities: ");
+			new Label(form.getBody(), SWT.NONE);
+
+			for (ContextEntityModel entity : cam.getEntities()) {
+				createLabelAndTextForEntity(" Name: ", entity.getName(), cam, entity);
+				createLabelAndTextForEntity(" Comment: ", entity.getComment(), cam, entity);
+			}
+		}
 	}
 
 	@Override
@@ -209,9 +199,7 @@ public class FormView extends FormPage implements IResourceChangeListener {
 			System.out.println(affected[i].getResource().getName());
 			projectName = affected[i].getResource().getName();
 		}
-		WorkspaceModel instance = WorkspaceModel.getInstance();
-		projectModel = instance.getProjectModel(projectName);
-
+		projectModel = WorkspaceModel.getInstance().getProjectModel(projectName);
 		System.out.println("Reload formView");
 	}
 }

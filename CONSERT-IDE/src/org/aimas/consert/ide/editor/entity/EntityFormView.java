@@ -32,9 +32,9 @@ public class EntityFormView extends FormPage implements IResourceChangeListener 
 	private ProjectModel projectModel;
 	public static final String ID = "org.aimas.consert.ide.editor.entity.EntityFormView";
 
-	public EntityFormView(EntityMultiPageEditor entityMultiPageEditor) {
-		super(entityMultiPageEditor, ID, "EntityFormView");
-		this.editor = entityMultiPageEditor;
+	public EntityFormView(EntityMultiPageEditor editor) {
+		super(editor, ID, "EntityFormView");
+		this.editor = editor;
 		isDirty = false;
 		ResourcesPlugin.getWorkspace().addResourceChangeListener(this);
 	}
@@ -101,13 +101,12 @@ public class EntityFormView extends FormPage implements IResourceChangeListener 
 	@Override
 	public void resourceChanged(IResourceChangeEvent event) {
 		IResourceDelta rootDelta = event.getDelta();
-		IResourceDelta affected[]= rootDelta.getAffectedChildren();
-		for(int i=0;i<affected.length;i++){
+		IResourceDelta affected[] = rootDelta.getAffectedChildren();
+		for (int i = 0; i < affected.length; i++) {
 			System.out.println(affected[i].getResource().getName());
-			this.projectName = affected[i].getResource().getName();
+			projectName = affected[i].getResource().getName();
 		}
-		WorkspaceModel instance = WorkspaceModel.getInstance();
-		this.projectModel = instance.getProjectModel(this.projectName); 
+		projectModel = WorkspaceModel.getInstance().getProjectModel(projectName);
 		System.out.println("Reload EntityformView");
 	}
 }

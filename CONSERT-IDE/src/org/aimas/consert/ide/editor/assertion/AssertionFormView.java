@@ -159,10 +159,9 @@ public class AssertionFormView extends FormPage implements IResourceChangeListen
 		IResourceDelta affected[] = rootDelta.getAffectedChildren();
 		for (int i = 0; i < affected.length; i++) {
 			System.out.println(affected[i].getResource().getName());
-			this.projectName = affected[i].getResource().getName();
+			projectName = affected[i].getResource().getName();
 		}
-		WorkspaceModel instance = WorkspaceModel.getInstance();
-		this.projectModel = instance.getProjectModel(this.projectName);
+		projectModel = WorkspaceModel.getInstance().getProjectModel(projectName);
 		System.out.println("Reload AssertionformView");
 	}
 }
