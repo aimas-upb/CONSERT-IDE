@@ -7,8 +7,10 @@ import org.aimas.consert.ide.editor.MultiPageEditor;
 import org.aimas.consert.ide.model.ContextAssertionModel;
 import org.aimas.consert.ide.model.ContextEntityModel;
 import org.aimas.consert.ide.model.ProjectModel;
+import org.aimas.consert.ide.model.WorkspaceModel;
 import org.eclipse.core.resources.IResourceChangeEvent;
 import org.eclipse.core.resources.IResourceChangeListener;
+import org.eclipse.core.resources.IResourceDelta;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.swt.SWT;
@@ -30,6 +32,8 @@ public class AssertionFormView extends FormPage implements IResourceChangeListen
 	private ScrolledForm form;
 	private boolean isDirty;
 	private ContextAssertionModel cam;
+	private String projectName;
+	private ProjectModel projectModel;
 	public static final String ID = "org.aimas.consert.ide.editor.assertion.AssertionFormView";
 
 	public AssertionFormView(MultiPageEditor editor) {
@@ -54,12 +58,12 @@ public class AssertionFormView extends FormPage implements IResourceChangeListen
 				editor.editorDirtyStateChanged();
 
 				if (labelName.equals(" Name: ")) {
-					ProjectModel.getInstance().getAssertionByName(cam.getName()).setName(nameText.getText());
+					projectModel.getAssertionByName(cam.getName()).setName(nameText.getText());
 				} else if (labelName.equals(" Comment: ")) {
-					ProjectModel.getInstance().getAssertionByName(cam.getName()).setComment(nameText.getText());
+					projectModel.getAssertionByName(cam.getName()).setComment(nameText.getText());
 				} else if (labelName.equals(" Arity: ")) {
 					try {
-						ProjectModel.getInstance().getAssertionByName(cam.getName())
+						projectModel.getAssertionByName(cam.getName())
 								.setArity(Integer.parseInt((nameText.getText())));
 					} catch (NumberFormatException exp) {
 						System.err.print("Please Introduce an Integer Arity");
@@ -90,7 +94,7 @@ public class AssertionFormView extends FormPage implements IResourceChangeListen
 				 * This entity belongs to an assertion, and is not present in
 				 * the getEntities() of the ProjectModel!!!
 				 */
-				List<ContextEntityModel> entities = ProjectModel.getInstance().getAssertionByName(cam.getName())
+				List<ContextEntityModel> entities = projectModel.getAssertionByName(cam.getName())
 						.getEntities();
 				for (ContextEntityModel entity : entities) {
 					if (entity.equals(cem)) {
@@ -112,8 +116,8 @@ public class AssertionFormView extends FormPage implements IResourceChangeListen
 
 	@Override
 	public void doSave(IProgressMonitor monitor) {
-		ProjectModel.getInstance().updateAssertionsJsonNode();
-		ProjectModel.getInstance().writeJsonOnDisk();
+		projectModel.updateAssertionsJsonNode();
+		projectModel.writeJsonOnDisk();
 		isDirty = false;
 		firePropertyChange(PROP_DIRTY);
 		editor.editorDirtyStateChanged();
@@ -153,6 +157,14 @@ public class AssertionFormView extends FormPage implements IResourceChangeListen
 
 	@Override
 	public void resourceChanged(IResourceChangeEvent event) {
+		IResourceDelta rootDelta = event.getDelta();
+		IResourceDelta affected[]= rootDelta.getAffectedChildren();
+		for(int i=0;i<affected.length;i++){
+			System.out.println(affected[i].getResource().getName());
+			this.projectName = affected[i].getResource().getName();
+		}
+		WorkspaceModel instance = WorkspaceModel.getInstance();
+		this.projectModel = instance.getProjectModel(this.projectName); 	
 		System.out.println("Reload AssertionformView");
 	}
 }

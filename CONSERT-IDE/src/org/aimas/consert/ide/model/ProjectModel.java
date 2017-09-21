@@ -18,25 +18,20 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 public class ProjectModel {
 	private IPath path;
 	private JsonNode rootNode;
-	private static ProjectModel instance;
+	public String projectName;
 	private List<ContextEntityModel> entities;
 	private List<ContextAssertionModel> assertions;
 	private static ObjectMapper mapper;
-
-	/**
-	 * here to defeat instantiation
-	 */
-	private ProjectModel() {
-		mapper = new ObjectMapper();
-		entities = new ArrayList<ContextEntityModel>();
-		assertions = new ArrayList<ContextAssertionModel>();
+	
+	public ProjectModel (String projectName){
+		this.projectName = projectName;
+		this.mapper = new ObjectMapper();
+		this.entities = new ArrayList<ContextEntityModel>();
+		this.assertions = new ArrayList<ContextAssertionModel>();
 	}
-
-	public static ProjectModel getInstance() {
-		if (instance == null) {
-			instance = new ProjectModel();
-		}
-		return instance;
+	
+	public String getName(){
+		return this.projectName;
 	}
 
 	public void setRootNode(JsonNode rootNode) {

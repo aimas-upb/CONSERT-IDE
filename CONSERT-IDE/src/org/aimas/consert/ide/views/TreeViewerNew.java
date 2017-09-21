@@ -1,6 +1,7 @@
 package org.aimas.consert.ide.views;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 
 import org.aimas.consert.ide.editor.EditorInputWrapper;
@@ -9,9 +10,9 @@ import org.aimas.consert.ide.editor.entity.EntityMultiPageEditor;
 import org.aimas.consert.ide.model.ContextAssertionModel;
 import org.aimas.consert.ide.model.ContextEntityModel;
 import org.aimas.consert.ide.model.ProjectModel;
+import org.aimas.consert.ide.model.WorkspaceModel;
 import org.aimas.consert.ide.wizards.ContextAssertionWizard;
 import org.aimas.consert.ide.wizards.ContextEntityWizard;
-import org.eclipse.core.runtime.IAdaptable;
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.MenuManager;
 import org.eclipse.jface.viewers.DoubleClickEvent;
@@ -41,50 +42,11 @@ public class TreeViewerNew extends ViewPart {
 	private TreeViewer viewer;
 	private TreeParent invisibleRoot;
 
-	class TreeObject<T> implements IAdaptable {
-
-		private String name;
-		private TreeParent<T> parent;
-		private T resource;
-
-		public TreeObject(String name) {
-			this.name = name;
-		}
-
-		public String getName() {
-			return name;
-		}
-
-		public void setParent(TreeParent<T> parent) {
-			this.parent = parent;
-		}
-
-		public TreeParent<T> getParent() {
-			return parent;
-		}
-
-		public String toString() {
-			return getName();
-		}
-
-		public Object getAdapter(Class key) {
-			return null;
-		}
-
-		protected T getResource() {
-			return resource;
-		}
-
-		protected void setResource(T resource) {
-			this.resource = resource;
-		}
-	}
-
 	class TreeParent<T> extends TreeObject<T> {
 		private ArrayList<TreeObject<T>> children;
 
-		public TreeParent(String name) {
-			super(name);
+		public TreeParent(String name, String projectName) {
+			super(name, projectName);
 			children = new ArrayList<TreeObject<T>>();
 		}
 
@@ -168,41 +130,51 @@ public class TreeViewerNew extends ViewPart {
 	}
 
 	public void initialize() {
-		ProjectModel projectWideModel = ProjectModel.getInstance();
-		TreeParent root = new TreeParent("CONSERT Model elements");
-		try {
-			// create separate folders for ContextEntities and ContextAssertions
-			TreeParent<ContextEntityModel> entitiesParent = new TreeParent<ContextEntityModel>(
-					"CONSERT ContextEntities");
-			root.addChild(entitiesParent);
-			TreeParent<ContextAssertionModel> assertionsParent = new TreeParent<ContextAssertionModel>(
-					"CONSERT ContextAssertions");
-			root.addChild(assertionsParent);
+		WorkspaceModel workspaceModel = WorkspaceModel.getInstance();
+		workspaceModel.refreshWorkspace();
+		HashMap<String, ProjectModel> projects = workspaceModel.getProjectModels();
+		
+		invisibleRoot = new TreeParent("", "");
 
-			// get the list of entities and assertions from the projectWideModel
-			// instance
-			List<ContextEntityModel> entities = projectWideModel.getEntities();
-			List<ContextAssertionModel> assertions = projectWideModel.getAssertions();
+		for (HashMap.Entry<String, ProjectModel> entry : projects.entrySet()){
+			ProjectModel project = entry.getValue();
+			TreeParent root = new TreeParent(project.getName(), project.getName());
+			try {
+				// create separate folders for ContextEntities and ContextAssertions
+				TreeParent<ContextEntityModel> entitiesParent = new TreeParent<ContextEntityModel>(
+						"CONSERT ContextEntities", project.getName());
+				root.addChild(entitiesParent);
+				TreeParent<ContextAssertionModel> assertionsParent = new TreeParent<ContextAssertionModel>(
+						"CONSERT ContextAssertions", project.getName());
+				root.addChild(assertionsParent);
 
-			// add entities to the tree
-			for (ContextEntityModel ent : entities) {
-				TreeObject<ContextEntityModel> obj = new TreeObject<ContextEntityModel>(ent.getName());
-				obj.setResource(ent);
-				entitiesParent.addChild(obj);
+				/* get the list of entities and assertions from the projectWideModel
+				 instance */
+				List<ContextEntityModel> entities = project.getEntities();
+				List<ContextAssertionModel> assertions = project.getAssertions();
+
+				System.out.println(project.getEntities());
+				
+				/* add entities to the tree */
+				for (ContextEntityModel ent : entities) {
+					TreeObject<ContextEntityModel> obj = new TreeObject<ContextEntityModel>(ent.getName(), project.getName());
+					obj.setResource(ent);
+					entitiesParent.addChild(obj);
+				}
+
+				/* add assertions to the tree */
+				for (ContextAssertionModel ass : assertions) {
+					TreeObject<ContextAssertionModel> obj = new TreeObject<ContextAssertionModel>(ass.getName(), project.getName());
+					obj.setResource(ass);
+					assertionsParent.addChild(obj);
+				}
+
+			} catch (Exception e) {
+				/* log exception */
 			}
-
-			// add assertions to the tree
-			for (ContextAssertionModel ass : assertions) {
-				TreeObject<ContextAssertionModel> obj = new TreeObject<ContextAssertionModel>(ass.getName());
-				obj.setResource(ass);
-				assertionsParent.addChild(obj);
-			}
-
-		} catch (Exception e) {
-			// log exception
+			invisibleRoot.addChild(root);
 		}
-		invisibleRoot = new TreeParent("");
-		invisibleRoot.addChild(root);
+		
 	}
 
 	public TreeViewerNew() {
@@ -229,19 +201,27 @@ public class TreeViewerNew extends ViewPart {
 		viewer.addDoubleClickListener(new IDoubleClickListener() {
 			public void doubleClick(DoubleClickEvent event) {
 				ISelection selection = event.getSelection();
+				System.out.println("Current active project: ");
+				System.out.println(WorkspaceModel.getInstance().getCurrentActiveProject((IStructuredSelection)selection));
 				Object obj = ((IStructuredSelection) selection).getFirstElement();
 				if (!(obj instanceof TreeObject)) {
 					return;
 				}
-				// get the page
+				/* get the ProjectModel associated to this selection*/
+				TreeObject treeObject = (TreeObject) obj;
+				ProjectModel pm = WorkspaceModel.getInstance().getProjectModel(treeObject.getParent().getParent().getName());
+				/* get the page */
 				IWorkbenchPage page = TreeViewerNew.this.getViewSite().getWorkbenchWindow().getActivePage();
 				try {
 					Object model = ((TreeObject) obj).getResource();
 					if (model instanceof ContextEntityModel) {
-						page.openEditor(new EditorInputWrapper((ContextEntityModel) model), EntityMultiPageEditor.ID);
+						EditorInputWrapper eiw = new EditorInputWrapper((ContextEntityModel) model);
+						eiw.setPm(pm);
+						page.openEditor(eiw, EntityMultiPageEditor.ID);
 					} else if (model instanceof ContextAssertionModel) {
-						page.openEditor(new EditorInputWrapper((ContextAssertionModel) model),
-								AssertionMultiPageEditor.ID);
+						EditorInputWrapper eiw = new EditorInputWrapper((ContextAssertionModel) model);
+						eiw.setPm(pm);
+						page.openEditor(eiw, AssertionMultiPageEditor.ID);
 					} else {
 						System.err.println("Model is nor Entity nor Assertion!");
 					}
@@ -312,6 +292,7 @@ public class TreeViewerNew extends ViewPart {
 		refresh.setText("Refresh");
 		menuMgr.add(refresh);
 	}
+	
 
 	public void setFocus() {
 		viewer.getControl().setFocus();

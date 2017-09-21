@@ -1,7 +1,7 @@
 package org.aimas.consert.ide.wizards;
 
 import org.aimas.consert.ide.model.ContextEntityModel;
-import org.aimas.consert.ide.model.ProjectModel;
+import org.aimas.consert.ide.model.WorkspaceModel;
 import org.aimas.consert.ide.wizards.pages.WizardNewEntityPage;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.wizard.Wizard;
@@ -27,7 +27,8 @@ public class ContextEntityWizard extends Wizard implements INewWizard {
 	@Override
 	public void addPages() {
 		super.addPages();
-		_pageOne = new WizardNewEntityPage(NewWizardMessages.NewContextEntityWizard);
+		String projectName = WorkspaceModel.getInstance().getCurrentActiveProject(this.selection);
+		_pageOne = new WizardNewEntityPage(NewWizardMessages.NewContextEntityWizard, projectName);
 		_pageOne.setDescription(NewWizardMessages.NewContextEntityDescription);
 		_pageOne.setTitle(NewWizardMessages.NewContextEntityTitle);
 		addPage(_pageOne);
@@ -41,6 +42,6 @@ public class ContextEntityWizard extends Wizard implements INewWizard {
 		model.setComment(_pageOne.getTextComment());
 
 		/* finish means adding in the consert.txt file the required fields */
-		return ProjectModel.getInstance().saveNewModelOnDisk(projectName, model);
+		return WorkspaceModel.getInstance().getProjectModel(projectName).saveNewModelOnDisk(projectName, model);
 	}
 }

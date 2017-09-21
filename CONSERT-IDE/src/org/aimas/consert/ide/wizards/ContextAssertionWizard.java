@@ -5,7 +5,7 @@ import java.util.List;
 
 import org.aimas.consert.ide.model.ContextAssertionModel;
 import org.aimas.consert.ide.model.ContextEntityModel;
-import org.aimas.consert.ide.model.ProjectModel;
+import org.aimas.consert.ide.model.WorkspaceModel;
 import org.aimas.consert.ide.wizards.pages.WizardNewAssertionPage;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.wizard.Wizard;
@@ -31,7 +31,8 @@ public class ContextAssertionWizard extends Wizard implements INewWizard {
 	@Override
 	public void addPages() {
 		super.addPages();
-		_pageOne = new WizardNewAssertionPage(NewWizardMessages.NewContextAssertionWizard);
+		String projectName = WorkspaceModel.getInstance().getCurrentActiveProject(this.selection);
+		_pageOne = new WizardNewAssertionPage(NewWizardMessages.NewContextAssertionWizard, projectName);
 		_pageOne.setDescription(NewWizardMessages.NewContextAssertionDescription);
 		_pageOne.setTitle(NewWizardMessages.NewContextAssertionTitle);
 		addPage(_pageOne);
@@ -47,7 +48,7 @@ public class ContextAssertionWizard extends Wizard implements INewWizard {
 		model.setEntities(getEntities(_pageOne.getTextEntities()));
 
 		/* finish means adding in the consert.txt file the required fields */
-		return ProjectModel.getInstance().saveNewModelOnDisk(projectName, model);
+		return WorkspaceModel.getInstance().getProjectModel(projectName).saveNewModelOnDisk(projectName, model);
 	}
 
 	private List<ContextEntityModel> getEntities(String textEntities) {

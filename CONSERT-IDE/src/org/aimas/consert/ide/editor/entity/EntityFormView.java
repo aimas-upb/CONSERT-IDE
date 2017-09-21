@@ -3,8 +3,10 @@ package org.aimas.consert.ide.editor.entity;
 import org.aimas.consert.ide.editor.EditorInputWrapper;
 import org.aimas.consert.ide.model.ContextEntityModel;
 import org.aimas.consert.ide.model.ProjectModel;
+import org.aimas.consert.ide.model.WorkspaceModel;
 import org.eclipse.core.resources.IResourceChangeEvent;
 import org.eclipse.core.resources.IResourceChangeListener;
+import org.eclipse.core.resources.IResourceDelta;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.swt.SWT;
@@ -26,6 +28,8 @@ public class EntityFormView extends FormPage implements IResourceChangeListener 
 	private ScrolledForm form;
 	private boolean isDirty;
 	private ContextEntityModel cem;
+	private String projectName;
+	private ProjectModel projectModel;
 	public static final String ID = "org.aimas.consert.ide.editor.entity.EntityFormView";
 
 	public EntityFormView(EntityMultiPageEditor entityMultiPageEditor) {
@@ -50,9 +54,9 @@ public class EntityFormView extends FormPage implements IResourceChangeListener 
 				editor.editorDirtyStateChanged();
 
 				if (labelName.equals(" Name: ")) {
-					ProjectModel.getInstance().getEntityByName(cem.getName()).setName(nameText.getText());
+					projectModel.getEntityByName(cem.getName()).setName(nameText.getText());
 				} else if (labelName.equals(" Comment: "))
-					ProjectModel.getInstance().getEntityByName(cem.getName()).setComment(nameText.getText());
+					projectModel.getEntityByName(cem.getName()).setComment(nameText.getText());
 			}
 		});
 	}
@@ -64,8 +68,8 @@ public class EntityFormView extends FormPage implements IResourceChangeListener 
 
 	@Override
 	public void doSave(IProgressMonitor monitor) {
-		ProjectModel.getInstance().updateEntitiesJsonNode();
-		ProjectModel.getInstance().writeJsonOnDisk();
+		projectModel.updateEntitiesJsonNode();
+		projectModel.writeJsonOnDisk();
 		isDirty = false;
 		firePropertyChange(PROP_DIRTY);
 		editor.editorDirtyStateChanged();
@@ -96,6 +100,14 @@ public class EntityFormView extends FormPage implements IResourceChangeListener 
 
 	@Override
 	public void resourceChanged(IResourceChangeEvent event) {
+		IResourceDelta rootDelta = event.getDelta();
+		IResourceDelta affected[]= rootDelta.getAffectedChildren();
+		for(int i=0;i<affected.length;i++){
+			System.out.println(affected[i].getResource().getName());
+			this.projectName = affected[i].getResource().getName();
+		}
+		WorkspaceModel instance = WorkspaceModel.getInstance();
+		this.projectModel = instance.getProjectModel(this.projectName); 
 		System.out.println("Reload EntityformView");
 	}
 }

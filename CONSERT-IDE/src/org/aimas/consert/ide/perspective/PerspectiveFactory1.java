@@ -1,5 +1,6 @@
 package org.aimas.consert.ide.perspective;
 
+import org.aimas.consert.ide.model.WorkspaceModel;
 import org.eclipse.ui.IPageLayout;
 import org.eclipse.ui.IPerspectiveFactory;
 
@@ -14,5 +15,7 @@ public class PerspectiveFactory1 implements IPerspectiveFactory {
 		// myLayout.createFolder(BOTTOM,IPageLayout.BOTTOM,0.76f,myLayout.getEditorArea());
 		// bot.addView(VIEW_ID);
 		myLayout.setFixed(true);
+		WorkspaceModel workspaceModel = WorkspaceModel.getInstance();
+		workspaceModel.initializeWorkspace();
 	}
 }
