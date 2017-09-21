@@ -162,21 +162,21 @@ public class WorkspaceModel {
 
 		/* get string content from file */
 		InputStream is = file.getContents();
-		ByteArrayOutputStream result = new ByteArrayOutputStream();
-		byte[] buffer = new byte[1024];
-		int length;
-		while ((length = is.read(buffer)) != -1) {
-			result.write(buffer, 0, length);
-		}
-		String content = result.toString("UTF-8");
-
-		if (content.isEmpty()) {
-			System.err.println("File is completely empty!");
-			return;
-		}
+//		ByteArrayOutputStream result = new ByteArrayOutputStream();
+//		byte[] buffer = new byte[1024];
+//		int length;
+//		while ((length = is.read(buffer)) != -1) {
+//			result.write(buffer, 0, length);
+//		}
+//		String content = result.toString("UTF-8");
+//
+//		if (content.isEmpty()) {
+//			System.err.println("File is completely empty!");
+//			return;
+//		}
 
 		ObjectMapper mapper = new ObjectMapper();
-		JsonNode rootNode = mapper.readTree(content);
+		JsonNode rootNode = mapper.readTree(is);
 
 		System.out.println("Form View parsed: " + rootNode.toString());
 
@@ -245,16 +245,18 @@ public class WorkspaceModel {
 	public String extractSelection(IStructuredSelection selection) {
 		Object element = selection.getFirstElement();
 		Object selected;
-		if (element instanceof IResource){
-			IProject project = ((IResource) element).getProject();
-			return project.getName();
-		}
 		
 		if (element instanceof TreeObject){
 			TreeObject treeObject = (TreeObject) element;
 			return ((TreeObject) element).getProjectName();
 			
 		}
+		
+		if (element instanceof IResource){
+			IProject project = ((IResource) element).getProject();
+			return project.getName();
+		}
+		
 		
 		if (element instanceof IAdaptable){
 			IAdaptable adaptable = (IAdaptable) element;
@@ -263,7 +265,7 @@ public class WorkspaceModel {
 			return project.getName();
 		}
 	
-			return null;	
+			return "";	
 		
 	}
 

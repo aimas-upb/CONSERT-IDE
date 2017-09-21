@@ -11,9 +11,8 @@ import org.aimas.consert.ide.model.ContextAssertionModel;
 import org.aimas.consert.ide.model.ContextEntityModel;
 import org.aimas.consert.ide.model.ProjectModel;
 import org.aimas.consert.ide.model.WorkspaceModel;
-import org.eclipse.core.resources.IProject;
-import org.eclipse.core.runtime.IAdaptable;
-import org.eclipse.core.runtime.IPath;
+import org.aimas.consert.ide.wizards.ContextAssertionWizard;
+import org.aimas.consert.ide.wizards.ContextEntityWizard;
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.MenuManager;
 import org.eclipse.jface.viewers.DoubleClickEvent;
@@ -21,17 +20,18 @@ import org.eclipse.jface.viewers.IDoubleClickListener;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.ITreeContentProvider;
-import org.eclipse.jface.viewers.ITreeViewerListener;
 import org.eclipse.jface.viewers.LabelProvider;
 import org.eclipse.jface.viewers.TreeViewer;
 import org.eclipse.jface.viewers.Viewer;
+import org.eclipse.jface.window.Window;
+import org.eclipse.jface.wizard.IWizard;
+import org.eclipse.jface.wizard.WizardDialog;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Menu;
 import org.eclipse.ui.ISharedImages;
 import org.eclipse.ui.IWorkbenchPage;
-import org.eclipse.ui.IWorkbenchWindow;
 import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.part.ViewPart;
@@ -236,6 +236,53 @@ public class TreeViewerNew extends ViewPart {
 		MenuManager menuMgr = new MenuManager("#PopupMenu");
 		Menu menu = menuMgr.createContextMenu(viewer.getControl());
 		viewer.getControl().setMenu(menu);
+
+		addRefreshActionToMenu(menuMgr);
+		addNewEntityActionToMenu(menuMgr);
+		addNewAssertionActionToMenu(menuMgr);
+	}
+
+	/**
+	 * adds a new entry in the menu for adding new assertions and refreshes the
+	 * view on Finish
+	 */
+	private void addNewAssertionActionToMenu(MenuManager menuMgr) {
+		Action addAssertion = new Action() {
+			public void run() {
+				IWizard wizard = new ContextAssertionWizard();
+				WizardDialog dialog = new WizardDialog(PlatformUI.getWorkbench().getActiveWorkbenchWindow().getShell(),
+						wizard);
+				if (dialog.open() == Window.OK) {
+					initialize();
+					viewer.refresh();
+				}
+			}
+		};
+		addAssertion.setText("addNewAssertion");
+		menuMgr.add(addAssertion);
+	}
+
+	/**
+	 * adds a new entry in the menu for adding new entities and refreshes the
+	 * view on Finish
+	 */
+	private void addNewEntityActionToMenu(MenuManager menuMgr) {
+		Action addEntity = new Action() {
+			public void run() {
+				IWizard wizard = new ContextEntityWizard();
+				WizardDialog dialog = new WizardDialog(PlatformUI.getWorkbench().getActiveWorkbenchWindow().getShell(),
+						wizard);
+				if (dialog.open() == Window.OK) {
+					initialize();
+					viewer.refresh();
+				}
+			}
+		};
+		addEntity.setText("addNewEntity");
+		menuMgr.add(addEntity);
+	}
+
+	private void addRefreshActionToMenu(MenuManager menuMgr) {
 		Action refresh = new Action() {
 			public void run() {
 				initialize();

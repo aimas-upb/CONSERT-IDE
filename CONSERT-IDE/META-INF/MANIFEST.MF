@@ -11,7 +11,6 @@ Bundle-Vendor: AI-MAS
 Export-Package: org.aimas.consert.ide.model,
  org.aimas.consert.ide.perspective,
  org.aimas.consert.ide.projects,
- org.aimas.consert.ide.utils,
  org.aimas.consert.ide.wizards,
  org.aimas.consert.ide.wizards.pages
 Require-Bundle: org.eclipse.ui,

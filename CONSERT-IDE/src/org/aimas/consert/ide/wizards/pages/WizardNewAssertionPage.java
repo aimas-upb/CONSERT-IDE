@@ -1,9 +1,5 @@
 package org.aimas.consert.ide.wizards.pages;
 
-import java.util.ArrayList;
-import java.util.List;
-
-import org.aimas.consert.ide.model.ContextEntityModel;
 import org.eclipse.jface.wizard.WizardPage;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.KeyEvent;

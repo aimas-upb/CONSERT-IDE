@@ -1,8 +1,5 @@
 package org.aimas.consert.ide.editor.entity;
 
-import java.io.File;
-import java.io.IOException;
-
 import org.aimas.consert.ide.editor.EditorInputWrapper;
 import org.aimas.consert.ide.model.ContextEntityModel;
 import org.aimas.consert.ide.model.ProjectModel;
@@ -11,7 +8,6 @@ import org.eclipse.core.resources.IResourceChangeEvent;
 import org.eclipse.core.resources.IResourceChangeListener;
 import org.eclipse.core.resources.IResourceDelta;
 import org.eclipse.core.resources.ResourcesPlugin;
-import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.ModifyEvent;
@@ -26,10 +22,6 @@ import org.eclipse.ui.forms.IManagedForm;
 import org.eclipse.ui.forms.editor.FormPage;
 import org.eclipse.ui.forms.widgets.FormToolkit;
 import org.eclipse.ui.forms.widgets.ScrolledForm;
-
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.node.ObjectNode;
 
 public class EntityFormView extends FormPage implements IResourceChangeListener {
 	private EntityMultiPageEditor editor;
@@ -76,27 +68,8 @@ public class EntityFormView extends FormPage implements IResourceChangeListener 
 
 	@Override
 	public void doSave(IProgressMonitor monitor) {
-		IPath path = projectModel.getPath();
-		ObjectMapper mapper = new ObjectMapper();
-		JsonNode rootNode = projectModel.getRootNode();
-
-		/*
-		 * Saving all entities, because the formView does not track them
-		 * individually, so it does not know which changed and which didn't.
-		 */
-		((ObjectNode) rootNode).withArray("ContextEntities").removeAll();
-		for (ContextEntityModel cem : projectModel.getEntities()) {
-			((ObjectNode) rootNode).withArray("ContextEntities").add(mapper.valueToTree(cem));
-		}
-		System.out.println("[doSave] maped new entities into Json: " + projectModel.getEntities());
-
-		/* Write on disk the new Json into File, replacing the old one. */
-		try {
-			mapper.writeValue(new File(path.toString()), rootNode);
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
-
+		projectModel.updateEntitiesJsonNode();
+		projectModel.writeJsonOnDisk();
 		isDirty = false;
 		firePropertyChange(PROP_DIRTY);
 		editor.editorDirtyStateChanged();

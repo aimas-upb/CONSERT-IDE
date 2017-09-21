@@ -1,6 +1,5 @@
 package org.aimas.consert.ide.editor;
 
-import java.io.File;
 import java.io.IOException;
 import java.util.List;
 
@@ -13,7 +12,6 @@ import org.eclipse.core.resources.IResourceChangeEvent;
 import org.eclipse.core.resources.IResourceChangeListener;
 import org.eclipse.core.resources.IResourceDelta;
 import org.eclipse.core.resources.ResourcesPlugin;
-import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.viewers.IStructuredSelection;
@@ -30,12 +28,10 @@ import org.eclipse.ui.forms.IManagedForm;
 import org.eclipse.ui.forms.editor.FormPage;
 import org.eclipse.ui.forms.widgets.FormToolkit;
 import org.eclipse.ui.forms.widgets.ScrolledForm;
-import org.eclipse.ui.part.FileEditorInput;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.node.ObjectNode;
 
 public class FormView extends FormPage implements IResourceChangeListener {
 	private MultiPageEditor editor;
@@ -149,34 +145,7 @@ public class FormView extends FormPage implements IResourceChangeListener {
 
 	@Override
 	public void doSave(IProgressMonitor monitor) {
-		IPath path = ((FileEditorInput) editor.getEditorInput()).getPath();
-		ObjectMapper mapper = new ObjectMapper();
-		JsonNode rootNode = projectModel.getRootNode();
-
-		/*
-		 * Saving all entities, because the formView does not track them
-		 * individually, so it does not know which changed and which didn't.
-		 */
-		((ObjectNode) rootNode).withArray("ContextEntities").removeAll();
-		for (ContextEntityModel cem : projectModel.getEntities()) {
-			((ObjectNode) rootNode).withArray("ContextEntities").add(mapper.valueToTree(cem));
-		}
-		System.out.println("[doSave] maped new entities into Json: " + projectModel.getEntities());
-
-		/* Saving all assertions as well. */
-		((ObjectNode) rootNode).withArray("ContextAssertions").removeAll();
-		for (ContextAssertionModel cam : projectModel.getAssertions()) {
-			((ObjectNode) rootNode).withArray("ContextAssertions").add(mapper.valueToTree(cam));
-		}
-		System.out.println("[doSave] maped new assertions into Json: " + projectModel.getAssertions());
-
-		/* Write on disk the new Json into File, replacing the old one. */
-		try {
-			mapper.writeValue(new File(path.toString()), rootNode);
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
-
+		projectModel.saveJsonOnDisk();
 		isDirty = false;
 		firePropertyChange(PROP_DIRTY);
 		editor.editorDirtyStateChanged();

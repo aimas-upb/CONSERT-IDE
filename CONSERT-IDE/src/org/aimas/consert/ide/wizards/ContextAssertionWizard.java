@@ -6,7 +6,6 @@ import java.util.List;
 import org.aimas.consert.ide.model.ContextAssertionModel;
 import org.aimas.consert.ide.model.ContextEntityModel;
 import org.aimas.consert.ide.model.WorkspaceModel;
-import org.aimas.consert.ide.utils.JsonParser;
 import org.aimas.consert.ide.wizards.pages.WizardNewAssertionPage;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.wizard.Wizard;
@@ -20,7 +19,7 @@ public class ContextAssertionWizard extends Wizard implements INewWizard {
 
 	public ContextAssertionWizard() {
 		super();
-		setWindowTitle(org.aimas.consert.ide.wizards.NewWizardMessages.ScratchAssertion);
+		setWindowTitle(NewWizardMessages.NewContextAssertionTitle);
 	}
 
 	@Override
@@ -33,10 +32,9 @@ public class ContextAssertionWizard extends Wizard implements INewWizard {
 	public void addPages() {
 		super.addPages();
 		String projectName = WorkspaceModel.getInstance().getCurrentActiveProject(this.selection);
-		_pageOne = new WizardNewAssertionPage(org.aimas.consert.ide.wizards.NewWizardMessages.ScratchAssertion, projectName);
-		_pageOne.setDescription(
-				org.aimas.consert.ide.wizards.NewWizardMessages.ConsertProjectWizard_ConsertProjectWizard_Create_something_custom);
-		_pageOne.setTitle(org.aimas.consert.ide.wizards.NewWizardMessages.ScratchEntity);
+		_pageOne = new WizardNewAssertionPage(NewWizardMessages.NewContextAssertionWizard, projectName);
+		_pageOne.setDescription(NewWizardMessages.NewContextAssertionDescription);
+		_pageOne.setTitle(NewWizardMessages.NewContextAssertionTitle);
 		addPage(_pageOne);
 	}
 
@@ -50,7 +48,7 @@ public class ContextAssertionWizard extends Wizard implements INewWizard {
 		model.setEntities(getEntities(_pageOne.getTextEntities()));
 
 		/* finish means adding in the consert.txt file the required fields */
-		return JsonParser.getInstance().appendToFile(projectName, model);
+		return WorkspaceModel.getInstance().getProjectModel(projectName).saveNewModelOnDisk(projectName, model);
 	}
 
 	private List<ContextEntityModel> getEntities(String textEntities) {
@@ -63,5 +61,4 @@ public class ContextAssertionWizard extends Wizard implements INewWizard {
 		}
 		return entities;
 	}
-
 }

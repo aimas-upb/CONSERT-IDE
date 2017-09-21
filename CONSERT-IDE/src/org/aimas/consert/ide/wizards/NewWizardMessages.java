@@ -3,17 +3,26 @@ package org.aimas.consert.ide.wizards;
 import org.eclipse.osgi.util.NLS;
 
 public class NewWizardMessages extends NLS {
-	private static final String BUNDLE_NAME = "wizards.messages"; //$NON-NLS-1$
-	public static String ScratchEntity;
-	public static String ScratchAssertion;
-	public static String ConsertProjectWizard_2;
-	public static String ConsertProjectWizard_ConsertProjectNewWizard_Custom_Project;
-	public static String ConsertProjectWizard_ConsertProjectWizard_Create_something_custom;
-	static {
-		// initialize resource bundle
-		NLS.initializeMessages(BUNDLE_NAME, NewWizardMessages.class);
-	}
+	/* BUNDLE_NAME is the path to messages.properties */
+	private static final String BUNDLE_NAME = "org.aimas.consert.ide.wizards.messages";
 
-	private NewWizardMessages() {
+	public static String NewConsertProjectWizard;
+	public static String NewConsertProjectDescription;
+	public static String NewConsertProjectTitle;
+
+	public static String ImportConsertProjectDescription;
+	public static String ImportConsertProjectTitle;
+
+	public static String NewContextEntityWizard;
+	public static String NewContextEntityDescription;
+	public static String NewContextEntityTitle;
+
+	public static String NewContextAssertionWizard;
+	public static String NewContextAssertionDescription;
+	public static String NewContextAssertionTitle;
+
+	static {
+		/* initialize resource bundle */
+		NLS.initializeMessages(BUNDLE_NAME, NewWizardMessages.class);
 	}
 }

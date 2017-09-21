@@ -1,7 +1,5 @@
 package org.aimas.consert.ide.editor.assertion;
 
-import java.io.File;
-import java.io.IOException;
 import java.util.List;
 
 import org.aimas.consert.ide.editor.EditorInputWrapper;
@@ -14,7 +12,6 @@ import org.eclipse.core.resources.IResourceChangeEvent;
 import org.eclipse.core.resources.IResourceChangeListener;
 import org.eclipse.core.resources.IResourceDelta;
 import org.eclipse.core.resources.ResourcesPlugin;
-import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.ModifyEvent;
@@ -29,10 +26,6 @@ import org.eclipse.ui.forms.IManagedForm;
 import org.eclipse.ui.forms.editor.FormPage;
 import org.eclipse.ui.forms.widgets.FormToolkit;
 import org.eclipse.ui.forms.widgets.ScrolledForm;
-
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.node.ObjectNode;
 
 public class AssertionFormView extends FormPage implements IResourceChangeListener {
 	private MultiPageEditor editor;
@@ -123,24 +116,8 @@ public class AssertionFormView extends FormPage implements IResourceChangeListen
 
 	@Override
 	public void doSave(IProgressMonitor monitor) {
-		IPath path = projectModel.getPath();
-		ObjectMapper mapper = new ObjectMapper();
-		JsonNode rootNode =projectModel.getRootNode();
-
-		/* Saving all assertions as well. */
-		((ObjectNode) rootNode).withArray("ContextAssertions").removeAll();
-		for (ContextAssertionModel cam : projectModel.getAssertions()) {
-			((ObjectNode) rootNode).withArray("ContextAssertions").add(mapper.valueToTree(cam));
-		}
-		System.out.println("[doSave] maped new assertions into Json: " + projectModel.getAssertions());
-
-		/* Write on disk the new Json into File, replacing the old one. */
-		try {
-			mapper.writeValue(new File(path.toString()), rootNode);
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
-
+		projectModel.updateAssertionsJsonNode();
+		projectModel.writeJsonOnDisk();
 		isDirty = false;
 		firePropertyChange(PROP_DIRTY);
 		editor.editorDirtyStateChanged();
