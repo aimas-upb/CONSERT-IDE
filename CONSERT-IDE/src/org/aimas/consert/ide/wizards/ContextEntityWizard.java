@@ -11,10 +11,16 @@ import org.eclipse.ui.IWorkbench;
 public class ContextEntityWizard extends Wizard implements INewWizard {
 	private IWorkbench workbench;
 	private IStructuredSelection selection;
+	private String projectName;
 	private WizardNewEntityPage _pageOne;
 
 	public ContextEntityWizard() {
+		this(null);
+	}
+	
+	public ContextEntityWizard(String projectName) {
 		super();
+		this.projectName = projectName;
 		setWindowTitle(NewWizardMessages.NewContextEntityTitle);
 	}
 
@@ -27,7 +33,9 @@ public class ContextEntityWizard extends Wizard implements INewWizard {
 	@Override
 	public void addPages() {
 		super.addPages();
-		String projectName = WorkspaceModel.getInstance().getCurrentActiveProject(this.selection);
+		if(this.projectName == null){
+			this.projectName = WorkspaceModel.getInstance().getCurrentActiveProject(this.selection);
+		}
 		_pageOne = new WizardNewEntityPage(NewWizardMessages.NewContextEntityWizard, projectName);
 		_pageOne.setDescription(NewWizardMessages.NewContextEntityDescription);
 		_pageOne.setTitle(NewWizardMessages.NewContextEntityTitle);

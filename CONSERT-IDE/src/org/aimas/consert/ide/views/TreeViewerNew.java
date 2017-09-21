@@ -236,7 +236,6 @@ public class TreeViewerNew extends ViewPart {
 		MenuManager menuMgr = new MenuManager("#PopupMenu");
 		Menu menu = menuMgr.createContextMenu(viewer.getControl());
 		viewer.getControl().setMenu(menu);
-
 		addRefreshActionToMenu(menuMgr);
 		addNewEntityActionToMenu(menuMgr);
 		addNewAssertionActionToMenu(menuMgr);
@@ -249,6 +248,8 @@ public class TreeViewerNew extends ViewPart {
 	private void addNewAssertionActionToMenu(MenuManager menuMgr) {
 		Action addAssertion = new Action() {
 			public void run() {
+				ISelection selection = viewer.getSelection();
+				String projectName = WorkspaceModel.getInstance().getCurrentActiveProject((IStructuredSelection)selection);
 				IWizard wizard = new ContextAssertionWizard();
 				WizardDialog dialog = new WizardDialog(PlatformUI.getWorkbench().getActiveWorkbenchWindow().getShell(),
 						wizard);
@@ -269,11 +270,15 @@ public class TreeViewerNew extends ViewPart {
 	private void addNewEntityActionToMenu(MenuManager menuMgr) {
 		Action addEntity = new Action() {
 			public void run() {
-				IWizard wizard = new ContextEntityWizard();
+				ISelection selection = viewer.getSelection();
+				String projectName = WorkspaceModel.getInstance().getCurrentActiveProject((IStructuredSelection)selection);
+				System.out.println("Selectie tree: ");
+				System.out.println(projectName);
+				IWizard wizard = new ContextEntityWizard(projectName);
 				WizardDialog dialog = new WizardDialog(PlatformUI.getWorkbench().getActiveWorkbenchWindow().getShell(),
 						wizard);
 				if (dialog.open() == Window.OK) {
-					initialize();
+//					initialize();
 					viewer.refresh();
 				}
 			}
