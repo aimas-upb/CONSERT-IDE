@@ -21,5 +21,4 @@ public class JsonTextEditor extends TextEditor implements IResourceChangeListene
 	public void doSave(IProgressMonitor monitor) {
 		super.doSave(monitor);
 	}
-
 }
