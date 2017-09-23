@@ -205,12 +205,18 @@ public class TreeViewerNew extends ViewPart {
 				ISelection selection = event.getSelection();
 				Object object = ((IStructuredSelection) selection).getFirstElement();
 
+				/*
+				 * in case of double clicking on parent or sub-parent, returns
+				 */
 				if (!(object instanceof TreeObject)) {
 					return;
 				}
-
 				TreeObject treeObject = (TreeObject) object;
 				Object model = treeObject.getResource();
+				if (model == null) {
+					return;
+				}
+
 				/* get the ProjectModel associated to this selection */
 				ProjectModel projectModel = WorkspaceModel.getInstance()
 						.getProjectModel(treeObject.getParent().getParent().getName());

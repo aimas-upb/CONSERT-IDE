@@ -17,7 +17,7 @@ public class TreeObject<T> implements IAdaptable {
 	public String getName() {
 		return name;
 	}
-	
+
 	public String getProjectName() {
 		return projectName;
 	}
@@ -45,5 +45,4 @@ public class TreeObject<T> implements IAdaptable {
 	protected void setResource(T resource) {
 		this.resource = resource;
 	}
-
 }
