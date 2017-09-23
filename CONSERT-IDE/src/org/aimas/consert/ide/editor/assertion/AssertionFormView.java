@@ -7,10 +7,8 @@ import org.aimas.consert.ide.editor.MultiPageEditor;
 import org.aimas.consert.ide.model.ContextAssertionModel;
 import org.aimas.consert.ide.model.ContextEntityModel;
 import org.aimas.consert.ide.model.ProjectModel;
-import org.aimas.consert.ide.model.WorkspaceModel;
 import org.eclipse.core.resources.IResourceChangeEvent;
 import org.eclipse.core.resources.IResourceChangeListener;
-import org.eclipse.core.resources.IResourceDelta;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.swt.SWT;
@@ -20,7 +18,6 @@ import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Text;
-import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.forms.IManagedForm;
 import org.eclipse.ui.forms.editor.FormPage;
@@ -32,7 +29,6 @@ public class AssertionFormView extends FormPage implements IResourceChangeListen
 	private ScrolledForm form;
 	private boolean isDirty;
 	private ContextAssertionModel cam;
-	private String projectName;
 	private ProjectModel projectModel;
 	public static final String ID = "org.aimas.consert.ide.editor.assertion.AssertionFormView";
 
@@ -126,8 +122,9 @@ public class AssertionFormView extends FormPage implements IResourceChangeListen
 		form = managedForm.getForm();
 		FormToolkit toolkit = managedForm.getToolkit();
 
-		IEditorInput ied = getEditorInput();
-		cam = (ContextAssertionModel) ((EditorInputWrapper) ied).getModel();
+		EditorInputWrapper eiw = (EditorInputWrapper) getEditorInput();
+		cam = (ContextAssertionModel) eiw.getModel();
+		projectModel = eiw.getProjectModel();
 		form.setText(cam.getName());
 		GridLayout layout = new GridLayout();
 		form.getBody().setLayout(layout);
@@ -155,13 +152,14 @@ public class AssertionFormView extends FormPage implements IResourceChangeListen
 
 	@Override
 	public void resourceChanged(IResourceChangeEvent event) {
-		IResourceDelta rootDelta = event.getDelta();
-		IResourceDelta affected[] = rootDelta.getAffectedChildren();
-		for (int i = 0; i < affected.length; i++) {
-			System.out.println(affected[i].getResource().getName());
-			projectName = affected[i].getResource().getName();
-		}
-		projectModel = WorkspaceModel.getInstance().getProjectModel(projectName);
+		// IResourceDelta rootDelta = event.getDelta();
+		// IResourceDelta affected[] = rootDelta.getAffectedChildren();
+		// for (int i = 0; i < affected.length; i++) {
+		// System.out.println(affected[i].getResource().getName());
+		// projectName = affected[i].getResource().getName();
+		// }
+		// projectModel =
+		// WorkspaceModel.getInstance().getProjectModel(projectName);
 		System.out.println("Reload AssertionformView");
 	}
 }

@@ -9,7 +9,6 @@ import org.aimas.consert.ide.model.WorkspaceModel;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IResourceChangeEvent;
 import org.eclipse.core.resources.IResourceChangeListener;
-import org.eclipse.core.resources.IResourceDelta;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.jface.viewers.IStructuredSelection;
@@ -193,13 +192,14 @@ public class FormView extends FormPage implements IResourceChangeListener {
 
 	@Override
 	public void resourceChanged(IResourceChangeEvent event) {
-		IResourceDelta rootDelta = event.getDelta();
-		IResourceDelta affected[] = rootDelta.getAffectedChildren();
-		for (int i = 0; i < affected.length; i++) {
-			System.out.println(affected[i].getResource().getName());
-			projectName = affected[i].getResource().getName();
-		}
-		projectModel = WorkspaceModel.getInstance().getProjectModel(projectName);
+		// IResourceDelta rootDelta = event.getDelta();
+		// IResourceDelta affected[] = rootDelta.getAffectedChildren();
+		// for (int i = 0; i < affected.length; i++) {
+		// System.out.println(affected[i].getResource().getName());
+		// projectName = affected[i].getResource().getName();
+		// }
+		// projectModel =
+		// WorkspaceModel.getInstance().getProjectModel(projectName);
 		System.out.println("Reload formView");
 	}
 }

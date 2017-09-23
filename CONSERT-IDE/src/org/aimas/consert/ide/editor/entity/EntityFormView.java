@@ -3,10 +3,8 @@ package org.aimas.consert.ide.editor.entity;
 import org.aimas.consert.ide.editor.EditorInputWrapper;
 import org.aimas.consert.ide.model.ContextEntityModel;
 import org.aimas.consert.ide.model.ProjectModel;
-import org.aimas.consert.ide.model.WorkspaceModel;
 import org.eclipse.core.resources.IResourceChangeEvent;
 import org.eclipse.core.resources.IResourceChangeListener;
-import org.eclipse.core.resources.IResourceDelta;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.swt.SWT;
@@ -16,7 +14,6 @@ import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Text;
-import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.forms.IManagedForm;
 import org.eclipse.ui.forms.editor.FormPage;
@@ -28,7 +25,6 @@ public class EntityFormView extends FormPage implements IResourceChangeListener 
 	private ScrolledForm form;
 	private boolean isDirty;
 	private ContextEntityModel cem;
-	private String projectName;
 	private ProjectModel projectModel;
 	public static final String ID = "org.aimas.consert.ide.editor.entity.EntityFormView";
 
@@ -80,8 +76,9 @@ public class EntityFormView extends FormPage implements IResourceChangeListener 
 		form = managedForm.getForm();
 		FormToolkit toolkit = managedForm.getToolkit();
 
-		IEditorInput ied = getEditorInput();
-		cem = (ContextEntityModel) ((EditorInputWrapper) ied).getModel();
+		EditorInputWrapper eiw = (EditorInputWrapper) getEditorInput();
+		cem = (ContextEntityModel) eiw.getModel();
+		projectModel = eiw.getProjectModel();
 		form.setText(cem.getName());
 		GridLayout layout = new GridLayout();
 		form.getBody().setLayout(layout);
@@ -100,13 +97,14 @@ public class EntityFormView extends FormPage implements IResourceChangeListener 
 
 	@Override
 	public void resourceChanged(IResourceChangeEvent event) {
-		IResourceDelta rootDelta = event.getDelta();
-		IResourceDelta affected[] = rootDelta.getAffectedChildren();
-		for (int i = 0; i < affected.length; i++) {
-			System.out.println(affected[i].getResource().getName());
-			projectName = affected[i].getResource().getName();
-		}
-		projectModel = WorkspaceModel.getInstance().getProjectModel(projectName);
+		// IResourceDelta rootDelta = event.getDelta();
+		// IResourceDelta affected[] = rootDelta.getAffectedChildren();
+		// for (int i = 0; i < affected.length; i++) {
+		// System.out.println(affected[i].getResource().getName());
+		// projectName = affected[i].getResource().getName();
+		// }
+		// projectModel =
+		// WorkspaceModel.getInstance().getProjectModel(projectName);
 		System.out.println("Reload EntityformView");
 	}
 }
