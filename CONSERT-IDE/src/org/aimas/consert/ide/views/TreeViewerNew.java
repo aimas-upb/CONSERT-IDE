@@ -3,6 +3,8 @@ package org.aimas.consert.ide.views;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Observable;
+import java.util.Observer;
 
 import org.aimas.consert.ide.editor.EditorInputWrapper;
 import org.aimas.consert.ide.editor.assertion.AssertionMultiPageEditor;
@@ -36,7 +38,7 @@ import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.part.ViewPart;
 
-public class TreeViewerNew extends ViewPart {
+public class TreeViewerNew extends ViewPart implements Observer {
 	public static final String ID = "org.aimas.consert.ide.views.TreeViewerNew";
 	private static TreeViewerNew instance;
 	private TreeViewer viewer;
@@ -313,5 +315,15 @@ public class TreeViewerNew extends ViewPart {
 
 	public TreeViewer getView() {
 		return viewer;
+	}
+
+	/**
+	 * Called indirectly by the observable object's notifyAll() method
+	 */
+	@Override
+	public void update(Observable o, Object arg) {
+		/* Refreshes the view on update */
+		initialize();
+		viewer.refresh();
 	}
 }

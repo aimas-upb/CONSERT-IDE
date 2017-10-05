@@ -5,7 +5,9 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Observable;
 
+import org.aimas.consert.ide.views.TreeViewerNew;
 import org.eclipse.core.resources.IFolder;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.ResourcesPlugin;
@@ -15,7 +17,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 
-public class ProjectModel {
+public class ProjectModel extends Observable {
 	private IPath path;
 	private JsonNode rootNode;
 	public String projectName;
@@ -28,6 +30,7 @@ public class ProjectModel {
 	}
 
 	public ProjectModel(String projectName) {
+		this.addObserver(TreeViewerNew.getInstance());
 		this.projectName = projectName;
 		entities = new ArrayList<ContextEntityModel>();
 		assertions = new ArrayList<ContextAssertionModel>();
@@ -105,6 +108,12 @@ public class ProjectModel {
 	public void writeJsonOnDisk() {
 		try {
 			mapper.writeValue(new File(getPath().toString()), getRootNode());
+			/*
+			 * Notify TreeViewer the project has been modified on disk so
+			 * TreeViewer can refresh too
+			 */
+			this.setChanged();
+			this.notifyObservers();
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
@@ -160,6 +169,12 @@ public class ProjectModel {
 			}
 
 			mapper.writeValue(new File(folder.getFile("consert.txt").getLocation().toString()), rootNode);
+			/*
+			 * Notify TreeViewer the project has been modified on disk so
+			 * TreeViewer can refresh too
+			 */
+			this.setChanged();
+			this.notifyObservers();
 			System.out.println(model);
 		} catch (IOException e) {
 			e.printStackTrace();
