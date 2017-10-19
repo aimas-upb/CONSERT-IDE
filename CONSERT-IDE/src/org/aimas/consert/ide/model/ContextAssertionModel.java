@@ -4,20 +4,37 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class ContextAssertionModel {
+	public static final int BINARY = 2;
 	private String name;
 	private String comment;
-	private int arity;
+
+	protected ContextEntityModel subjectEntity;
+	protected ContextEntityModel objectEntity;
+
+	protected AcquisitionType acquisitionType = AcquisitionType.SENSED;
+	protected int arity = BINARY;
 	private List<ContextEntityModel> entities;
 
 	public ContextAssertionModel() {
 		entities = new ArrayList<ContextEntityModel>();
 	}
 
-	public ContextAssertionModel(String name, String comment, int arity, List<ContextEntityModel> entities) {
+	public ContextAssertionModel(String name, String comment, ContextEntityModel subjectEntity,
+			ContextEntityModel objectEntity, AcquisitionType acquisitionType) {
+		entities = new ArrayList<ContextEntityModel>();
 		setName(name);
 		setComment(comment);
-		setArity(arity);
-		setEntities(entities);
+		setSubjectEntity(subjectEntity);
+		setObjectEntity(objectEntity);
+		setAcquisitionType(acquisitionType);
+	}
+
+	public AcquisitionType getAcquisitionType() {
+		return acquisitionType;
+	}
+
+	public void setAcquisitionType(AcquisitionType acquisitionType) {
+		this.acquisitionType = acquisitionType;
 	}
 
 	public String getName() {
@@ -36,6 +53,30 @@ public class ContextAssertionModel {
 		this.comment = comment;
 	}
 
+	public ContextEntityModel getSubjectEntity() {
+		return subjectEntity;
+	}
+
+	public void setSubjectEntity(ContextEntityModel subjectEntity) {
+		if (!entities.contains(subjectEntity)) {
+			entities.remove(this.subjectEntity);
+			entities.add(subjectEntity);
+			this.subjectEntity = subjectEntity;
+		}
+	}
+
+	public ContextEntityModel getObjectEntity() {
+		return objectEntity;
+	}
+
+	public void setObjectEntity(ContextEntityModel objectEntity) {
+		if (!entities.contains(objectEntity)) {
+			entities.remove(this.objectEntity);
+			entities.add(objectEntity);
+			this.objectEntity = objectEntity;
+		}
+	}
+
 	public int getArity() {
 		return arity;
 	}
@@ -46,10 +87,6 @@ public class ContextAssertionModel {
 
 	public List<ContextEntityModel> getEntities() {
 		return entities;
-	}
-
-	public void setEntities(List<ContextEntityModel> entities) {
-		this.entities = entities;
 	}
 
 	public String toString() {

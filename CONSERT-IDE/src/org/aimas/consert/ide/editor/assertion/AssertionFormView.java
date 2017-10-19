@@ -139,15 +139,19 @@ public class AssertionFormView extends FormPage implements IResourceChangeListen
 		createLabelAndText(" Name: ", cam.getName());
 		createLabelAndText(" Comment: ", cam.getComment());
 		createLabelAndText(" Arity: ", Integer.toString(cam.getArity()));
+		createLabelAndText(" Acquisition Type: ", cam.getAcquisitionType().toString());
 
 		Label entitiesNameLabel = new Label(form.getBody(), SWT.NONE);
 		entitiesNameLabel.setText(" ContextEntities: ");
 		new Label(form.getBody(), SWT.NONE);
 
-		for (ContextEntityModel entity : cam.getEntities()) {
-			createLabelAndTextForEntity(" Name: ", entity.getName(), entity);
-			createLabelAndTextForEntity(" Comment: ", entity.getComment(), entity);
-		}
+		ContextEntityModel subjectEntity = cam.getSubjectEntity();
+		createLabelAndTextForEntity(" Subject Name: ", subjectEntity.getName(), subjectEntity);
+		createLabelAndTextForEntity(" Subject Comment: ", subjectEntity.getComment(), subjectEntity);
+
+		ContextEntityModel objectEntity = cam.getObjectEntity();
+		createLabelAndTextForEntity(" Object Name: ", objectEntity.getName(), objectEntity);
+		createLabelAndTextForEntity(" Object Comment: ", objectEntity.getComment(), objectEntity);
 	}
 
 	@Override

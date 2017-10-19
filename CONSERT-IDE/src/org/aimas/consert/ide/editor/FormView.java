@@ -178,15 +178,19 @@ public class FormView extends FormPage implements IResourceChangeListener {
 			createLabelAndTextForAssertion(" Name: ", cam.getName(), cam);
 			createLabelAndTextForAssertion(" Comment: ", cam.getComment(), cam);
 			createLabelAndTextForAssertion(" Arity: ", Integer.toString(cam.getArity()), cam);
+			createLabelAndTextForAssertion(" Acquisition Type: ", cam.getAcquisitionType().toString(), cam);
 
 			Label entitiesPerAssertionLabel = new Label(form.getBody(), SWT.NONE);
 			entitiesPerAssertionLabel.setText(" ContextEntities: ");
 			new Label(form.getBody(), SWT.NONE);
 
-			for (ContextEntityModel entity : cam.getEntities()) {
-				createLabelAndTextForEntity(" Name: ", entity.getName(), cam, entity);
-				createLabelAndTextForEntity(" Comment: ", entity.getComment(), cam, entity);
-			}
+			ContextEntityModel subjectEntity = cam.getSubjectEntity();
+			createLabelAndTextForEntity(" Subject Name: ", subjectEntity.getName(), cam, subjectEntity);
+			createLabelAndTextForEntity(" Subject Comment: ", subjectEntity.getComment(), cam, subjectEntity);
+
+			ContextEntityModel objectEntity = cam.getObjectEntity();
+			createLabelAndTextForEntity(" Object Name: ", objectEntity.getName(), cam, objectEntity);
+			createLabelAndTextForEntity(" Object Comment: ", objectEntity.getComment(), cam, objectEntity);
 		}
 	}
 

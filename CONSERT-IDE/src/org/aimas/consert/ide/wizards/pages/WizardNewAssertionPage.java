@@ -1,28 +1,36 @@
 package org.aimas.consert.ide.wizards.pages;
 
+import org.aimas.consert.ide.model.AcquisitionType;
+import org.aimas.consert.ide.model.ContextEntityModel;
 import org.eclipse.jface.wizard.WizardPage;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.KeyEvent;
 import org.eclipse.swt.events.KeyListener;
+import org.eclipse.swt.events.SelectionEvent;
+import org.eclipse.swt.events.SelectionListener;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
+import org.eclipse.swt.widgets.Combo;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Text;
 
 public class WizardNewAssertionPage extends WizardPage {
 	private Text textName;
-	private Text textprojectName;
-	private Label labelprojectName;
-	private Label labelComment;
-	private Label labelName;
 	private Text textComment;
+	private Text textprojectName;
+	private Text textObjectEntityName;
+	private Text textSubjectEntityName;
+	private Label labelName;
+	private Label labelComment;
+	private Label labelprojectName;
+	private Label labelAcquisitionType;
+	private Label labelObjectEntityName;
+	private Label labelSubjectEntityName;
 	private Composite container;
-	private Text textArity;
-	private Label labelArity;
-	private Text textEntities;
-	private Label labelEntities;
+	private Combo comboAcquisitionType;
 	private String projectName;
+
 
 	public WizardNewAssertionPage(String pageName, String projectName) {
 		super(pageName);
@@ -35,6 +43,7 @@ public class WizardNewAssertionPage extends WizardPage {
 		GridLayout layout = new GridLayout();
 		container.setLayout(layout);
 		layout.numColumns = 2;
+		GridData gridData = new GridData(GridData.FILL_HORIZONTAL);
 
 		// project name
 		labelprojectName = new Label(container, SWT.NONE);
@@ -57,8 +66,7 @@ public class WizardNewAssertionPage extends WizardPage {
 			}
 
 		});
-		GridData gd = new GridData(GridData.FILL_HORIZONTAL);
-		textprojectName.setLayoutData(gd);
+		textprojectName.setLayoutData(gridData);
 
 		// name of the context assertion
 		labelName = new Label(container, SWT.NONE);
@@ -80,7 +88,7 @@ public class WizardNewAssertionPage extends WizardPage {
 			}
 
 		});
-		textName.setLayoutData(gd);
+		textName.setLayoutData(gridData);
 
 		// comment of the context assertion
 		labelComment = new Label(container, SWT.NONE);
@@ -102,15 +110,36 @@ public class WizardNewAssertionPage extends WizardPage {
 			}
 
 		});
-		textComment.setLayoutData(gd);
+		textComment.setLayoutData(gridData);
 
-		// arity
-		labelArity = new Label(container, SWT.NONE);
-		labelArity.setText("Arity");
+		// AcquisitionType
+		labelAcquisitionType = new Label(container, SWT.NONE);
+		labelAcquisitionType.setText("AcquisitionType");
 
-		textArity = new Text(container, SWT.BORDER | SWT.SINGLE);
-		textArity.setText("");
-		textArity.addKeyListener(new KeyListener() {
+		comboAcquisitionType = new Combo(container, SWT.READ_ONLY);
+		String items[] = { AcquisitionType.DERIVED.toString(), AcquisitionType.PROFILED.toString(),
+				AcquisitionType.SENSED.toString() };
+		comboAcquisitionType.setItems(items);
+		comboAcquisitionType.addSelectionListener(new SelectionListener() {
+
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				System.out.println(comboAcquisitionType.getText());
+			}
+
+			@Override
+			public void widgetDefaultSelected(SelectionEvent e) {
+				System.out.println(comboAcquisitionType.getText());
+			}
+		});
+
+		// objectEntityName of the context assertion
+		labelObjectEntityName = new Label(container, SWT.NONE);
+		labelObjectEntityName.setText("Object Entity Name");
+
+		textObjectEntityName = new Text(container, SWT.BORDER | SWT.SINGLE);
+		textObjectEntityName.setText("");
+		textObjectEntityName.addKeyListener(new KeyListener() {
 
 			@Override
 			public void keyPressed(KeyEvent e) {
@@ -118,21 +147,21 @@ public class WizardNewAssertionPage extends WizardPage {
 
 			@Override
 			public void keyReleased(KeyEvent e) {
-				if (!textArity.getText().isEmpty()) {
+				if (!textObjectEntityName.getText().isEmpty()) {
 					setPageComplete(true);
 				}
 			}
 
 		});
-		textArity.setLayoutData(gd);
+		textObjectEntityName.setLayoutData(gridData);
 
-		// list of entities
-		labelEntities = new Label(container, SWT.NONE);
-		labelEntities.setText("Entities");
+		// subjectEntityName of the context assertion
+		labelSubjectEntityName = new Label(container, SWT.NONE);
+		labelSubjectEntityName.setText("Subject Entity Name");
 
-		textEntities = new Text(container, SWT.BORDER | SWT.SINGLE);
-		textEntities.setText("");
-		textEntities.addKeyListener(new KeyListener() {
+		textSubjectEntityName = new Text(container, SWT.BORDER | SWT.SINGLE);
+		textSubjectEntityName.setText("");
+		textSubjectEntityName.addKeyListener(new KeyListener() {
 
 			@Override
 			public void keyPressed(KeyEvent e) {
@@ -140,13 +169,13 @@ public class WizardNewAssertionPage extends WizardPage {
 
 			@Override
 			public void keyReleased(KeyEvent e) {
-				if (!textEntities.getText().isEmpty()) {
+				if (!textSubjectEntityName.getText().isEmpty()) {
 					setPageComplete(true);
 				}
 			}
 
 		});
-		textEntities.setLayoutData(gd);
+		textSubjectEntityName.setLayoutData(gridData);
 
 		setControl(container);
 		setPageComplete(false);
@@ -164,11 +193,21 @@ public class WizardNewAssertionPage extends WizardPage {
 		return textName.getText();
 	}
 
-	public String getTextArity() {
-		return textArity.getText();
+	public AcquisitionType getAcquisitionType() {
+		int index = comboAcquisitionType.getSelectionIndex();
+		String acquisitionTypeName = comboAcquisitionType.getItem(index == -1 ? 0 : index);
+		return AcquisitionType.toValue(acquisitionTypeName);
 	}
 
-	public String getTextEntities() {
-		return textEntities.getText();
+	public ContextEntityModel getObjectEntity() {
+		ContextEntityModel objectEntity = new ContextEntityModel();
+		objectEntity.setName(textObjectEntityName.getText());
+		return objectEntity;
+	}
+
+	public ContextEntityModel getSubjectEntity() {
+		ContextEntityModel subjectEntity = new ContextEntityModel();
+		subjectEntity.setName(textSubjectEntityName.getText());
+		return subjectEntity;
 	}
 }
