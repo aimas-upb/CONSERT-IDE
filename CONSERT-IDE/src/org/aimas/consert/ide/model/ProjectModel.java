@@ -157,12 +157,14 @@ public class ProjectModel extends Observable {
 
 			if (rootNode.has("ContextAssertions") && model instanceof ContextAssertionModel) {
 				((ObjectNode) rootNode).withArray("ContextAssertions").add(mapper.valueToTree(model));
-				for (JsonNode entity : rootNode.get("ContextAssertions"))
-					addAssertion(mapper.treeToValue(entity, ContextAssertionModel.class));
+				for (JsonNode assertion : rootNode.get("ContextAssertions")) {
+					addAssertion(mapper.treeToValue(assertion, ContextAssertionModel.class));
+				}
 			} else if (rootNode.has("ContextEntities") && model instanceof ContextEntityModel) {
 				((ObjectNode) rootNode).withArray("ContextEntities").add(mapper.valueToTree(model));
-				for (JsonNode entity : rootNode.get("ContextEntities"))
+				for (JsonNode entity : rootNode.get("ContextEntities")) {
 					addEntity(mapper.treeToValue(entity, ContextEntityModel.class));
+				}
 			} else {
 				System.out.println("RootNode does not have this node");
 				return false;
