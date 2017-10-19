@@ -1,6 +1,7 @@
 package org.aimas.consert.ide.model;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 public class ContextAssertionModel {
@@ -13,15 +14,12 @@ public class ContextAssertionModel {
 
 	protected AcquisitionType acquisitionType = AcquisitionType.SENSED;
 	protected int arity = BINARY;
-	private List<ContextEntityModel> entities;
 
 	public ContextAssertionModel() {
-		entities = new ArrayList<ContextEntityModel>();
 	}
 
 	public ContextAssertionModel(String name, String comment, ContextEntityModel subjectEntity,
 			ContextEntityModel objectEntity, AcquisitionType acquisitionType) {
-		entities = new ArrayList<ContextEntityModel>();
 		setName(name);
 		setComment(comment);
 		setSubjectEntity(subjectEntity);
@@ -58,11 +56,7 @@ public class ContextAssertionModel {
 	}
 
 	public void setSubjectEntity(ContextEntityModel subjectEntity) {
-		if (!entities.contains(subjectEntity)) {
-			entities.remove(this.subjectEntity);
-			entities.add(subjectEntity);
-			this.subjectEntity = subjectEntity;
-		}
+		this.subjectEntity = subjectEntity;
 	}
 
 	public ContextEntityModel getObjectEntity() {
@@ -70,11 +64,7 @@ public class ContextAssertionModel {
 	}
 
 	public void setObjectEntity(ContextEntityModel objectEntity) {
-		if (!entities.contains(objectEntity)) {
-			entities.remove(this.objectEntity);
-			entities.add(objectEntity);
-			this.objectEntity = objectEntity;
-		}
+		this.objectEntity = objectEntity;
 	}
 
 	public int getArity() {
@@ -86,7 +76,7 @@ public class ContextAssertionModel {
 	}
 
 	public List<ContextEntityModel> getEntities() {
-		return entities;
+		return new ArrayList<ContextEntityModel>(Arrays.asList(subjectEntity, objectEntity));
 	}
 
 	public String toString() {
