@@ -1,7 +1,13 @@
 package org.aimas.consert.ide.wizards.pages;
 
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
+
 import org.aimas.consert.ide.model.AcquisitionType;
 import org.aimas.consert.ide.model.ContextEntityModel;
+import org.aimas.consert.ide.model.ProjectModel;
+import org.aimas.consert.ide.model.WorkspaceModel;
 import org.eclipse.jface.wizard.WizardPage;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.KeyEvent;
@@ -19,8 +25,6 @@ public class WizardNewAssertionPage extends WizardPage {
 	private Text textName;
 	private Text textComment;
 	private Text textprojectName;
-	private Text textObjectEntityName;
-	private Text textSubjectEntityName;
 	private Label labelName;
 	private Label labelComment;
 	private Label labelprojectName;
@@ -29,12 +33,15 @@ public class WizardNewAssertionPage extends WizardPage {
 	private Label labelSubjectEntityName;
 	private Composite container;
 	private Combo comboAcquisitionType;
+	private Combo comboObjectEntityName;
+	private Combo comboSubjectEntityName;
 	private String projectName;
-
+	private List<ContextEntityModel> allEntities;
 
 	public WizardNewAssertionPage(String pageName, String projectName) {
 		super(pageName);
 		this.projectName = projectName;
+		allEntities = new ArrayList<>();
 	}
 
 	@Override
@@ -137,45 +144,40 @@ public class WizardNewAssertionPage extends WizardPage {
 		labelObjectEntityName = new Label(container, SWT.NONE);
 		labelObjectEntityName.setText("Object Entity Name");
 
-		textObjectEntityName = new Text(container, SWT.BORDER | SWT.SINGLE);
-		textObjectEntityName.setText("");
-		textObjectEntityName.addKeyListener(new KeyListener() {
+		comboObjectEntityName = new Combo(container, SWT.READ_ONLY);
+		Collection<ProjectModel> projects = WorkspaceModel.getInstance().getProjectModels().values();
+		projects.forEach(project -> allEntities.addAll(project.getEntities()));
+		List<String> entityNames = new ArrayList<>();
+		allEntities.forEach(entity -> entityNames.add(entity.getName()));
+		String items2[] = entityNames.toArray(new String[entityNames.size()]);
+		comboObjectEntityName.setItems(items2);
+		comboObjectEntityName.addSelectionListener(new SelectionListener() {
 
 			@Override
-			public void keyPressed(KeyEvent e) {
+			public void widgetSelected(SelectionEvent e) {
 			}
 
 			@Override
-			public void keyReleased(KeyEvent e) {
-				if (!textObjectEntityName.getText().isEmpty()) {
-					setPageComplete(true);
-				}
+			public void widgetDefaultSelected(SelectionEvent e) {
 			}
-
 		});
-		textObjectEntityName.setLayoutData(gridData);
 
 		// subjectEntityName of the context assertion
 		labelSubjectEntityName = new Label(container, SWT.NONE);
 		labelSubjectEntityName.setText("Subject Entity Name");
 
-		textSubjectEntityName = new Text(container, SWT.BORDER | SWT.SINGLE);
-		textSubjectEntityName.setText("");
-		textSubjectEntityName.addKeyListener(new KeyListener() {
+		comboSubjectEntityName = new Combo(container, SWT.READ_ONLY);
+		comboSubjectEntityName.setItems(items2);
+		comboSubjectEntityName.addSelectionListener(new SelectionListener() {
 
 			@Override
-			public void keyPressed(KeyEvent e) {
+			public void widgetSelected(SelectionEvent e) {
 			}
 
 			@Override
-			public void keyReleased(KeyEvent e) {
-				if (!textSubjectEntityName.getText().isEmpty()) {
-					setPageComplete(true);
-				}
+			public void widgetDefaultSelected(SelectionEvent e) {
 			}
-
 		});
-		textSubjectEntityName.setLayoutData(gridData);
 
 		setControl(container);
 		setPageComplete(false);
@@ -200,14 +202,24 @@ public class WizardNewAssertionPage extends WizardPage {
 	}
 
 	public ContextEntityModel getObjectEntity() {
-		ContextEntityModel objectEntity = new ContextEntityModel();
-		objectEntity.setName(textObjectEntityName.getText());
-		return objectEntity;
+		int index = comboObjectEntityName.getSelectionIndex();
+		String objectEntityName = comboObjectEntityName.getItem(index == -1 ? 0 : index);
+		for (ContextEntityModel cem : allEntities) {
+			if (cem.getName().equals(objectEntityName)) {
+				return cem;
+			}
+		}
+		return null;
 	}
 
 	public ContextEntityModel getSubjectEntity() {
-		ContextEntityModel subjectEntity = new ContextEntityModel();
-		subjectEntity.setName(textSubjectEntityName.getText());
-		return subjectEntity;
+		int index = comboSubjectEntityName.getSelectionIndex();
+		String subjectEntityName = comboSubjectEntityName.getItem(index == -1 ? 0 : index);
+		for (ContextEntityModel cem : allEntities) {
+			if (cem.getName().equals(subjectEntityName)) {
+				return cem;
+			}
+		}
+		return null;
 	}
 }
