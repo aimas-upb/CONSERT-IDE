@@ -4,6 +4,7 @@ import java.util.List;
 
 import org.aimas.consert.ide.editor.EditorInputWrapper;
 import org.aimas.consert.ide.editor.MultiPageEditor;
+import org.aimas.consert.ide.editor.entity.EntityMultiPageEditor;
 import org.aimas.consert.ide.model.AcquisitionType;
 import org.aimas.consert.ide.model.ContextAssertionModel;
 import org.aimas.consert.ide.model.ContextEntityModel;
@@ -17,13 +18,18 @@ import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.CCombo;
 import org.eclipse.swt.events.ModifyEvent;
 import org.eclipse.swt.events.ModifyListener;
+import org.eclipse.swt.events.MouseEvent;
+import org.eclipse.swt.events.MouseListener;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.events.SelectionListener;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
+import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Text;
 import org.eclipse.ui.IEditorPart;
+import org.eclipse.ui.IWorkbenchPage;
+import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.forms.IManagedForm;
 import org.eclipse.ui.forms.editor.FormPage;
 import org.eclipse.ui.forms.widgets.FormToolkit;
@@ -119,7 +125,7 @@ public class AssertionFormView extends FormPage implements IResourceChangeListen
 		return null;
 	}
 
-	private void createLabelAndComboForEntity(ContextEntityModel givenEntity) {
+	private void addEntityCComboBox(ContextEntityModel givenEntity) {
 		CCombo comboEntities = new CCombo(form.getBody(), SWT.READ_ONLY);
 		List<ContextEntityModel> allEntities = Utils.getInstance().getAllEntities();
 		String items[] = Utils.getInstance().getAllEntitiesStringNames(allEntities);
@@ -195,6 +201,36 @@ public class AssertionFormView extends FormPage implements IResourceChangeListen
 		});
 	}
 
+	private void adddEntityGotoButton(ContextEntityModel givenEntity) {
+		Button entityGotoButton = new Button(form.getBody(), SWT.NONE);
+		entityGotoButton.setText("Goto");
+		entityGotoButton.addMouseListener(new MouseListener() {
+
+			@Override
+			public void mouseUp(MouseEvent e) {
+				/*
+				 * On mouse click, open the selected entity in an EntityEditor
+				 */
+				EditorInputWrapper eiw = new EditorInputWrapper(givenEntity);
+				eiw.setProjectModel(projectModel);
+				IWorkbenchPage page = getEditorSite().getWorkbenchWindow().getActivePage();
+				try {
+					page.openEditor(eiw, EntityMultiPageEditor.ID);
+				} catch (PartInitException e1) {
+					e1.printStackTrace();
+				}
+			}
+
+			@Override
+			public void mouseDown(MouseEvent e) {
+			}
+
+			@Override
+			public void mouseDoubleClick(MouseEvent e) {
+			}
+		});
+	}
+
 	@Override
 	protected void createFormContent(IManagedForm managedForm) {
 		form = managedForm.getForm();
@@ -206,31 +242,39 @@ public class AssertionFormView extends FormPage implements IResourceChangeListen
 		form.setText(cam.getName());
 		GridLayout layout = new GridLayout();
 		form.getBody().setLayout(layout);
-		layout.numColumns = 2;
+		layout.numColumns = 3;
 
 		System.out.println("Assertion inside Assertion Form View parsed: " + cam.toString());
 
 		Label nameLabel = new Label(form.getBody(), SWT.NONE);
 		nameLabel.setText(" ContextAssertion: ");
 		new Label(form.getBody(), SWT.NONE);
+		new Label(form.getBody(), SWT.NONE);
 
 		createLabelAndText(" Name: ", cam.getName());
+		new Label(form.getBody(), SWT.NONE);
 		createLabelAndText(" Comment: ", cam.getComment());
+		new Label(form.getBody(), SWT.NONE);
 		createLabelAndText(" Arity: ", Integer.toString(cam.getArity()));
+		new Label(form.getBody(), SWT.NONE);
 		createLabelAndCombo(" Acquisition Type: ", cam.getAcquisitionType().toString());
+		new Label(form.getBody(), SWT.NONE);
 
 		Label entitiesNameLabel = new Label(form.getBody(), SWT.NONE);
 		entitiesNameLabel.setText(" ContextEntities: ");
+		new Label(form.getBody(), SWT.NONE);
 		new Label(form.getBody(), SWT.NONE);
 
 		/* combos for entities selection */
 		Label nameSubjectLabel = new Label(form.getBody(), SWT.NONE);
 		nameSubjectLabel.setText(" Subject Entity: ");
-		createLabelAndComboForEntity(cam.getSubjectEntity());
+		addEntityCComboBox(cam.getSubjectEntity());
+		adddEntityGotoButton(cam.getSubjectEntity());
 
 		Label nameObjectLabel = new Label(form.getBody(), SWT.NONE);
 		nameObjectLabel.setText(" Object Entity: ");
-		createLabelAndComboForEntity(cam.getObjectEntity());
+		addEntityCComboBox(cam.getObjectEntity());
+		adddEntityGotoButton(cam.getObjectEntity());
 	}
 
 	@Override
