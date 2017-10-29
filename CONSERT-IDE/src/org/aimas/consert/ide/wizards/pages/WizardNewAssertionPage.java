@@ -1,13 +1,10 @@
 package org.aimas.consert.ide.wizards.pages;
 
-import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
 
 import org.aimas.consert.ide.model.AcquisitionType;
 import org.aimas.consert.ide.model.ContextEntityModel;
-import org.aimas.consert.ide.model.ProjectModel;
-import org.aimas.consert.ide.model.WorkspaceModel;
+import org.aimas.consert.ide.util.Utils;
 import org.eclipse.jface.wizard.WizardPage;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.KeyEvent;
@@ -41,7 +38,7 @@ public class WizardNewAssertionPage extends WizardPage {
 	public WizardNewAssertionPage(String pageName, String projectName) {
 		super(pageName);
 		this.projectName = projectName;
-		allEntities = new ArrayList<>();
+		allEntities = Utils.getInstance().getAllEntities();
 	}
 
 	@Override
@@ -145,11 +142,7 @@ public class WizardNewAssertionPage extends WizardPage {
 		labelObjectEntityName.setText("Object Entity Name");
 
 		comboObjectEntityName = new Combo(container, SWT.READ_ONLY);
-		Collection<ProjectModel> projects = WorkspaceModel.getInstance().getProjectModels().values();
-		projects.forEach(project -> allEntities.addAll(project.getEntities()));
-		List<String> entityNames = new ArrayList<>();
-		allEntities.forEach(entity -> entityNames.add(entity.getName()));
-		String items2[] = entityNames.toArray(new String[entityNames.size()]);
+		String items2[] = Utils.getInstance().getAllEntitiesStringNames(allEntities);
 		comboObjectEntityName.setItems(items2);
 		comboObjectEntityName.addSelectionListener(new SelectionListener() {
 
