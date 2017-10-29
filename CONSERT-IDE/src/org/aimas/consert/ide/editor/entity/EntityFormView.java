@@ -39,6 +39,9 @@ public class EntityFormView extends FormPage implements IResourceChangeListener 
 		Label nameLabel = new Label(form.getBody(), SWT.NONE);
 		nameLabel.setText(labelName);
 		Text nameText = new Text(form.getBody(), SWT.BORDER | SWT.SINGLE);
+		if (textName == null) {
+			textName = "";
+		}
 		nameText.setText(textName);
 		nameText.setLayoutData(new GridData(100, 10));
 		nameText.addModifyListener(new ModifyListener() {
