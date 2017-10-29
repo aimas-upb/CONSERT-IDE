@@ -4,16 +4,21 @@ import java.util.List;
 
 import org.aimas.consert.ide.editor.EditorInputWrapper;
 import org.aimas.consert.ide.editor.MultiPageEditor;
+import org.aimas.consert.ide.model.AcquisitionType;
 import org.aimas.consert.ide.model.ContextAssertionModel;
 import org.aimas.consert.ide.model.ContextEntityModel;
 import org.aimas.consert.ide.model.ProjectModel;
+import org.aimas.consert.ide.util.Utils;
 import org.eclipse.core.resources.IResourceChangeEvent;
 import org.eclipse.core.resources.IResourceChangeListener;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.custom.CCombo;
 import org.eclipse.swt.events.ModifyEvent;
 import org.eclipse.swt.events.ModifyListener;
+import org.eclipse.swt.events.SelectionEvent;
+import org.eclipse.swt.events.SelectionListener;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Label;
@@ -103,6 +108,46 @@ public class AssertionFormView extends FormPage implements IResourceChangeListen
 		});
 	}
 
+	public ContextEntityModel getSelectedEntity(CCombo combo, List<ContextEntityModel> allEntities) {
+		int index = combo.getSelectionIndex();
+		String entityName = combo.getItem(index == -1 ? 0 : index);
+		for (ContextEntityModel cem : allEntities) {
+			if (cem.getName().equals(entityName)) {
+				return cem;
+			}
+		}
+		return null;
+	}
+
+	private void createLabelAndComboForEntity(ContextEntityModel givenEntity) {
+		CCombo comboEntities = new CCombo(form.getBody(), SWT.READ_ONLY);
+		List<ContextEntityModel> allEntities = Utils.getInstance().getAllEntities();
+		String items[] = Utils.getInstance().getAllEntitiesStringNames(allEntities);
+		comboEntities.setItems(items);
+		comboEntities.setText(givenEntity.getName());
+		comboEntities.addSelectionListener(new SelectionListener() {
+
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				ContextEntityModel cem = getSelectedEntity(comboEntities, allEntities);
+				/*
+				 * if a different entity was selected, set it and mark editor
+				 * dirty
+				 */
+				if (!givenEntity.getName().equals(cem.getName())) {
+					cam.setSubjectEntity(cem);
+					isDirty = true;
+					firePropertyChange(IEditorPart.PROP_DIRTY);
+					editor.editorDirtyStateChanged();
+				}
+			}
+
+			@Override
+			public void widgetDefaultSelected(SelectionEvent e) {
+			}
+		});
+	}
+
 	@Override
 	public boolean isDirty() {
 		return isDirty;
@@ -115,6 +160,39 @@ public class AssertionFormView extends FormPage implements IResourceChangeListen
 		isDirty = false;
 		firePropertyChange(PROP_DIRTY);
 		editor.editorDirtyStateChanged();
+	}
+
+	private void createLabelAndCombo(String string, String acquisitionTypeText) {
+		Label labelAcquisitionType = new Label(form.getBody(), SWT.NONE);
+		labelAcquisitionType.setText("AcquisitionType");
+
+		CCombo comboAcquisitionType = new CCombo(form.getBody(), SWT.READ_ONLY);
+		String items[] = { AcquisitionType.DERIVED.toString(), AcquisitionType.PROFILED.toString(),
+				AcquisitionType.SENSED.toString() };
+		comboAcquisitionType.setItems(items);
+		comboAcquisitionType.setText(acquisitionTypeText);
+		comboAcquisitionType.addSelectionListener(new SelectionListener() {
+
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				int index = comboAcquisitionType.getSelectionIndex();
+				String acquisitionTypeName = comboAcquisitionType.getItem(index == -1 ? 0 : index);
+				/*
+				 * if a different acquisitionType was selected, set it and mark
+				 * editor dirty
+				 */
+				if (!acquisitionTypeText.equals(acquisitionTypeName)) {
+					cam.setAcquisitionType(AcquisitionType.toValue(acquisitionTypeName));
+					isDirty = true;
+					firePropertyChange(IEditorPart.PROP_DIRTY);
+					editor.editorDirtyStateChanged();
+				}
+			}
+
+			@Override
+			public void widgetDefaultSelected(SelectionEvent e) {
+			}
+		});
 	}
 
 	@Override
@@ -139,19 +217,20 @@ public class AssertionFormView extends FormPage implements IResourceChangeListen
 		createLabelAndText(" Name: ", cam.getName());
 		createLabelAndText(" Comment: ", cam.getComment());
 		createLabelAndText(" Arity: ", Integer.toString(cam.getArity()));
-		createLabelAndText(" Acquisition Type: ", cam.getAcquisitionType().toString());
+		createLabelAndCombo(" Acquisition Type: ", cam.getAcquisitionType().toString());
 
 		Label entitiesNameLabel = new Label(form.getBody(), SWT.NONE);
 		entitiesNameLabel.setText(" ContextEntities: ");
 		new Label(form.getBody(), SWT.NONE);
 
-		ContextEntityModel subjectEntity = cam.getSubjectEntity();
-		createLabelAndTextForEntity(" Subject Name: ", subjectEntity.getName(), subjectEntity);
-		createLabelAndTextForEntity(" Subject Comment: ", subjectEntity.getComment(), subjectEntity);
+		/* combos for entities selection */
+		Label nameSubjectLabel = new Label(form.getBody(), SWT.NONE);
+		nameSubjectLabel.setText(" Subject Entity: ");
+		createLabelAndComboForEntity(cam.getSubjectEntity());
 
-		ContextEntityModel objectEntity = cam.getObjectEntity();
-		createLabelAndTextForEntity(" Object Name: ", objectEntity.getName(), objectEntity);
-		createLabelAndTextForEntity(" Object Comment: ", objectEntity.getComment(), objectEntity);
+		Label nameObjectLabel = new Label(form.getBody(), SWT.NONE);
+		nameObjectLabel.setText(" Object Entity: ");
+		createLabelAndComboForEntity(cam.getObjectEntity());
 	}
 
 	@Override
