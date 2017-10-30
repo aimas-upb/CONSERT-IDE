@@ -13,6 +13,7 @@ import org.aimas.consert.ide.model.ContextAssertionModel;
 import org.aimas.consert.ide.model.ContextEntityModel;
 import org.aimas.consert.ide.model.ProjectModel;
 import org.aimas.consert.ide.model.WorkspaceModel;
+import org.aimas.consert.ide.views.TreeViewerNew.TreeParent;
 import org.aimas.consert.ide.wizards.ContextAssertionWizard;
 import org.aimas.consert.ide.wizards.ContextEntityWizard;
 import org.eclipse.jface.action.Action;
@@ -31,6 +32,7 @@ import org.eclipse.jface.wizard.WizardDialog;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Menu;
 import org.eclipse.ui.ISharedImages;
 import org.eclipse.ui.IWorkbenchPage;
@@ -69,6 +71,168 @@ public class TreeViewerNew extends ViewPart implements Observer {
 		public boolean hasChildren() {
 			return !children.isEmpty();
 		}
+	}
+
+	/**
+	 * 
+	 * @param projectName
+	 * @return
+	 * On most operating systems, drawing to the screen is an operation that needs to be synchronized with other draw requests to prevent chaos. 
+	 * A simple OS solution for this resource-contention problem is to allow drawing operations to occur only in a special thread. 
+	 * Rather than drawing at will, an application sends in a request to the OS for a redraw, and the OS will, 
+	 * at a time it deems appropriate, call back the application. An SWT application behaves in the same way.
+	 * 
+	 */
+	public <T> boolean removeProjectfromTreeView(String projectName) {
+		for (int i = 0; i < invisibleRoot.children.size(); i++) {
+			TreeObject<T> child = (TreeObject<T>) invisibleRoot.children.get(i);
+			if (child.getProjectName().equals(projectName)) {
+				((TreeParent<T>) invisibleRoot).removeChild(child);
+				
+				new Thread(new Runnable() {
+					public void run() {
+						try {
+							Thread.sleep(100);
+						} catch (Exception e) {
+						}
+						Display.getDefault().asyncExec(new Runnable() {
+							public void run() {
+								viewer.refresh();
+							}
+						});
+					}
+				}).start();
+				return true;
+			}
+		}
+		return false;
+	}
+	
+	/**
+	 * 
+	 * @param projectName
+	 * @param workspaceModel
+	 */
+	public void addProjectToTreeViewer(String projectName, WorkspaceModel workspaceModel){
+		
+		Map<String, ProjectModel> projects = workspaceModel.getProjectModels();
+		
+		ProjectModel project = projects.get(projectName);
+		
+		TreeParent root = new TreeParent(projectName, projectName);
+		try {
+			// create separate folders for ContextEntities and
+			// ContextAssertions
+			TreeParent<ContextEntityModel> entitiesParent = new TreeParent<ContextEntityModel>(
+					"CONSERT ContextEntities", projectName);
+			root.addChild(entitiesParent);
+			TreeParent<ContextAssertionModel> assertionsParent = new TreeParent<ContextAssertionModel>(
+					"CONSERT ContextAssertions", projectName);
+			root.addChild(assertionsParent);
+
+			/*
+			 * get the list of entities and assertions from the
+			 * projectWideModel instance
+			 */
+			List<ContextEntityModel> entities = project.getEntities();
+			List<ContextAssertionModel> assertions = project.getAssertions();
+
+			System.out.println(project.getEntities());
+
+			/* add entities to the tree */
+			for (ContextEntityModel ent : entities) {
+				TreeObject<ContextEntityModel> obj = new TreeObject<ContextEntityModel>(ent.getName(),
+						project.getName());
+				obj.setResource(ent);
+				entitiesParent.addChild(obj);
+			}
+
+			/* add assertions to the tree */
+			for (ContextAssertionModel ass : assertions) {
+				TreeObject<ContextAssertionModel> obj = new TreeObject<ContextAssertionModel>(ass.getName(),
+						project.getName());
+				obj.setResource(ass);
+				assertionsParent.addChild(obj);
+			}
+
+		} catch (Exception e) {
+			/* log exception */
+			e.printStackTrace();
+		}
+		
+		invisibleRoot.addChild(root);
+		
+		new Thread(new Runnable() {
+			public void run() {
+				try {
+					Thread.sleep(100);
+				} catch (Exception e) {
+				}
+				Display.getDefault().asyncExec(new Runnable() {
+					public void run() {
+						viewer.refresh();
+					}
+				});
+			}
+		}).start();
+	}
+	
+	/**
+	 * 
+	 * @param projectName
+	 * @param workspaceModel
+	 * Method which is called to add a NEW, empty Project to the Tree View
+	 */
+	public void addEmptyProjectToTreeViewer(String projectName, WorkspaceModel workspaceModel){
+Map<String, ProjectModel> projects = workspaceModel.getProjectModels();
+		
+		ProjectModel project = projects.get(projectName);
+		
+		TreeParent root = new TreeParent(projectName, projectName);
+		try {
+			// create separate folders for ContextEntities and
+			// ContextAssertions
+			TreeParent<ContextEntityModel> entitiesParent = new TreeParent<ContextEntityModel>(
+					"CONSERT ContextEntities", projectName);
+			root.addChild(entitiesParent);
+			TreeParent<ContextAssertionModel> assertionsParent = new TreeParent<ContextAssertionModel>(
+					"CONSERT ContextAssertions", projectName);
+			root.addChild(assertionsParent);
+
+			
+
+		} catch (Exception e) {
+			/* log exception */
+			e.printStackTrace();
+		}
+		
+		invisibleRoot.addChild(root);
+		
+		new Thread(new Runnable() {
+			public void run() {
+				try {
+					Thread.sleep(100);
+				} catch (Exception e) {
+				}
+				Display.getDefault().asyncExec(new Runnable() {
+					public void run() {
+						viewer.refresh();
+					}
+				});
+			}
+		}).start();
+		
+	}
+	
+	/**
+	 * 
+	 * @param projectName
+	 * Method which is called to add a NEW, empty Project to the Tree View
+	 * Method called from WorkspaceModel
+	 */
+	public void addProjectToTreeViewer(String projectName){
+		WorkspaceModel workspaceModel = WorkspaceModel.getInstance();
+		addEmptyProjectToTreeViewer(projectName, workspaceModel);
 	}
 
 	class ViewContentProvider implements ITreeContentProvider {
@@ -137,47 +301,7 @@ public class TreeViewerNew extends ViewPart implements Observer {
 		invisibleRoot = new TreeParent("", "");
 
 		for (Map.Entry<String, ProjectModel> entry : projects.entrySet()) {
-			ProjectModel project = entry.getValue();
-			TreeParent root = new TreeParent(project.getName(), project.getName());
-			try {
-				// create separate folders for ContextEntities and
-				// ContextAssertions
-				TreeParent<ContextEntityModel> entitiesParent = new TreeParent<ContextEntityModel>(
-						"CONSERT ContextEntities", project.getName());
-				root.addChild(entitiesParent);
-				TreeParent<ContextAssertionModel> assertionsParent = new TreeParent<ContextAssertionModel>(
-						"CONSERT ContextAssertions", project.getName());
-				root.addChild(assertionsParent);
-
-				/*
-				 * get the list of entities and assertions from the
-				 * projectWideModel instance
-				 */
-				List<ContextEntityModel> entities = project.getEntities();
-				List<ContextAssertionModel> assertions = project.getAssertions();
-
-				System.out.println(project.getEntities());
-
-				/* add entities to the tree */
-				for (ContextEntityModel ent : entities) {
-					TreeObject<ContextEntityModel> obj = new TreeObject<ContextEntityModel>(ent.getName(),
-							project.getName());
-					obj.setResource(ent);
-					entitiesParent.addChild(obj);
-				}
-
-				/* add assertions to the tree */
-				for (ContextAssertionModel ass : assertions) {
-					TreeObject<ContextAssertionModel> obj = new TreeObject<ContextAssertionModel>(ass.getName(),
-							project.getName());
-					obj.setResource(ass);
-					assertionsParent.addChild(obj);
-				}
-
-			} catch (Exception e) {
-				/* log exception */
-			}
-			invisibleRoot.addChild(root);
+			addProjectToTreeViewer(entry.getKey(), workspaceModel);
 		}
 	}
 
@@ -250,6 +374,7 @@ public class TreeViewerNew extends ViewPart implements Observer {
 		addRefreshActionToMenu(menuMgr);
 		addNewEntityActionToMenu(menuMgr);
 		addNewAssertionActionToMenu(menuMgr);
+		addDeleteActionToMenu(menuMgr);
 	}
 
 	/**
@@ -297,6 +422,51 @@ public class TreeViewerNew extends ViewPart implements Observer {
 		addEntity.setText("NewContextEntity");
 		menuMgr.add(addEntity);
 	}
+	
+	/**
+	 * 
+	 * @param menuMgr
+	 * Deletes an Entity or an Assertion
+	 */
+	private void addDeleteActionToMenu(MenuManager menuMgr) {
+		Action delete = new Action() {
+			public void run() {
+				ISelection selection = viewer.getSelection();
+				String projectName = WorkspaceModel.getInstance()
+						.getCurrentActiveProject((IStructuredSelection) selection);
+				
+				Object object = ((IStructuredSelection) selection).getFirstElement();
+
+				/*
+				 * in case of deleting on parent or sub-parent, returns
+				 */
+				if (!(object instanceof TreeObject)) {
+					return;
+				}
+				
+				TreeObject treeObject = (TreeObject) object;
+				Object model = treeObject.getResource();
+				if (model == null) {
+					return;
+				}
+				if(model instanceof ContextAssertionModel){
+					System.out.println("Delete Assertion");
+					WorkspaceModel.getInstance().removeAssertionfromProjectModel(projectName, (ContextAssertionModel) model);
+				}
+				if(model instanceof ContextEntityModel){
+					System.out.println("Delete Entity");
+					WorkspaceModel.getInstance().removeEntityfromProjectModel(projectName, (ContextEntityModel) model);
+				}
+				
+				initialize();
+				viewer.refresh();
+				
+			}
+		};
+		delete.setText("delete");
+		menuMgr.add(delete);
+	}
+	
 
 	private void addRefreshActionToMenu(MenuManager menuMgr) {
 		Action refresh = new Action() {
