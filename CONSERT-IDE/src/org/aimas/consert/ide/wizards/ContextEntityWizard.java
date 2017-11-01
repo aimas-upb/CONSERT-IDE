@@ -1,12 +1,18 @@
 package org.aimas.consert.ide.wizards;
 
+import org.aimas.consert.ide.editor.EditorInputWrapper;
+import org.aimas.consert.ide.editor.entity.EntityMultiPageEditor;
 import org.aimas.consert.ide.model.ContextEntityModel;
+import org.aimas.consert.ide.model.ProjectModel;
 import org.aimas.consert.ide.model.WorkspaceModel;
 import org.aimas.consert.ide.wizards.pages.WizardNewEntityPage;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.wizard.Wizard;
 import org.eclipse.ui.INewWizard;
 import org.eclipse.ui.IWorkbench;
+import org.eclipse.ui.IWorkbenchPage;
+import org.eclipse.ui.PartInitException;
+import org.eclipse.ui.PlatformUI;
 
 public class ContextEntityWizard extends Wizard implements INewWizard {
 	private IWorkbench workbench;
@@ -49,6 +55,21 @@ public class ContextEntityWizard extends Wizard implements INewWizard {
 		model.setComment(_pageOne.getTextComment());
 
 		/* finish means adding in the consert.txt file the required fields */
-		return WorkspaceModel.getInstance().getProjectModel(projectName).saveNewModelOnDisk(model);
+		ProjectModel projectModel = WorkspaceModel.getInstance().getProjectModel(projectName);
+		projectModel.saveNewModelOnDisk(model);
+
+		openEditorOnFinish(projectModel, model);
+		return true;
+	}
+
+	public void openEditorOnFinish(ProjectModel projectModel, ContextEntityModel model) {
+		IWorkbenchPage page = PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage();
+		EditorInputWrapper eiw = new EditorInputWrapper((ContextEntityModel) model);
+		eiw.setProjectModel(projectModel);
+		try {
+			page.openEditor(eiw, EntityMultiPageEditor.ID);
+		} catch (PartInitException e) {
+			e.printStackTrace();
+		}
 	}
 }
