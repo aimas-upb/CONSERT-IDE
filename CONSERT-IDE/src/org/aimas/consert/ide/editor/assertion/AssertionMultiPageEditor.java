@@ -2,6 +2,7 @@ package org.aimas.consert.ide.editor.assertion;
 
 import org.aimas.consert.ide.editor.EditorInputWrapper;
 import org.aimas.consert.ide.editor.MultiPageEditor;
+import org.aimas.consert.ide.model.ContextAssertionModel;
 import org.eclipse.core.resources.IResourceChangeEvent;
 import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IEditorSite;
@@ -16,8 +17,17 @@ public class AssertionMultiPageEditor extends MultiPageEditor {
 		if (!(editorInput instanceof EditorInputWrapper)) {
 			throw new PartInitException("Invalid Input in AssertionMultiPageEditor: Must be EditorInputWrapper");
 		}
+
+		setEditorName((EditorInputWrapper) editorInput);
+
 		formView = new AssertionFormView(this);
 		textEditor = new AssertionTextEditor(this);
+	}
+
+	private void setEditorName(EditorInputWrapper editorInput) {
+		StringBuilder name = new StringBuilder("Assertion:");
+		name.append(((ContextAssertionModel) editorInput.getModel()).getName());
+		setPartName(name.toString());
 	}
 
 	@Override

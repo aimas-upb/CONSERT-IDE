@@ -2,6 +2,7 @@ package org.aimas.consert.ide.editor.entity;
 
 import org.aimas.consert.ide.editor.EditorInputWrapper;
 import org.aimas.consert.ide.editor.MultiPageEditor;
+import org.aimas.consert.ide.model.ContextEntityModel;
 import org.eclipse.core.resources.IResourceChangeEvent;
 import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IEditorSite;
@@ -16,8 +17,17 @@ public class EntityMultiPageEditor extends MultiPageEditor {
 		if (!(editorInput instanceof EditorInputWrapper)) {
 			throw new PartInitException("Invalid Input in EntityMultiPageEditor: Must be EditorInputWrapper");
 		}
+
+		setEditorName((EditorInputWrapper) editorInput);
+
 		formView = new EntityFormView(this);
 		textEditor = new EntityTextEditor(this);
+	}
+
+	private void setEditorName(EditorInputWrapper editorInput) {
+		StringBuilder name = new StringBuilder("Entity:");
+		name.append(((ContextEntityModel) editorInput.getModel()).getName());
+		setPartName(name.toString());
 	}
 
 	@Override
