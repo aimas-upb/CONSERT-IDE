@@ -33,4 +33,17 @@ public class Utils {
 		allEntities.forEach(entity -> entityNames.add(entity.getName()));
 		return entityNames.toArray(new String[entityNames.size()]);
 	}
+	
+	/**
+	 * 
+	 * @param projectName
+	 * @param modelType
+	 * @param modelName
+	 * @return
+	 * Method used to generate a unique ID for a certain model
+	 */
+	public String generateID(String projectName, String modelType, String modelName){
+		String ID = projectName + "_"+ modelType +  "_" + modelName;
+		return ID;
+	}
 }

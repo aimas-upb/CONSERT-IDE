@@ -8,6 +8,7 @@ public class ContextAssertionModel {
 	public static final int BINARY = 2;
 	private String name;
 	private String comment;
+	private String ID;
 
 	protected ContextEntityModel subjectEntity;
 	protected ContextEntityModel objectEntity;
@@ -25,6 +26,24 @@ public class ContextAssertionModel {
 		setSubjectEntity(subjectEntity);
 		setObjectEntity(objectEntity);
 		setAcquisitionType(acquisitionType);
+	}
+	
+	public ContextAssertionModel(String ID, String name, String comment, ContextEntityModel subjectEntity,
+			ContextEntityModel objectEntity, AcquisitionType acquisitionType) {
+		setID(ID);
+		setName(name);
+		setComment(comment);
+		setSubjectEntity(subjectEntity);
+		setObjectEntity(objectEntity);
+		setAcquisitionType(acquisitionType);
+	}
+	
+	public void setID(String ID){
+		this.ID = ID;
+	}
+	
+	public String getID(){
+		return this.ID;
 	}
 
 	public AcquisitionType getAcquisitionType() {
