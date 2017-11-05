@@ -3,6 +3,7 @@ package org.aimas.consert.ide.model;
 public class ContextEntityModel {
 	private String name;
 	private String comment;
+	private String ID;
 	
 	public ContextEntityModel() {
 	}
@@ -10,6 +11,20 @@ public class ContextEntityModel {
 	public ContextEntityModel(String name, String comment) {
 		setName(name);
 		setComment(comment);
+	}
+	
+	public ContextEntityModel(String ID, String name, String comment) {
+		setName(name);
+		setComment(comment);
+		setID(ID);
+	}
+	
+	public void setID(String ID){
+		this.ID = ID;
+	}
+	
+	public String getID(){
+		return this.ID;
 	}
 	
 	public String getName() {

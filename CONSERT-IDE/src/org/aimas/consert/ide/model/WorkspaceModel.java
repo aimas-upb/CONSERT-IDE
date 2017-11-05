@@ -68,7 +68,7 @@ public class WorkspaceModel {
 		ProjectModel projectModel = getProjectModel(projectName);
 		IProject projectInWorkspace = workspace.getRoot().getProject(projectName);
 		String nodeName = CONTEXT_ENTITY_NODE_NAME;
-		auxDeleteFromFile(projectInWorkspace, projectModel, cem.getName(), nodeName);
+		auxDeleteFromFile(projectInWorkspace, projectModel, cem.getID(), nodeName);
 
 		return projects.get(projectName).removeEntity(cem);
 	}
@@ -78,12 +78,12 @@ public class WorkspaceModel {
 		ProjectModel projectModel = getProjectModel(projectName);
 		IProject projectInWorkspace = workspace.getRoot().getProject(projectName);
 		String nodeName = CONTEXT_ASSERTION_NODE_NAME;
-		auxDeleteFromFile(projectInWorkspace, projectModel, cam.getName(), nodeName);
+		auxDeleteFromFile(projectInWorkspace, projectModel, cam.getID(), nodeName);
 		
 		return projects.get(projectName).removeAssertions(cam);
 	}
 	
-	public void auxDeleteFromFile(IProject projectInWorkspace, ProjectModel projectModel, String modelName, String nodeName){
+	public void auxDeleteFromFile(IProject projectInWorkspace, ProjectModel projectModel, String modelID, String nodeName){
 		IResource[] folderResources;
 		try {
 			folderResources = projectInWorkspace.members();
@@ -99,7 +99,7 @@ public class WorkspaceModel {
 									TextFileDocumentProvider provider = new TextFileDocumentProvider();
 									IDocument document = provider.getDocument((IFile) fileResources[k]);
 
-									deleteFromFile(projectModel, document, (IFile) fileResources[k], modelName, nodeName);
+									deleteFromFile(projectModel, document, (IFile) fileResources[k], modelID, nodeName);
 								}
 							}
 
@@ -273,7 +273,7 @@ public class WorkspaceModel {
 		 * This code populates the view and the model with the found ENTITIES
 		 * from the rootNode
 		 */
-		String nodeName = "ContextEntities";
+		String nodeName = CONTEXT_ENTITY_NODE_NAME;
 		projectModel.getEntities().clear();
 		if (rootNode.has(nodeName)) {
 			JsonNode entities = (JsonNode) rootNode.get(nodeName);
@@ -298,7 +298,7 @@ public class WorkspaceModel {
 		 * This code populates the view and the model with the found ASSERTIONS
 		 * from the rootNode
 		 */
-		nodeName = "ContextAssertions";
+		nodeName = CONTEXT_ASSERTION_NODE_NAME;
 		projectModel.getAssertions().clear();
 		if (rootNode.has(nodeName)) {
 			JsonNode assertions = (JsonNode) rootNode.get(nodeName);
@@ -333,7 +333,7 @@ public class WorkspaceModel {
 	 * @throws CoreException
 	 * Method used to delete an Entity or assertion from the file in which all elements defined by the user are stored
 	 */
-	public void deleteFromFile(ProjectModel projectModel, IDocument document, IFile file, String modelName, String nodeName)
+	public void deleteFromFile(ProjectModel projectModel, IDocument document, IFile file, String modelID, String nodeName)
 			throws JsonProcessingException, IOException, CoreException {
 		/* get string content from file, first refreshed on disk */
 		file.refreshLocal(IFile.DEPTH_INFINITE, null);
@@ -349,10 +349,10 @@ public class WorkspaceModel {
 
 			while (itr.hasNext()) {
 				JsonNode entity = itr.next();
-				System.out.println(entity.get("name"));
-				String entityName = entity.get("name").textValue();
-				System.out.println(entityName);
-				if (entityName.equals(modelName)) {
+				
+				String entityID = entity.get("id").textValue();
+				
+				if (entityID.equals(modelID)) {
 					/*
 					 * Remove the found object
 					 */

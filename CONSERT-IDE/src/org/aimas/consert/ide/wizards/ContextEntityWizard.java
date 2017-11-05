@@ -5,6 +5,7 @@ import org.aimas.consert.ide.editor.entity.EntityMultiPageEditor;
 import org.aimas.consert.ide.model.ContextEntityModel;
 import org.aimas.consert.ide.model.ProjectModel;
 import org.aimas.consert.ide.model.WorkspaceModel;
+import org.aimas.consert.ide.util.Utils;
 import org.aimas.consert.ide.wizards.pages.WizardNewEntityPage;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.wizard.Wizard;
@@ -51,6 +52,11 @@ public class ContextEntityWizard extends Wizard implements INewWizard {
 	@Override
 	public boolean performFinish() {
 		ContextEntityModel model = new ContextEntityModel();
+		
+		//ID for Entity
+		String ID = Utils.getInstance().generateID(projectName, "ENTITY", _pageOne.getTextName());
+		
+		model.setID(ID);
 		model.setName(_pageOne.getTextName());
 		model.setComment(_pageOne.getTextComment());
 

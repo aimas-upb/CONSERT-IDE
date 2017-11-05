@@ -13,6 +13,7 @@ import org.eclipse.ui.IWorkbench;
 import org.eclipse.ui.IWorkbenchPage;
 import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.PlatformUI;
+import org.aimas.consert.ide.util.Utils;
 
 public class ContextAssertionWizard extends Wizard implements INewWizard {
 	private IWorkbench workbench;
@@ -51,6 +52,11 @@ public class ContextAssertionWizard extends Wizard implements INewWizard {
 	@Override
 	public boolean performFinish() {
 		ContextAssertionModel model = new ContextAssertionModel();
+		
+		//ID for Assertion
+		String ID = Utils.getInstance().generateID(projectName, "ASSERTION", _pageOne.getTextName());
+		
+		model.setID(ID);
 		model.setName(_pageOne.getTextName());
 		model.setComment(_pageOne.getTextComment());
 		// model.setArity(Integer.parseInt(_pageOne.getTextArity()));
