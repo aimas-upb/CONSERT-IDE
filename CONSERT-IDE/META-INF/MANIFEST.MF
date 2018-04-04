@@ -3,10 +3,10 @@ Bundle-ManifestVersion: 2
 Bundle-Name: CONSERT-IDE
 Bundle-SymbolicName: CONSERT-IDE;singleton:=true
 Bundle-Version: 1.0.0.qualifier
-Bundle-ClassPath: libs/jackson-annotations-2.8.8.jar,
+Bundle-ClassPath: .,
+ libs/jackson-annotations-2.8.8.jar,
  libs/jackson-core-2.8.8.jar,
- libs/jackson-databind-2.8.8.jar,
- .
+ libs/jackson-databind-2.8.8.jar
 Bundle-Vendor: AI-MAS
 Export-Package: org.aimas.consert.ide.model,
  org.aimas.consert.ide.perspective,
