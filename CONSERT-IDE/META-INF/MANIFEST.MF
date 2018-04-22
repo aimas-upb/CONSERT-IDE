@@ -3,9 +3,9 @@ Bundle-ManifestVersion: 2
 Bundle-Name: CONSERT-IDE
 Bundle-SymbolicName: CONSERT-IDE;singleton:=true
 Bundle-Version: 1.0.0.qualifier
-Bundle-ClassPath: libs/jackson-annotations-2.8.8.jar,
- libs/jackson-core-2.8.8.jar,
- libs/jackson-databind-2.8.8.jar,
+Bundle-ClassPath: target/dependency/jackson-annotations-2.9.4.jar,
+ target/dependency/jackson-core-2.9.4.jar,
+ target/dependency/jackson-databind-2.9.4.jar,
  .
 Bundle-Vendor: AI-MAS
 Export-Package: org.aimas.consert.ide.model,
@@ -23,5 +23,6 @@ Require-Bundle: org.eclipse.ui,
  org.eclipse.jface.text,
  org.eclipse.ui.forms;bundle-version="3.7.1",
  org.eclipse.ui.workbench,
- org.eclipse.equinox.registry
+ org.eclipse.equinox.registry,
+ CONSERT-IDE
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
