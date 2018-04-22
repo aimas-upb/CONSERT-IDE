@@ -1,5 +1,51 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <classpath>
+	<classpathentry exported="true" kind="lib" path="target/dependency/aopalliance-1.0.jar"/>
+	<classpathentry exported="true" kind="lib" path="target/dependency/commons-codec-1.6.jar"/>
+	<classpathentry exported="true" kind="lib" path="target/dependency/commons-io-2.4.jar"/>
+	<classpathentry exported="true" kind="lib" path="target/dependency/guava-18.0.jar"/>
+	<classpathentry exported="true" kind="lib" path="target/dependency/guice-4.0-beta.jar"/>
+	<classpathentry exported="true" kind="lib" path="target/dependency/guice-multibindings-4.0-beta.jar"/>
+	<classpathentry exported="true" kind="lib" path="target/dependency/httpclient-4.2.5.jar"/>
+	<classpathentry exported="true" kind="lib" path="target/dependency/httpclient-cache-4.2.5.jar"/>
+	<classpathentry exported="true" kind="lib" path="target/dependency/httpcore-4.2.4.jar"/>
+	<classpathentry exported="true" kind="lib" path="target/dependency/javax.inject-1.jar"/>
+	<classpathentry exported="true" kind="lib" path="target/dependency/jcl-over-slf4j-1.7.7.jar"/>
+	<classpathentry exported="true" kind="lib" path="target/dependency/jsonld-java-0.5.0.jar"/>
+	<classpathentry exported="true" kind="lib" path="target/dependency/jsonld-java-sesame-0.5.0.jar"/>
+	<classpathentry exported="true" kind="lib" path="target/dependency/jsr305-2.0.1.jar"/>
+	<classpathentry exported="true" kind="lib" path="target/dependency/org.apache.commons.io-2.4.jar"/>
+	<classpathentry exported="true" kind="lib" path="target/dependency/org.osgi.core-1.4.0.jar"/>
+	<classpathentry exported="true" kind="lib" path="target/dependency/owlapi-api-4.0.2.jar"/>
+	<classpathentry exported="true" kind="lib" path="target/dependency/owlapi-apibinding-4.0.2.jar"/>
+	<classpathentry exported="true" kind="lib" path="target/dependency/owlapi-distribution-4.0.2.jar"/>
+	<classpathentry exported="true" kind="lib" path="target/dependency/owlapi-fixers-4.0.2.jar"/>
+	<classpathentry exported="true" kind="lib" path="target/dependency/owlapi-impl-4.0.2.jar"/>
+	<classpathentry exported="true" kind="lib" path="target/dependency/owlapi-oboformat-4.0.2.jar"/>
+	<classpathentry exported="true" kind="lib" path="target/dependency/owlapi-parsers-4.0.2.jar"/>
+	<classpathentry exported="true" kind="lib" path="target/dependency/owlapi-rio-4.0.2.jar"/>
+	<classpathentry exported="true" kind="lib" path="target/dependency/owlapi-tools-4.0.2.jar"/>
+	<classpathentry exported="true" kind="lib" path="target/dependency/semargl-core-0.6.1.jar"/>
+	<classpathentry exported="true" kind="lib" path="target/dependency/semargl-rdf-0.6.1.jar"/>
+	<classpathentry exported="true" kind="lib" path="target/dependency/semargl-rdfa-0.6.1.jar"/>
+	<classpathentry exported="true" kind="lib" path="target/dependency/semargl-sesame-0.6.1.jar"/>
+	<classpathentry exported="true" kind="lib" path="target/dependency/sesame-model-2.7.12.jar"/>
+	<classpathentry exported="true" kind="lib" path="target/dependency/sesame-rio-api-2.7.12.jar"/>
+	<classpathentry exported="true" kind="lib" path="target/dependency/sesame-rio-binary-2.7.12.jar"/>
+	<classpathentry exported="true" kind="lib" path="target/dependency/sesame-rio-datatypes-2.7.12.jar"/>
+	<classpathentry exported="true" kind="lib" path="target/dependency/sesame-rio-languages-2.7.12.jar"/>
+	<classpathentry exported="true" kind="lib" path="target/dependency/sesame-rio-n3-2.7.12.jar"/>
+	<classpathentry exported="true" kind="lib" path="target/dependency/sesame-rio-nquads-2.7.12.jar"/>
+	<classpathentry exported="true" kind="lib" path="target/dependency/sesame-rio-ntriples-2.7.12.jar"/>
+	<classpathentry exported="true" kind="lib" path="target/dependency/sesame-rio-rdfjson-2.7.12.jar"/>
+	<classpathentry exported="true" kind="lib" path="target/dependency/sesame-rio-rdfxml-2.7.12.jar"/>
+	<classpathentry exported="true" kind="lib" path="target/dependency/sesame-rio-trig-2.7.12.jar"/>
+	<classpathentry exported="true" kind="lib" path="target/dependency/sesame-rio-trix-2.7.12.jar"/>
+	<classpathentry exported="true" kind="lib" path="target/dependency/sesame-rio-turtle-2.7.12.jar"/>
+	<classpathentry exported="true" kind="lib" path="target/dependency/sesame-util-2.7.12.jar"/>
+	<classpathentry exported="true" kind="lib" path="target/dependency/slf4j-api-1.7.7.jar"/>
+	<classpathentry exported="true" kind="lib" path="target/dependency/trove4j-3.0.3.jar"/>
+	<classpathentry exported="true" kind="lib" path="target/dependency/xz-1.5.jar"/>
 	<classpathentry exported="true" kind="lib" path="target/dependency/jackson-annotations-2.9.4.jar"/>
 	<classpathentry exported="true" kind="lib" path="target/dependency/jackson-core-2.9.4.jar"/>
 	<classpathentry exported="true" kind="lib" path="target/dependency/jackson-databind-2.9.4.jar"/>
