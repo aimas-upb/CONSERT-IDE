@@ -5,6 +5,7 @@ import org.aimas.consert.ide.editor.assertion.AssertionMultiPageEditor;
 import org.aimas.consert.ide.model.ContextAssertionModel;
 import org.aimas.consert.ide.model.ProjectModel;
 import org.aimas.consert.ide.model.WorkspaceModel;
+import org.aimas.consert.ide.util.Utils;
 import org.aimas.consert.ide.wizards.pages.WizardNewAssertionPage;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.wizard.Wizard;
@@ -13,27 +14,23 @@ import org.eclipse.ui.IWorkbench;
 import org.eclipse.ui.IWorkbenchPage;
 import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.PlatformUI;
-import org.aimas.consert.ide.util.Utils;
 
 public class ContextAssertionWizard extends Wizard implements INewWizard {
-	private IWorkbench workbench;
 	private IStructuredSelection selection;
 	private String projectName;
 	private WizardNewAssertionPage _pageOne;
 
 	public ContextAssertionWizard() {
-		this(null);
+		setWindowTitle(NewWizardMessages.NewContextAssertionTitle);
 	}
 
 	public ContextAssertionWizard(String projectName) {
-		super();
+		this();
 		this.projectName = projectName;
-		setWindowTitle(NewWizardMessages.NewContextAssertionTitle);
 	}
 
 	@Override
 	public void init(IWorkbench workbench, IStructuredSelection selection) {
-		this.workbench = workbench;
 		this.selection = selection;
 	}
 
@@ -51,30 +48,33 @@ public class ContextAssertionWizard extends Wizard implements INewWizard {
 
 	@Override
 	public boolean performFinish() {
-		ContextAssertionModel model = new ContextAssertionModel();
+		ProjectModel projectModel = WorkspaceModel.getInstance().getProjectModel(projectName);
 		
-		//ID for Assertion
-		String ID = Utils.getInstance().generateID(projectName, "ASSERTION", _pageOne.getTextName());
-		
-		model.setID(ID);
-		model.setName(_pageOne.getTextName());
-		model.setComment(_pageOne.getTextComment());
-		// model.setArity(Integer.parseInt(_pageOne.getTextArity()));
-		model.setAcquisitionType(_pageOne.getAcquisitionType());
-		model.setObjectEntity(_pageOne.getObjectEntity());
-		model.setSubjectEntity(_pageOne.getSubjectEntity());
+		ContextAssertionModel model = populateModel(projectModel);
 
 		/* finish means adding in the consert.txt file the required fields */
-		ProjectModel projectModel = WorkspaceModel.getInstance().getProjectModel(projectName);
 		projectModel.saveNewModelOnDisk(model);
 
 		openEditorOnFinish(projectModel, model);
 		return true;
 	}
 
+	private ContextAssertionModel populateModel(ProjectModel projectModel) {
+		ContextAssertionModel model = new ContextAssertionModel();
+		model.setID(Utils.getInstance().generateID(projectName, "ASSERTION", _pageOne.getTextName()));
+		model.setName(_pageOne.getTextName());
+		model.setURI(projectModel.getBaseURI() + "/" + model.getName());
+		model.setComment(_pageOne.getTextComment());
+		// model.setArity(Integer.parseInt(_pageOne.getTextArity()));
+		model.setAcquisitionType(_pageOne.getAcquisitionType());
+		model.setObjectEntity(_pageOne.getObjectEntity());
+		model.setSubjectEntity(_pageOne.getSubjectEntity());
+		return model;
+	}
+
 	private void openEditorOnFinish(ProjectModel projectModel, ContextAssertionModel model) {
 		IWorkbenchPage page = PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage();
-		EditorInputWrapper eiw = new EditorInputWrapper((ContextAssertionModel) model);
+		EditorInputWrapper eiw = new EditorInputWrapper(model);
 		eiw.setProjectModel(projectModel);
 		try {
 			page.openEditor(eiw, AssertionMultiPageEditor.ID);
