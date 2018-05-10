@@ -148,7 +148,7 @@ public class ProjectModel extends Observable {
 			System.out.println("project does not exist");
 			return false;
 		}
-
+		saveOntologyOnDisk();
 		/* Convert object to JSON string and save into file directly */
 		try {
 			FileInputStream in = new FileInputStream(folder.getFile("consert.txt").getLocation().toFile());
@@ -181,6 +181,26 @@ public class ProjectModel extends Observable {
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
+		return true;
+	}
+	
+	public boolean saveOntologyOnDisk() {
+		IProject project = ResourcesPlugin.getWorkspace().getRoot().getProject(projectName);
+		IFolder folder = project.getFolder("origin");
+		if (!project.exists()) {
+			System.out.println("project does not exist");
+			return false;
+		}
+		try {
+			File OWLfile = folder.getFile("consert.owl").getLocation().toFile();
+			POC.createAndSaveOntology(OWLfile);
+		}catch(IOException e) {
+			e.printStackTrace();
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		
 		return true;
 	}
 }

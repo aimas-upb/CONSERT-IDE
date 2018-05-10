@@ -1,10 +1,60 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <classpath>
-	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/JavaSE-1.8"/>
+	<classpathentry exported="true" kind="lib" path="target/dependency/aopalliance-1.0.jar"/>
+	<classpathentry exported="true" kind="lib" path="target/dependency/commons-codec-1.6.jar"/>
+	<classpathentry exported="true" kind="lib" path="target/dependency/commons-io-2.4.jar"/>
+	<classpathentry exported="true" kind="lib" path="target/dependency/guava-18.0.jar"/>
+	<classpathentry exported="true" kind="lib" path="target/dependency/guice-4.0-beta.jar"/>
+	<classpathentry exported="true" kind="lib" path="target/dependency/guice-multibindings-4.0-beta.jar"/>
+	<classpathentry exported="true" kind="lib" path="target/dependency/httpclient-4.2.5.jar"/>
+	<classpathentry exported="true" kind="lib" path="target/dependency/httpclient-cache-4.2.5.jar"/>
+	<classpathentry exported="true" kind="lib" path="target/dependency/httpcore-4.2.4.jar"/>
+	<classpathentry exported="true" kind="lib" path="target/dependency/javax.inject-1.jar"/>
+	<classpathentry exported="true" kind="lib" path="target/dependency/jcl-over-slf4j-1.7.7.jar"/>
+	<classpathentry exported="true" kind="lib" path="target/dependency/jsonld-java-0.5.0.jar"/>
+	<classpathentry exported="true" kind="lib" path="target/dependency/jsonld-java-sesame-0.5.0.jar"/>
+	<classpathentry exported="true" kind="lib" path="target/dependency/jsr305-2.0.1.jar"/>
+	<classpathentry exported="true" kind="lib" path="target/dependency/org.apache.commons.io-2.4.jar"/>
+	<classpathentry exported="true" kind="lib" path="target/dependency/owlapi-distribution-4.0.2.jar"/>
+	<classpathentry exported="true" kind="lib" path="target/dependency/semargl-core-0.6.1.jar"/>
+	<classpathentry exported="true" kind="lib" path="target/dependency/semargl-rdf-0.6.1.jar"/>
+	<classpathentry exported="true" kind="lib" path="target/dependency/semargl-rdfa-0.6.1.jar"/>
+	<classpathentry exported="true" kind="lib" path="target/dependency/semargl-sesame-0.6.1.jar"/>
+	<classpathentry exported="true" kind="lib" path="target/dependency/sesame-model-2.7.12.jar"/>
+	<classpathentry exported="true" kind="lib" path="target/dependency/sesame-rio-api-2.7.12.jar"/>
+	<classpathentry exported="true" kind="lib" path="target/dependency/sesame-rio-binary-2.7.12.jar"/>
+	<classpathentry exported="true" kind="lib" path="target/dependency/sesame-rio-datatypes-2.7.12.jar"/>
+	<classpathentry exported="true" kind="lib" path="target/dependency/sesame-rio-languages-2.7.12.jar"/>
+	<classpathentry exported="true" kind="lib" path="target/dependency/sesame-rio-n3-2.7.12.jar"/>
+	<classpathentry exported="true" kind="lib" path="target/dependency/sesame-rio-nquads-2.7.12.jar"/>
+	<classpathentry exported="true" kind="lib" path="target/dependency/sesame-rio-ntriples-2.7.12.jar"/>
+	<classpathentry exported="true" kind="lib" path="target/dependency/sesame-rio-rdfjson-2.7.12.jar"/>
+	<classpathentry exported="true" kind="lib" path="target/dependency/sesame-rio-rdfxml-2.7.12.jar"/>
+	<classpathentry exported="true" kind="lib" path="target/dependency/sesame-rio-trig-2.7.12.jar"/>
+	<classpathentry exported="true" kind="lib" path="target/dependency/sesame-rio-trix-2.7.12.jar"/>
+	<classpathentry exported="true" kind="lib" path="target/dependency/sesame-rio-turtle-2.7.12.jar"/>
+	<classpathentry exported="true" kind="lib" path="target/dependency/sesame-util-2.7.12.jar"/>
+	<classpathentry exported="true" kind="lib" path="target/dependency/slf4j-api-1.7.7.jar"/>
+	<classpathentry exported="true" kind="lib" path="target/dependency/trove4j-3.0.3.jar"/>
+	<classpathentry exported="true" kind="lib" path="target/dependency/jackson-annotations-2.9.4.jar"/>
+	<classpathentry exported="true" kind="lib" path="target/dependency/jackson-core-2.9.4.jar"/>
+	<classpathentry exported="true" kind="lib" path="target/dependency/jackson-databind-2.9.4.jar"/>
+	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/JavaSE-1.8">
+		<attributes>
+			<attribute name="maven.pomderived" value="true"/>
+		</attributes>
+	</classpathentry>
 	<classpathentry kind="con" path="org.eclipse.pde.core.requiredPlugins"/>
-	<classpathentry kind="src" path="src"/>
-	<classpathentry kind="lib" path="libs/jackson-annotations-2.8.8.jar"/>
-	<classpathentry kind="lib" path="libs/jackson-core-2.8.8.jar"/>
-	<classpathentry kind="lib" path="libs/jackson-databind-2.8.8.jar"/>
-	<classpathentry kind="output" path="bin"/>
+	<classpathentry including="**/*.java" kind="src" output="target/classes" path="src">
+		<attributes>
+			<attribute name="optional" value="true"/>
+			<attribute name="maven.pomderived" value="true"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry kind="con" path="org.eclipse.m2e.MAVEN2_CLASSPATH_CONTAINER">
+		<attributes>
+			<attribute name="maven.pomderived" value="true"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry kind="output" path="target/classes"/>
 </classpath>

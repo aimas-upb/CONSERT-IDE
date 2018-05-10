@@ -111,6 +111,16 @@ public class CustomProjectSupport {
 			InputStream source = new ByteArrayInputStream(bytes);
 			file.create(source, IResource.NONE, null);
 		}
+		
+		// create origin folder
+
+		IFile OWLfile = folder.getFile("consert.owl");
+		if (!OWLfile.exists()) {
+			String contents = "";
+			byte[] bytes = contents.getBytes();
+			InputStream source = new ByteArrayInputStream(bytes);
+			OWLfile.create(source, IResource.NONE, null);
+		}
 	}
 
 	private static void addNature(IProject project) throws CoreException {
