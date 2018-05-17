@@ -12,6 +12,8 @@ import org.eclipse.core.resources.IFolder;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.IPath;
+import org.semanticweb.owlapi.model.OWLOntologyCreationException;
+import org.semanticweb.owlapi.model.OWLOntologyStorageException;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -194,13 +196,9 @@ public class ProjectModel extends Observable {
 			return false;
 		}
 		try {
-			File OWLfile = folder.getFile("consert.owl").getLocation().toFile();
-			POC.createAndSaveOntology(OWLfile);
-		}catch(IOException e) {
-			e.printStackTrace();
-		} catch (Exception e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			POC.createAndSaveOntology(folder);
+		} catch (OWLOntologyCreationException | OWLOntologyStorageException e) {
+			System.err.println("Ontology could not be created or stored.");
 		}
 		
 		return true;
