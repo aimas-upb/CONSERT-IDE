@@ -2,20 +2,48 @@ package org.aimas.consert.ide.model;
 
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Observable;
+import java.util.Set;
 
 import org.aimas.consert.ide.views.TreeViewerNew;
 import org.eclipse.core.resources.IFolder;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.IPath;
+import org.semanticweb.owlapi.apibinding.OWLManager;
+import org.semanticweb.owlapi.model.AxiomType;
+import org.semanticweb.owlapi.model.IRI;
+import org.semanticweb.owlapi.model.OWLAnnotation;
+import org.semanticweb.owlapi.model.OWLAnnotationAssertionAxiom;
+import org.semanticweb.owlapi.model.OWLAnnotationProperty;
+import org.semanticweb.owlapi.model.OWLAxiom;
+import org.semanticweb.owlapi.model.OWLClass;
+import org.semanticweb.owlapi.model.OWLClassAssertionAxiom;
+import org.semanticweb.owlapi.model.OWLClassExpression;
+import org.semanticweb.owlapi.model.OWLDataFactory;
+import org.semanticweb.owlapi.model.OWLDeclarationAxiom;
+import org.semanticweb.owlapi.model.OWLEntity;
+import org.semanticweb.owlapi.model.OWLLiteral;
+import org.semanticweb.owlapi.model.OWLOntology;
+import org.semanticweb.owlapi.model.OWLOntologyCreationException;
+import org.semanticweb.owlapi.model.OWLOntologyManager;
+import org.semanticweb.owlapi.model.OWLOntologyStorageException;
+import org.semanticweb.owlapi.model.OWLSubClassOfAxiom;
+import org.semanticweb.owlapi.reasoner.OWLReasoner;
+import org.semanticweb.owlapi.search.EntitySearcher;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+
+import java.nio.file.Files;
+import java.nio.file.Path;
+
 
 public class ProjectModel extends Observable {
 	private IPath path;
@@ -24,6 +52,7 @@ public class ProjectModel extends Observable {
 	private List<ContextEntityModel> entities;
 	private List<ContextAssertionModel> assertions;
 	private static ObjectMapper mapper;
+	private final static String BASE_URI = "http://example.org/org/aimas/consert/ide/";
 
 	static {
 		mapper = new ObjectMapper();
@@ -35,6 +64,11 @@ public class ProjectModel extends Observable {
 		entities = new ArrayList<ContextEntityModel>();
 		assertions = new ArrayList<ContextAssertionModel>();
 	}
+	
+	public String getBaseURI() {
+		return BASE_URI + this.getName() + "/";
+	}
+
 
 	public String getName() {
 		return projectName;
@@ -102,6 +136,22 @@ public class ProjectModel extends Observable {
 		updateEntitiesJsonNode();
 		updateAssertionsJsonNode();
 		writeJsonOnDisk();
+		
+		IProject project = ResourcesPlugin.getWorkspace().getRoot().getProject(projectName);
+		IFolder folder = project.getFolder("origin");
+		if (!project.exists()) {
+			System.out.println("project does not exist");
+		}
+		
+		FileInputStream in = null;
+		try {
+			in = new FileInputStream(folder.getFile("consert.owl").getLocation().toFile());
+		} catch (FileNotFoundException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		
+		updateEntitiesOntology(in);
 	}
 
 	/** Write the new Json into File on disk, replacing the old one. */
@@ -130,6 +180,69 @@ public class ProjectModel extends Observable {
 		}
 		System.out.println("Updated new entities into Json: " + getEntities());
 	}
+	
+	/**
+	 * Save all entities in OWL and TTL
+	 * @throws IOException 
+	 */
+	
+	public void updateEntitiesOntology(FileInputStream testFile) {
+		OWLOntology ontology;
+		OWLOntologyManager manager = OWLManager.createOWLOntologyManager();
+		
+		try (InputStream inStream = testFile) {
+			ontology = manager.loadOntologyFromOntologyDocument(inStream);
+			
+			for (OWLClass cls : ontology.getClassesInSignature()) {
+			    for (OWLAnnotationAssertionAxiom annAx : EntitySearcher.getAnnotationAssertionAxioms(cls.getIRI(), ontology)) {
+			    		System.out.println(annAx);
+			        }
+			}
+			
+			// Don't  load from the File - as it will make URIs absolute 
+			// when loading from RDF/XML (fine from Turtle..)
+			for (final OWLSubClassOfAxiom subClasse : ontology.getAxioms(AxiomType.SUBCLASS_OF))
+			{
+			    if (subClasse.getSuperClass() instanceof OWLClass && subClasse.getSubClass() instanceof OWLClass)
+			    {
+			        System.out.println(subClasse.getSubClass() + " extends " + subClasse.getSuperClass());
+			        OWLDataFactory df = manager.getOWLDataFactory();
+			        OWLClass contextEntity = df.getOWLClass(IRI.create("http://example.org/org/aimas/consert/ide/brand/" + "ContextEntity"));
+			        System.out.println(contextEntity);
+			        Set<OWLSubClassOfAxiom> superClasses = ontology.getSubClassAxiomsForSuperClass(contextEntity);
+			        Set<OWLClass> classes = ontology.getClassesInSignature();
+			        System.out.println(classes);
+			       
+			        for(OWLSubClassOfAxiom ax : superClasses){
+			        	System.out.println(ax.getSubClass());
+			        	OWLEntity entity = (OWLEntity) ax.getSubClass();
+			        	Set<OWLDeclarationAxiom> set = ontology.getDeclarationAxioms(entity);
+			        	for(OWLDeclarationAxiom aa : set){
+			        		System.out.println(aa);
+			        	
+			        	}
+			        	
+			        	Set<OWLAnnotationAssertionAxiom> oaa = ontology.getAnnotationAssertionAxioms(entity.getIRI());
+			        	System.out.println(oaa);
+			        	for(OWLAnnotationAssertionAxiom it : oaa){
+			        		System.out.println(it.getAnnotation().containsEntityInSignature(arg0));
+			        	
+			        	}
+			        	
+			        }
+			    }    
+			}   
+			
+		} catch (OWLOntologyCreationException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (IOException e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
+		}
+		
+		System.out.println("Updated new entities into OWL and TTL: " + getEntities());
+	}
 
 	/** Saving all assertions as well. */
 	public void updateAssertionsJsonNode() {
@@ -141,14 +254,8 @@ public class ProjectModel extends Observable {
 	}
 
 	/** Save newly created Context Model Element on empty Json File */
-	public boolean saveNewModelOnDisk(Object model) {
-		IProject project = ResourcesPlugin.getWorkspace().getRoot().getProject(projectName);
-		IFolder folder = project.getFolder("origin");
-		if (!project.exists()) {
-			System.out.println("project does not exist");
-			return false;
-		}
-		saveOntologyOnDisk();
+	public boolean saveNewModelJSONOnDisk(IFolder folder, Object model) {
+		
 		/* Convert object to JSON string and save into file directly */
 		try {
 			FileInputStream in = new FileInputStream(folder.getFile("consert.txt").getLocation().toFile());
@@ -184,23 +291,35 @@ public class ProjectModel extends Observable {
 		return true;
 	}
 	
-	public boolean saveOntologyOnDisk() {
+	public boolean saveNewModelOntologyOnDisk(Object model) {
 		IProject project = ResourcesPlugin.getWorkspace().getRoot().getProject(projectName);
 		IFolder folder = project.getFolder("origin");
 		if (!project.exists()) {
 			System.out.println("project does not exist");
 			return false;
 		}
-		try {
-			File OWLfile = folder.getFile("consert.owl").getLocation().toFile();
-			POC.createAndSaveOntology(OWLfile);
-		}catch(IOException e) {
-			e.printStackTrace();
-		} catch (Exception e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
+		
+		File OWLfile = folder.getFile("consert.owl").getLocation().toFile();
+		File TTLfile = folder.getFile("consert.ttl").getLocation().toFile();
+		
+		//Save OWL and TTL
+		saveContextEntitiesOnDisk(OWLfile, TTLfile, (ContextEntityModel)model);
+		
+		//Save JSON
+		saveNewModelJSONOnDisk(folder,model);
+		
+		this.setChanged();
+		this.notifyObservers();
 		
 		return true;
 	}
+	
+	public void saveContextEntitiesOnDisk(File OWLfile, File TTLfile, ContextEntityModel model) {
+		try {
+			model.saveEntityOnDisk(OWLfile, TTLfile, this.getBaseURI());
+		} catch (OWLOntologyCreationException | OWLOntologyStorageException e) {
+			System.err.println("Ontology could not be created or stored.");
+ 		}
+	}
+
 }
