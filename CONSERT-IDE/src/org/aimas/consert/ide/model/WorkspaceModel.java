@@ -2,13 +2,12 @@ package org.aimas.consert.ide.model;
 
 
 import java.io.ByteArrayInputStream;
-import java.io.File;
-import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
+
 import org.aimas.consert.ide.views.TreeObject;
 import org.aimas.consert.ide.views.TreeViewerNew;
 import org.eclipse.core.resources.IFile;
@@ -27,6 +26,7 @@ import org.eclipse.core.runtime.IAdaptable;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.ui.editors.text.TextFileDocumentProvider;
+
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -36,18 +36,14 @@ public class WorkspaceModel {
 	public static final String CONTEXT_ENTITY_NODE_NAME = "ContextEntities";
 	public static final String CONTEXT_ASSERTION_NODE_NAME = "ContextAssertions";
 	
-	private static WorkspaceModel instance;
-	private Map<String, ProjectModel> projects = new HashMap<>();
+	private static final WorkspaceModel instance = new WorkspaceModel();
+	private static final Map<String, ProjectModel> projects = new HashMap<>();
 
 	private WorkspaceModel() {
 		reactOnAddDelete();
-		projects = new HashMap<String, ProjectModel>();
 	}
 
 	public static WorkspaceModel getInstance() {
-		if (instance == null) {
-			instance = new WorkspaceModel();
-		}
 		return instance;
 	}
 
@@ -67,8 +63,7 @@ public class WorkspaceModel {
 		IWorkspace workspace = ResourcesPlugin.getWorkspace();
 		ProjectModel projectModel = getProjectModel(projectName);
 		IProject projectInWorkspace = workspace.getRoot().getProject(projectName);
-		String nodeName = CONTEXT_ENTITY_NODE_NAME;
-		auxDeleteFromFile(projectInWorkspace, projectModel, cem.getID(), nodeName);
+		auxDeleteFromFile(projectInWorkspace, projectModel, cem.getID(), CONTEXT_ENTITY_NODE_NAME);
 
 		return projects.get(projectName).removeEntity(cem);
 	}
@@ -77,8 +72,7 @@ public class WorkspaceModel {
 		IWorkspace workspace = ResourcesPlugin.getWorkspace();
 		ProjectModel projectModel = getProjectModel(projectName);
 		IProject projectInWorkspace = workspace.getRoot().getProject(projectName);
-		String nodeName = CONTEXT_ASSERTION_NODE_NAME;
-		auxDeleteFromFile(projectInWorkspace, projectModel, cam.getID(), nodeName);
+		auxDeleteFromFile(projectInWorkspace, projectModel, cam.getID(), CONTEXT_ASSERTION_NODE_NAME);
 		
 		return projects.get(projectName).removeAssertions(cam);
 	}
@@ -97,7 +91,7 @@ public class WorkspaceModel {
 								if (fileResources[k] instanceof IFile
 										&& fileResources[k].getName().equals("consert.txt")) {
 									TextFileDocumentProvider provider = new TextFileDocumentProvider();
-									IDocument document = provider.getDocument((IFile) fileResources[k]);
+									IDocument document = provider.getDocument(fileResources[k]);
 
 									deleteFromFile(projectModel, document, (IFile) fileResources[k], modelID, nodeName);
 								}
@@ -160,7 +154,6 @@ public class WorkspaceModel {
 	 * Initialize Workspace Model
 	 */
 	public void initializeWorkspace() {
-		projects = new HashMap<String, ProjectModel>();
 		try {
 			IWorkspace workspace = ResourcesPlugin.getWorkspace();
 			IProject[] projectsInWorkspace = workspace.getRoot().getProjects();
@@ -203,7 +196,7 @@ public class WorkspaceModel {
 						for (int k = 0; k < fileResources.length; k++) {
 							if (fileResources[k] instanceof IFile && fileResources[k].getName().equals("consert.txt")) {
 								TextFileDocumentProvider provider = new TextFileDocumentProvider();
-								IDocument document = provider.getDocument((IFile) fileResources[k]);
+								IDocument document = provider.getDocument(fileResources[k]);
 								populateProjectModel(projects.get(projectName), document, (IFile) fileResources[k]);
 							}
 						}
@@ -276,7 +269,7 @@ public class WorkspaceModel {
 		String nodeName = CONTEXT_ENTITY_NODE_NAME;
 		projectModel.getEntities().clear();
 		if (rootNode.has(nodeName)) {
-			JsonNode entities = (JsonNode) rootNode.get(nodeName);
+			JsonNode entities = rootNode.get(nodeName);
 			if (entities.isArray() && entities.size() > 0) {
 				for (JsonNode entity : entities) {
 					try {
@@ -301,7 +294,7 @@ public class WorkspaceModel {
 		nodeName = CONTEXT_ASSERTION_NODE_NAME;
 		projectModel.getAssertions().clear();
 		if (rootNode.has(nodeName)) {
-			JsonNode assertions = (JsonNode) rootNode.get(nodeName);
+			JsonNode assertions = rootNode.get(nodeName);
 			if (assertions.isArray() && assertions.size() > 0) {
 				for (JsonNode assertion : assertions) {
 					try {
@@ -343,7 +336,7 @@ public class WorkspaceModel {
 
 
 		if (rootNode.has(nodeName)) {
-			JsonNode entities = (JsonNode) rootNode.get(nodeName);
+			JsonNode entities = rootNode.get(nodeName);
 
 			Iterator<JsonNode> itr = entities.iterator();
 
@@ -386,7 +379,7 @@ public class WorkspaceModel {
 
 		/* Every IResource is an IAdaptable */
 		if (element instanceof IAdaptable) {
-			return ((IProject) ((IResource) element).getProject()).getName();
+			return ((IResource) element).getProject().getName();
 		}
 
 		return "";
@@ -413,6 +406,7 @@ public class WorkspaceModel {
 	public void reactOnAddDelete() {
 		IWorkspace workspace = ResourcesPlugin.getWorkspace();
 		IResourceChangeListener rcl = new IResourceChangeListener() {
+			@Override
 			public void resourceChanged(IResourceChangeEvent event) {
 				IResource res = event.getResource();
 
@@ -464,6 +458,7 @@ public class WorkspaceModel {
 
 	class DeltaPrinter implements IResourceDeltaVisitor {
 
+		@Override
 		public boolean visit(IResourceDelta delta) {
 			IResource res = delta.getResource();
 			TreeViewerNew tv = TreeViewerNew.getInstance();
