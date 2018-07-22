@@ -1,2 +1,2 @@
 # CONSERT-IDE
-IDE development for the CONSERT project
+Context Modeling IDE development for the CONSERT project
