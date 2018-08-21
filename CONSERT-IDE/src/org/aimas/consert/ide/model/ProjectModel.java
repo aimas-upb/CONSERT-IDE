@@ -17,11 +17,13 @@ import org.eclipse.core.runtime.IPath;
 import org.semanticweb.owlapi.apibinding.OWLManager;
 import org.semanticweb.owlapi.model.AxiomType;
 import org.semanticweb.owlapi.model.IRI;
+import org.semanticweb.owlapi.model.OWLAnnotation;
 import org.semanticweb.owlapi.model.OWLAnnotationAssertionAxiom;
 import org.semanticweb.owlapi.model.OWLClass;
 import org.semanticweb.owlapi.model.OWLDataFactory;
 import org.semanticweb.owlapi.model.OWLDeclarationAxiom;
 import org.semanticweb.owlapi.model.OWLEntity;
+import org.semanticweb.owlapi.model.OWLLiteral;
 import org.semanticweb.owlapi.model.OWLOntology;
 import org.semanticweb.owlapi.model.OWLOntologyCreationException;
 import org.semanticweb.owlapi.model.OWLOntologyManager;
@@ -170,47 +172,91 @@ public class ProjectModel extends Observable {
 		
 		try (InputStream inStream = testFile) {
 			OWLOntology ontology = manager.loadOntologyFromOntologyDocument(inStream);
+			OWLDataFactory df = manager.getOWLDataFactory();
 			
-			for (OWLClass cls : ontology.getClassesInSignature()) {
-			    for (OWLAnnotationAssertionAxiom annAx : EntitySearcher.getAnnotationAssertionAxioms(cls.getIRI(), ontology)) {
-			    		System.out.println(annAx);
-			        }
-			}
+//			for (OWLClass cls : ontology.getClassesInSignature()) {
+//			    for (OWLAnnotationAssertionAxiom annAx : EntitySearcher.getAnnotationAssertionAxioms(cls.getIRI(), ontology)) {
+//			    		System.out.println(annAx);
+//			        }
+//			}
 			
 			// Don't  load from the File - as it will make URIs absolute 
 			// when loading from RDF/XML (fine from Turtle..)
-			for (OWLSubClassOfAxiom subClasse : ontology.getAxioms(AxiomType.SUBCLASS_OF)) {
-				if (subClasse.getSuperClass() instanceof OWLClass 
-						&& subClasse.getSubClass() instanceof OWLClass) {
-			        System.out.println(subClasse.getSubClass() + " extends " + subClasse.getSuperClass());
-			        OWLDataFactory df = manager.getOWLDataFactory();
-			        OWLClass contextEntity = df.getOWLClass(IRI.create("http://example.org/org/aimas/consert/ide/brand/" + "ContextEntity"));
-			        System.out.println(contextEntity);
-			        Set<OWLSubClassOfAxiom> superClasses = ontology.getSubClassAxiomsForSuperClass(contextEntity);
-			        Set<OWLClass> classes = ontology.getClassesInSignature();
-			        System.out.println(classes);
-			       
-			        for(OWLSubClassOfAxiom ax : superClasses){
-			        	System.out.println(ax.getSubClass());
-			        	OWLEntity entity = (OWLEntity) ax.getSubClass();
-			        	Set<OWLDeclarationAxiom> set = ontology.getDeclarationAxioms(entity);
-			        	for(OWLDeclarationAxiom aa : set){
-			        		System.out.println(aa);
-			        	
-			        	}
-			        	
-			        	Set<OWLAnnotationAssertionAxiom> oaa = ontology.getAnnotationAssertionAxioms(entity.getIRI());
-			        	System.out.println(oaa);
-						// for(OWLAnnotationAssertionAxiom it : oaa){
-						// System.out.println(it.getAnnotation().containsEntityInSignature(arg0));
-						//
-						// }
-			        	
-			        }
-			    }    
-			}   
+//			for (OWLSubClassOfAxiom subClasse : ontology.getAxioms(AxiomType.SUBCLASS_OF)) {
+//				if (subClasse.getSuperClass() instanceof OWLClass 
+//						&& subClasse.getSubClass() instanceof OWLClass) {
+//					System.out.println("UNU");
+//			        System.out.println(subClasse.getSubClass() + " extends " + subClasse.getSuperClass());
+//			     
+//			        OWLClass contextEntity = df.getOWLClass(IRI.create("http://example.org/org/aimas/consert/ide/brand/" + "ContextEntity"));
+//			        System.out.println(contextEntity);
+//			        Set<OWLSubClassOfAxiom> superClasses = ontology.getSubClassAxiomsForSuperClass(contextEntity);
+//			        Set<OWLClass> classes = ontology.getClassesInSignature();
+//			        System.out.println(classes);
+//			        
+//			        
+//			        for(OWLClass cls: classes) {
+//			        	
+//			        	for (OWLAnnotation annotation : EntitySearcher.getAnnotations(cls.getIRI(), ontology)) {
+//			        	  if (annotation.getValue() instanceof OWLLiteral) {
+//			        	    OWLLiteral val = (OWLLiteral) annotation.getValue();
+//			        	    IRI propIri = annotation.getProperty().getIRI();
+//			        	    String fragment = propIri.getFragment();
+//			        	    
+//			        	    if (fragment.equals("comment")) {
+//			        	    	// Get the annotations on the class that use the comment property (rdfs:comment)
+//			        	    	System.out.println(cls + " commented " + val.getLiteral());
+//			        	    }else{
+//			        	    	// Get the annotations on the class that use the label property (rdfs:label)
+//			        	    	System.out.println(cls + " labelled " + val.getLiteral());
+//			        	    }		
+//			        	      
+//			        	   }
+//			        	}
+//			        }
+//			    }    
+//			}   
+			
+			//TRY to load only class which already exists in order to modify it
+			//Get your class of interest
+			for(ContextEntityModel entityModel: getEntities()){
+				//String entityName = "#" + entityModel.getName();
+		
+				Set<OWLClass> classes = ontology.getClassesInSignature();
+		      
+		        for(OWLClass cls: classes) {
+		        	System.out.println("fragm: " + cls.getIRI().getFragment());
+		        	if(cls.getIRI().getFragment().equals(entityModel.getName())){
+						for (OWLAnnotation annotation : EntitySearcher.getAnnotations(cls.getIRI(), ontology)) {
+				        	  if (annotation.getValue() instanceof OWLLiteral) {
+				        	    OWLLiteral val = (OWLLiteral) annotation.getValue();
+				        	    IRI propIri = annotation.getProperty().getIRI();
+				        	    String fragment = propIri.getFragment();
+				        	    
+				        	    if (fragment.equals("comment")) {
+				        	    	// Get the annotations on the class that use the comment property (rdfs:comment)
+				        	    	System.out.println(cls + " commented " + val.getLiteral());
+				        	    	if(!val.getLiteral().equals(entityModel.getComment())){
+				        	    		entityModel.setComment(entityModel.getComment());
+				        	    		entityModel.saveEntityOnDisk();
+				        	    	}
+				        	    }else{
+				        	    	// Get the annotations on the class that use the label property (rdfs:label)
+				        	    	System.out.println(cls + " labelled " + val.getLiteral());
+				        	    	
+				        	    }		
+				        	      
+				        	 }
+						}
+		        	}
+		        }
+			}
+			
 			
 		} catch (OWLOntologyCreationException | IOException e) {
+			e.printStackTrace();
+		} catch (OWLOntologyStorageException e) {
+			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 		
@@ -289,7 +335,10 @@ public class ProjectModel extends Observable {
 	
 	public void saveContextEntitiesOnDisk(File OWLfile, File TTLfile, ContextEntityModel model) {
 		try {
-			model.saveEntityOnDisk(OWLfile, TTLfile, getBaseURI());
+			model.setbaseURI(getBaseURI());
+			model.setOWLfile(OWLfile);
+			model.setTTLfile(TTLfile);
+			model.saveEntityOnDisk();
 		} catch (OWLOntologyCreationException | OWLOntologyStorageException e) {
 			System.err.println("Ontology could not be created or stored.");
  		}
