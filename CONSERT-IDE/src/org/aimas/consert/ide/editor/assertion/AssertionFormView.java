@@ -55,7 +55,7 @@ public class AssertionFormView extends FormPage implements IResourceChangeListen
 		nameLabel.setText(labelName);
 		Text nameText = new Text(form.getBody(), SWT.BORDER | SWT.SINGLE);
 		nameText.setText(textName);
-		nameText.setLayoutData(new GridData(100, 10));
+		nameText.setLayoutData(new GridData(180, 30));
 		nameText.addModifyListener(new ModifyListener() {
 
 			@Override
@@ -68,7 +68,7 @@ public class AssertionFormView extends FormPage implements IResourceChangeListen
 					projectModel.getAssertionByName(cam.getName()).setName(nameText.getText());
 				} else if (labelName.equals(" Comment: ")) {
 					projectModel.getAssertionByName(cam.getName()).setComment(nameText.getText());
-				} else if (labelName.equals(" Arity: ")) {
+				} else if (labelName.equals(" Arity: ")) { 
 					try {
 						projectModel.getAssertionByName(cam.getName()).setArity(Integer.parseInt((nameText.getText())));
 					} catch (NumberFormatException exp) {
@@ -82,12 +82,13 @@ public class AssertionFormView extends FormPage implements IResourceChangeListen
 	public void createLabelAndTextForEntity(String labelName, String textName, ContextEntityModel cem) {
 		Label nameLabel = new Label(form.getBody(), SWT.NONE);
 		nameLabel.setText(labelName);
+		nameLabel.setLayoutData(new GridData(180, 30));
 		Text nameText = new Text(form.getBody(), SWT.BORDER | SWT.SINGLE);
 		if (textName == null) {
 			textName = "";
 		}
 		nameText.setText(textName);
-		nameText.setLayoutData(new GridData(100, 10));
+		nameText.setLayoutData(new GridData(180, 30));
 		nameText.addModifyListener(new ModifyListener() {
 
 			@Override
@@ -171,12 +172,14 @@ public class AssertionFormView extends FormPage implements IResourceChangeListen
 	private void createLabelAndCombo(String string, String acquisitionTypeText) {
 		Label labelAcquisitionType = new Label(form.getBody(), SWT.NONE);
 		labelAcquisitionType.setText("AcquisitionType");
+		labelAcquisitionType.setLayoutData(new GridData(180, 30));
 
 		CCombo comboAcquisitionType = new CCombo(form.getBody(), SWT.READ_ONLY);
 		String items[] = { AcquisitionType.DERIVED.toString(), AcquisitionType.PROFILED.toString(),
 				AcquisitionType.SENSED.toString() };
 		comboAcquisitionType.setItems(items);
 		comboAcquisitionType.setText(acquisitionTypeText);
+		comboAcquisitionType.setLayoutData(new GridData(180, 30));
 		comboAcquisitionType.addSelectionListener(new SelectionListener() {
 
 			@Override
@@ -248,6 +251,7 @@ public class AssertionFormView extends FormPage implements IResourceChangeListen
 
 		Label nameLabel = new Label(form.getBody(), SWT.NONE);
 		nameLabel.setText(" ContextAssertion: ");
+		nameLabel.setLayoutData(new GridData(180, 30));
 		new Label(form.getBody(), SWT.NONE);
 		new Label(form.getBody(), SWT.NONE);
 
@@ -262,17 +266,20 @@ public class AssertionFormView extends FormPage implements IResourceChangeListen
 
 		Label entitiesNameLabel = new Label(form.getBody(), SWT.NONE);
 		entitiesNameLabel.setText(" ContextEntities: ");
+		entitiesNameLabel.setLayoutData(new GridData(180, 30));
 		new Label(form.getBody(), SWT.NONE);
 		new Label(form.getBody(), SWT.NONE);
 
 		/* combos for entities selection */
 		Label nameSubjectLabel = new Label(form.getBody(), SWT.NONE);
 		nameSubjectLabel.setText(" Subject Entity: ");
+		nameSubjectLabel.setLayoutData(new GridData(180, 30));
 		addEntityCComboBox(cam.getSubjectEntity());
 		adddEntityGotoButton(cam.getSubjectEntity());
 
 		Label nameObjectLabel = new Label(form.getBody(), SWT.NONE);
 		nameObjectLabel.setText(" Object Entity: ");
+		nameObjectLabel.setLayoutData(new GridData(180, 30));
 		addEntityCComboBox(cam.getObjectEntity());
 		adddEntityGotoButton(cam.getObjectEntity());
 	}

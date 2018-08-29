@@ -20,6 +20,14 @@ public class NewWizardMessages extends NLS {
 	public static String NewContextAssertionWizard;
 	public static String NewContextAssertionDescription;
 	public static String NewContextAssertionTitle;
+	
+	public static String NewEntityDescriptionWizard;
+	public static String NewEntityDescriptionDescription;
+	public static String NewEntityDescriptionTitle;
+
+	public static String NewContextAnnotationWizard;
+	public static String NewContextAnnotationDescription;
+	public static String NewContextAnnotationTitle;
 
 	static {
 		/* initialize resource bundle */

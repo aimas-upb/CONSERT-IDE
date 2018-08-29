@@ -7,15 +7,21 @@ import java.util.Observable;
 import java.util.Observer;
 
 import org.aimas.consert.ide.editor.EditorInputWrapper;
+import org.aimas.consert.ide.editor.annotation.AnnotationMultiPageEditor;
 import org.aimas.consert.ide.editor.assertion.AssertionMultiPageEditor;
 import org.aimas.consert.ide.editor.entity.EntityMultiPageEditor;
+import org.aimas.consert.ide.editor.entitydescription.EntityDescriptionMultiPageEditor;
+import org.aimas.consert.ide.model.ContextAnnotationModel;
 import org.aimas.consert.ide.model.ContextAssertionModel;
 import org.aimas.consert.ide.model.ContextEntityModel;
+import org.aimas.consert.ide.model.EntityDescriptionModel;
 import org.aimas.consert.ide.model.ProjectModel;
 import org.aimas.consert.ide.model.WorkspaceModel;
 import org.aimas.consert.ide.views.TreeViewerNew.TreeParent;
+import org.aimas.consert.ide.wizards.ContextAnnotationWizard;
 import org.aimas.consert.ide.wizards.ContextAssertionWizard;
 import org.aimas.consert.ide.wizards.ContextEntityWizard;
+import org.aimas.consert.ide.wizards.EntityDescriptionWizard;
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.MenuManager;
 import org.eclipse.jface.viewers.DoubleClickEvent;
@@ -39,6 +45,7 @@ import org.eclipse.ui.IWorkbenchPage;
 import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.part.ViewPart;
+
 
 public class TreeViewerNew extends ViewPart implements Observer {
 	public static final String ID = "org.aimas.consert.ide.views.TreeViewerNew";
@@ -129,6 +136,12 @@ public class TreeViewerNew extends ViewPart implements Observer {
 			TreeParent<ContextAssertionModel> assertionsParent = new TreeParent<ContextAssertionModel>(
 					"CONSERT ContextAssertions", projectName);
 			root.addChild(assertionsParent);
+			TreeParent<EntityDescriptionModel> entityDescriptionsParent = new TreeParent<EntityDescriptionModel>(
+					"CONSERT EntityDescriptions", projectName);
+			root.addChild(entityDescriptionsParent);
+			TreeParent<ContextAnnotationModel> contextAnnotationsParent = new TreeParent<ContextAnnotationModel>(
+					"CONSERT ContextAnnotations", projectName);
+			root.addChild(contextAnnotationsParent);
 
 			/*
 			 * get the list of entities and assertions from the
@@ -136,8 +149,8 @@ public class TreeViewerNew extends ViewPart implements Observer {
 			 */
 			List<ContextEntityModel> entities = project.getEntities();
 			List<ContextAssertionModel> assertions = project.getAssertions();
-
-			System.out.println(project.getEntities());
+			List<EntityDescriptionModel> entityDescriptions = project.getEntityDescriptions();
+			List<ContextAnnotationModel> annotations = project.getAnnotations();
 
 			/* add entities to the tree */
 			for (ContextEntityModel ent : entities) {
@@ -153,6 +166,22 @@ public class TreeViewerNew extends ViewPart implements Observer {
 						project.getName());
 				obj.setResource(ass);
 				assertionsParent.addChild(obj);
+			}
+			
+			/* add entity descriptions to the tree */
+			for (EntityDescriptionModel edm : entityDescriptions) {
+				TreeObject<EntityDescriptionModel> obj = new TreeObject<EntityDescriptionModel>(edm.getName(),
+						project.getName());
+				obj.setResource(edm);
+				entityDescriptionsParent.addChild(obj);
+			}
+			
+			/* add annotations to the tree */
+			for (ContextAnnotationModel ann : annotations) {
+				TreeObject<ContextAnnotationModel> obj = new TreeObject<ContextAnnotationModel>(ann.getName(),
+						project.getName());
+				obj.setResource(ann);
+				contextAnnotationsParent.addChild(obj);
 			}
 
 		} catch (Exception e) {
@@ -198,7 +227,12 @@ Map<String, ProjectModel> projects = workspaceModel.getProjectModels();
 			TreeParent<ContextAssertionModel> assertionsParent = new TreeParent<ContextAssertionModel>(
 					"CONSERT ContextAssertions", projectName);
 			root.addChild(assertionsParent);
-
+			TreeParent<EntityDescriptionModel> entityDescriptionsParent = new TreeParent<EntityDescriptionModel>(
+					"CONSERT EntityDescriptions", projectName);
+			root.addChild(entityDescriptionsParent);
+			TreeParent<ContextAnnotationModel> contextAnnotationsParent = new TreeParent<ContextAnnotationModel>(
+					"CONSERT ContextAnnotations", projectName);
+			root.addChild(contextAnnotationsParent);
 			
 
 		} catch (Exception e) {
@@ -357,8 +391,16 @@ Map<String, ProjectModel> projects = workspaceModel.getProjectModels();
 						EditorInputWrapper eiw = new EditorInputWrapper((ContextAssertionModel) model);
 						eiw.setProjectModel(projectModel);
 						page.openEditor(eiw, AssertionMultiPageEditor.ID);
+					} else if (model instanceof EntityDescriptionModel) {
+						EditorInputWrapper eiw = new EditorInputWrapper((EntityDescriptionModel) model);
+						eiw.setProjectModel(projectModel);
+						page.openEditor(eiw, EntityDescriptionMultiPageEditor.ID);
+					} else if (model instanceof ContextAnnotationModel) {
+						EditorInputWrapper eiw = new EditorInputWrapper((ContextAnnotationModel) model);
+						eiw.setProjectModel(projectModel);
+						page.openEditor(eiw, AnnotationMultiPageEditor.ID);
 					} else {
-						System.err.println("Model is nor Entity nor Assertion!");
+						System.err.println("Model is not part of CONSERT Context Elements!");
 					}
 				} catch (PartInitException e) {
 					throw new RuntimeException(e);
@@ -374,6 +416,8 @@ Map<String, ProjectModel> projects = workspaceModel.getProjectModels();
 		addRefreshActionToMenu(menuMgr);
 		addNewEntityActionToMenu(menuMgr);
 		addNewAssertionActionToMenu(menuMgr);
+		addNewEntityDescriptionActionToMenu(menuMgr);
+		addNewContextAnnotationActionToMenu(menuMgr);
 		addDeleteActionToMenu(menuMgr);
 	}
 
@@ -398,6 +442,52 @@ Map<String, ProjectModel> projects = workspaceModel.getProjectModels();
 		};
 		addAssertion.setText("NewContextAssertion");
 		menuMgr.add(addAssertion);
+	}
+	
+	/**
+	 * adds a new entry in the menu for adding new assertions and refreshes the
+	 * view on Finish
+	 */
+	private void addNewEntityDescriptionActionToMenu(MenuManager menuMgr) {
+		Action addEntityDescription = new Action() {
+			public void run() {
+				ISelection selection = viewer.getSelection();
+				String projectName = WorkspaceModel.getInstance()
+						.getCurrentActiveProject((IStructuredSelection) selection);
+				IWizard wizard = new EntityDescriptionWizard(projectName);
+				WizardDialog dialog = new WizardDialog(PlatformUI.getWorkbench().getActiveWorkbenchWindow().getShell(),
+						wizard);
+				if (dialog.open() == Window.OK) {
+					initialize();
+					viewer.refresh();
+				}
+			}
+		};
+		addEntityDescription.setText("NewEntityDescription");
+		menuMgr.add(addEntityDescription);
+	}
+	
+	/**
+	 * adds a new entry in the menu for adding new assertions and refreshes the
+	 * view on Finish
+	 */
+	private void addNewContextAnnotationActionToMenu(MenuManager menuMgr) {
+		Action addContextAnnotation = new Action() {
+			public void run() {
+				ISelection selection = viewer.getSelection();
+				String projectName = WorkspaceModel.getInstance()
+						.getCurrentActiveProject((IStructuredSelection) selection);
+				IWizard wizard = new ContextAnnotationWizard(projectName);
+				WizardDialog dialog = new WizardDialog(PlatformUI.getWorkbench().getActiveWorkbenchWindow().getShell(),
+						wizard);
+				if (dialog.open() == Window.OK) {
+					initialize();
+					viewer.refresh();
+				}
+			}
+		};
+		addContextAnnotation.setText("NewContextAnnotation");
+		menuMgr.add(addContextAnnotation);
 	}
 
 	/**
@@ -456,6 +546,10 @@ Map<String, ProjectModel> projects = workspaceModel.getProjectModels();
 				if(model instanceof ContextEntityModel){
 					System.out.println("Delete Entity");
 					WorkspaceModel.getInstance().removeEntityfromProjectModel(projectName, (ContextEntityModel) model);
+				}
+				if(model instanceof EntityDescriptionModel){
+					System.out.println("Delete Entity Description");
+					WorkspaceModel.getInstance().removeEntityDescriptionfromProjectModel(projectName, (EntityDescriptionModel) model);
 				}
 				
 				initialize();

@@ -91,6 +91,30 @@
             name="ContextAssertion"
             project="false">
       </wizard>
+      <category
+            id="CONSERT-IDE"
+            name="Context Elements">
+      </category>
+      <wizard
+            category="CONSERT-IDE"
+            class="org.aimas.consert.ide.wizards.EntityDescriptionWizard"
+            finalPerspective="ConsertPerspective.perspective1"
+            hasPages="true"
+            icon="icons/sample.gif"
+            id="consertide.wizards.EntityDescriptionWizard"
+            name="Entity Description"
+            project="false">
+      </wizard>
+      <wizard
+            category="CONSERT-IDE"
+            class="org.aimas.consert.ide.wizards.ContextAnnotationWizard"
+            finalPerspective="ConsertPerspective.perspective1"
+            hasPages="true"
+            icon="icons/sample.gif"
+            id="org.aimas.consert.ide.wizards.ContextAnnotationWizard"
+            name="Context Annotation"
+            project="false">
+      </wizard>
              
      
    </extension>
@@ -141,6 +165,21 @@
             default="false"
             id="org.aimas.consert.ide.editor.assertion.AssertionMultiPageEditor"
             name="ContextAssertionMultiPageEditor">
+      </editor>
+      <editor
+            class="org.aimas.consert.ide.editor.entitydescription.EntityDescriptionMultiPageEditor"
+            contributorClass="org.aimas.consert.ide.editor.MultiPageEditorContributor"
+            default="false"
+            id="org.aimas.consert.ide.editor.entitydescription.EntityDescriptionMultiPageEditor"
+            name="EntityDescriptionMultiPageEditor">
+      </editor>
+      <editor
+            class="org.aimas.consert.ide.editor.annotation.AnnotationMultiPageEditor"
+            contributorClass="org.aimas.consert.ide.editor.MultiPageEditorContributor"
+            default="false"
+            icon="icons/sample.gif"
+            id="org.aimas.consert.ide.editor.annotation.AnnotationMultiPageEditor"
+            name="AnnotationMultiPageEditor">
       </editor>
    </extension>
    <extension
