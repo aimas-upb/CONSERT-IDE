@@ -5,6 +5,7 @@ import org.aimas.consert.ide.editor.assertion.AssertionMultiPageEditor;
 import org.aimas.consert.ide.model.ContextAssertionModel;
 import org.aimas.consert.ide.model.ProjectModel;
 import org.aimas.consert.ide.model.WorkspaceModel;
+import org.aimas.consert.ide.util.Utils;
 import org.aimas.consert.ide.wizards.pages.WizardNewAssertionPage;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.wizard.Wizard;
@@ -13,7 +14,6 @@ import org.eclipse.ui.IWorkbench;
 import org.eclipse.ui.IWorkbenchPage;
 import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.PlatformUI;
-import org.aimas.consert.ide.util.Utils;
 
 public class ContextAssertionWizard extends Wizard implements INewWizard {
 	private IWorkbench workbench;
@@ -66,7 +66,7 @@ public class ContextAssertionWizard extends Wizard implements INewWizard {
 
 		/* finish means adding in the consert.txt file the required fields */
 		ProjectModel projectModel = WorkspaceModel.getInstance().getProjectModel(projectName);
-		projectModel.saveNewModelOnDisk(model);
+		projectModel.saveNewModelOntologyOnDisk(model);
 
 		openEditorOnFinish(projectModel, model);
 		return true;
@@ -74,7 +74,7 @@ public class ContextAssertionWizard extends Wizard implements INewWizard {
 
 	private void openEditorOnFinish(ProjectModel projectModel, ContextAssertionModel model) {
 		IWorkbenchPage page = PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage();
-		EditorInputWrapper eiw = new EditorInputWrapper((ContextAssertionModel) model);
+		EditorInputWrapper eiw = new EditorInputWrapper(model);
 		eiw.setProjectModel(projectModel);
 		try {
 			page.openEditor(eiw, AssertionMultiPageEditor.ID);
