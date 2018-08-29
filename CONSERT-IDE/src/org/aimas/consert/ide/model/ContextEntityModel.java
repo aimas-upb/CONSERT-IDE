@@ -131,17 +131,17 @@ public class ContextEntityModel {
         DefaultPrefixManager pm = new DefaultPrefixManager();
 		pm.setDefaultPrefix(ontologyIRI + "#");
 		pm.setPrefix("core:", "http://pervasive.semanticweb.org/ont/2017/07/consert/core#");
-		// OWLImportsDeclaration coreImport =
-		// factory.getOWLImportsDeclaration(coreIri);
-		// manager.applyChange(new AddImport(ontology, coreImport));
+//		 OWLImportsDeclaration coreImport =
+//		 factory.getOWLImportsDeclaration(coreIri);
+//		 manager.applyChange(new AddImport(ontology, coreImport));
 		
 		String entityName = ":" + getName();
         
         OWLClass newEntity = df.getOWLClass(entityName, pm);
         OWLClass contextEntity = df.getOWLClass(IRI.create(ontologyIRI + "ContextEntity"));
         
-		OWLDeclarationAxiom declarationAxiom = df.getOWLDeclarationAxiom(newEntity);
-        manager.addAxiom(ontology, declarationAxiom);
+//		OWLDeclarationAxiom declarationAxiom = df.getOWLDeclarationAxiom(newEntity);
+//        manager.addAxiom(ontology, declarationAxiom);
         
         manager.addAxiom(ontology, df.getOWLSubClassOfAxiom(newEntity, contextEntity));
         

@@ -38,12 +38,13 @@ public class EntityFormView extends FormPage implements IResourceChangeListener 
 	public void createLabelAndText(String labelName, String textName) {
 		Label nameLabel = new Label(form.getBody(), SWT.NONE);
 		nameLabel.setText(labelName);
+		nameLabel.setLayoutData(new GridData(180, 30));
 		Text nameText = new Text(form.getBody(), SWT.BORDER | SWT.SINGLE);
 		if (textName == null) {
 			textName = "";
 		}
 		nameText.setText(textName);
-		nameText.setLayoutData(new GridData(100, 10));
+		nameText.setLayoutData(new GridData(180, 30));
 		nameText.addModifyListener(new ModifyListener() {
 
 			@Override
@@ -92,6 +93,7 @@ public class EntityFormView extends FormPage implements IResourceChangeListener 
 		String comment = cem.getComment();
 		Label nameLabel = new Label(form.getBody(), SWT.NONE);
 		nameLabel.setText(" ContextEntitity: ");
+		nameLabel.setLayoutData(new GridData(180, 30));
 		new Label(form.getBody(), SWT.NONE);
 
 		createLabelAndText(" Name: ", name);

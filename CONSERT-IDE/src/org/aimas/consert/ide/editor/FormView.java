@@ -2,8 +2,10 @@ package org.aimas.consert.ide.editor;
 
 import java.util.List;
 
+import org.aimas.consert.ide.model.ContextAnnotationModel;
 import org.aimas.consert.ide.model.ContextAssertionModel;
 import org.aimas.consert.ide.model.ContextEntityModel;
+import org.aimas.consert.ide.model.EntityDescriptionModel;
 import org.aimas.consert.ide.model.ProjectModel;
 import org.aimas.consert.ide.model.WorkspaceModel;
 import org.eclipse.core.resources.IFile;
@@ -67,7 +69,7 @@ public class FormView extends FormPage implements IResourceChangeListener {
 			textName = "";
 		}
 		nameText.setText(textName);
-		nameText.setLayoutData(new GridData(100, 10));
+		nameText.setLayoutData(new GridData(180, 30));
 		nameText.addModifyListener(new ModifyListener() {
 
 			@Override
@@ -101,13 +103,57 @@ public class FormView extends FormPage implements IResourceChangeListener {
 			}
 		});
 	}
+	
+	public void createLabelAndTextForEntity2(String labelName, String textName, EntityDescriptionModel edm,
+			ContextEntityModel cem) {
+		Label nameLabel = new Label(form.getBody(), SWT.NONE);
+		nameLabel.setText(labelName);
+		Text nameText = new Text(form.getBody(), SWT.BORDER | SWT.SINGLE);
+		if (textName == null) {
+			textName = "";
+		}
+		nameText.setText(textName);
+		nameText.setLayoutData(new GridData(180, 30));
+		nameText.addModifyListener(new ModifyListener() {
+
+			@Override
+			public void modifyText(ModifyEvent e) {
+				isDirty = true;
+				firePropertyChange(IEditorPart.PROP_DIRTY);
+				editor.editorDirtyStateChanged();
+
+				/*
+				 * This entity belongs to an assertion, and is not present in
+				 * the getEntities() of the ProjectModel!!!
+				 */
+				if (edm == null) { // an entity with no entity description.
+					if (labelName.equals(" Name: ")) {
+						projectModel.getEntityByName(cem.getName()).setName(nameText.getText());
+					} else if (labelName.equals(" Comment: ")) {
+						projectModel.getEntityByName(cem.getName()).setComment(nameText.getText());
+					}
+				} else { /* an entity that belongs to an assertion */
+					ContextEntityModel subjectEntity = projectModel.getEntityDescriptionByName(edm.getName()).getSubjectEntity();
+					
+					if (subjectEntity.equals(cem)) {
+						if (labelName.equals(" Name: ")) {
+							subjectEntity.setName(nameText.getText());
+						} else if (labelName.equals(" Comment: ")) {
+							subjectEntity.setComment(nameText.getText());
+						}
+					}
+					
+				}
+			}
+		});
+	}
 
 	public void createLabelAndTextForAssertion(String labelName, String textName, ContextAssertionModel cam) {
 		Label nameLabel = new Label(form.getBody(), SWT.NONE);
 		nameLabel.setText(labelName);
 		Text nameText = new Text(form.getBody(), SWT.BORDER | SWT.SINGLE);
 		nameText.setText(textName);
-		nameText.setLayoutData(new GridData(100, 10));
+		nameText.setLayoutData(new GridData(180, 30));
 		nameText.addModifyListener(new ModifyListener() {
 
 			@Override
@@ -127,6 +173,51 @@ public class FormView extends FormPage implements IResourceChangeListener {
 						System.err.print("Please Introduce an Integer Arity");
 					}
 				}
+			}
+		});
+	}
+	
+	public void createLabelAndTextForEntityDescription(String labelName, String textName, EntityDescriptionModel edm) {
+		Label nameLabel = new Label(form.getBody(), SWT.NONE);
+		nameLabel.setText(labelName);
+		Text nameText = new Text(form.getBody(), SWT.BORDER | SWT.SINGLE);
+		nameText.setText(textName);
+		nameText.setLayoutData(new GridData(180, 30));
+		nameText.addModifyListener(new ModifyListener() {
+
+			@Override
+			public void modifyText(ModifyEvent e) {
+				isDirty = true;
+				firePropertyChange(IEditorPart.PROP_DIRTY);
+				editor.editorDirtyStateChanged();
+
+				if (labelName.equals(" Name: ")) {
+					projectModel.getEntityDescriptionByName(edm.getName()).setName(nameText.getText());
+				} else if (labelName.equals(" Object: ")) {
+					projectModel.getEntityDescriptionByName(edm.getName()).setObject(nameText.getText());
+				}
+				
+			}
+		});
+	}
+	
+	public void createLabelAndTextForAnnotation(String labelName, String textName, ContextAnnotationModel ann) {
+		Label nameLabel = new Label(form.getBody(), SWT.NONE);
+		nameLabel.setText(labelName);
+		Text nameText = new Text(form.getBody(), SWT.BORDER | SWT.SINGLE);
+		nameText.setText(textName);
+		nameText.setLayoutData(new GridData(180, 30));
+		nameText.addModifyListener(new ModifyListener() {
+
+			@Override
+			public void modifyText(ModifyEvent e) {
+				isDirty = true;
+				firePropertyChange(IEditorPart.PROP_DIRTY);
+				editor.editorDirtyStateChanged();
+
+				if (labelName.equals(" Name: ")) {
+					projectModel.getAnnotationsByName(ann.getName()).setName(nameText.getText());
+				} 
 			}
 		});
 	}
@@ -163,6 +254,7 @@ public class FormView extends FormPage implements IResourceChangeListener {
 
 		Label entitiesNameLabel = new Label(form.getBody(), SWT.NONE);
 		entitiesNameLabel.setText(" ContextEntitities: ");
+		entitiesNameLabel.setLayoutData(new GridData(180, 30));
 		new Label(form.getBody(), SWT.NONE);
 
 		for (ContextEntityModel cem : projectModel.getEntities()) {
@@ -172,6 +264,7 @@ public class FormView extends FormPage implements IResourceChangeListener {
 
 		Label assertionsNameLabel = new Label(form.getBody(), SWT.NONE);
 		assertionsNameLabel.setText(" ContextAssertions: ");
+		assertionsNameLabel.setLayoutData(new GridData(180, 30));
 		new Label(form.getBody(), SWT.NONE);
 
 		for (ContextAssertionModel cam : projectModel.getAssertions()) {
@@ -192,6 +285,36 @@ public class FormView extends FormPage implements IResourceChangeListener {
 			createLabelAndTextForEntity(" Object Name: ", objectEntity.getName(), cam, objectEntity);
 			createLabelAndTextForEntity(" Object Comment: ", objectEntity.getComment(), cam, objectEntity);
 		}
+		
+		Label entityDescriptionsNameLabel = new Label(form.getBody(), SWT.NONE);
+		entityDescriptionsNameLabel.setText(" EntityDescriptions: ");
+		entityDescriptionsNameLabel.setLayoutData(new GridData(180, 30));
+		new Label(form.getBody(), SWT.NONE);
+
+		for (EntityDescriptionModel edm : projectModel.getEntityDescriptions()) {
+			createLabelAndTextForEntityDescription(" Name: ", edm.getName(), edm);
+			createLabelAndTextForEntityDescription(" Object: ", edm.getObject(), edm);
+
+			Label entitiesPerAssertionLabel = new Label(form.getBody(), SWT.NONE);
+			entitiesPerAssertionLabel.setText(" ContextEntities: ");
+			new Label(form.getBody(), SWT.NONE);
+
+			ContextEntityModel subjectEntity = edm.getSubjectEntity();
+			createLabelAndTextForEntity2(" Subject Name: ", subjectEntity.getName(), edm, subjectEntity);
+			createLabelAndTextForEntity2(" Subject Comment: ", subjectEntity.getComment(), edm, subjectEntity);
+		}
+		
+		Label annotationsNameLabel = new Label(form.getBody(), SWT.NONE);
+		annotationsNameLabel.setText(" Annotations: ");
+		annotationsNameLabel.setLayoutData(new GridData(180, 30));
+		new Label(form.getBody(), SWT.NONE);
+		
+		for (ContextAnnotationModel ann : projectModel.getAnnotations()) {
+			createLabelAndTextForAnnotation(" Name: ", ann.getName(), ann);
+			createLabelAndTextForAnnotation(" Annotation Type: ", ann.getAnnotationType().toString(), ann);
+			createLabelAndTextForAnnotation(" Annotation Category: ", ann.getAnnotationCategory().toString(), ann);
+		}
+		
 	}
 
 	@Override

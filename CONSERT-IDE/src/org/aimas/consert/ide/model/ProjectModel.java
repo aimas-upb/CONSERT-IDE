@@ -42,6 +42,8 @@ public class ProjectModel extends Observable {
 	private String name;
 	private List<ContextEntityModel> entities = new ArrayList<>();
 	private List<ContextAssertionModel> assertions = new ArrayList<>();
+	private List<EntityDescriptionModel> entityDescriptions = new ArrayList<>();
+	private List<ContextAnnotationModel> annotations = new ArrayList<>();
 	private static final ObjectMapper mapper = new ObjectMapper();
 	private static final String BASE_URI = "http://example.org/org/aimas/consert/ide/";
 
@@ -81,6 +83,14 @@ public class ProjectModel extends Observable {
 	public List<ContextAssertionModel> getAssertions() {
 		return assertions;
 	}
+	
+	public List<EntityDescriptionModel> getEntityDescriptions() {
+		return entityDescriptions;
+	}
+	
+	public List<ContextAnnotationModel> getAnnotations() {
+		return annotations;
+	}
 
 	public ContextEntityModel getEntityByName(String name) {
 		for (ContextEntityModel cem : entities) {
@@ -99,6 +109,24 @@ public class ProjectModel extends Observable {
 		}
 		return null;
 	}
+	
+	public EntityDescriptionModel getEntityDescriptionByName(String name) {
+		for (EntityDescriptionModel edm : entityDescriptions) {
+			if (edm.getName().equals(name)) {
+				return edm;
+			}
+		}
+		return null;
+	}
+	
+	public ContextAnnotationModel getAnnotationsByName(String name) {
+		for (ContextAnnotationModel ann : annotations) {
+			if (ann.getName().equals(name)) {
+				return ann;
+			}
+		}
+		return null;
+	}
 
 	public boolean addAssertion(ContextAssertionModel cam) {
 		return assertions.add(cam);
@@ -111,14 +139,32 @@ public class ProjectModel extends Observable {
 	public boolean addEntity(ContextEntityModel cem) {
 		return entities.add(cem);
 	}
+	
+	public boolean addEntityDescription(EntityDescriptionModel edm) {
+		return entityDescriptions.add(edm);
+	}
+	
+	public boolean removeEntityDescription(EntityDescriptionModel edm) {
+		return entityDescriptions.remove(edm);
+	}
 
 	public boolean removeEntity(ContextEntityModel cem) {
 		return entities.remove(cem);
+	}
+	
+	public boolean addAnnotation(ContextAnnotationModel ann) {
+		return annotations.add(ann);
+	}
+
+	public boolean removeAnnotation(ContextAnnotationModel ann) {
+		return annotations.remove(ann);
 	}
 
 	public void saveJsonOnDisk() {
 		updateEntitiesJsonNode();
 		updateAssertionsJsonNode();
+		updateEntityDescriptionsJsonNode();
+		updateAnnotationsJsonNode();
 		writeJsonOnDisk();
 		
 		IProject project = ResourcesPlugin.getWorkspace().getRoot().getProject(name);
@@ -291,6 +337,16 @@ public class ProjectModel extends Observable {
 				for (JsonNode entity : rootNode.get("ContextEntities")) {
 					addEntity(mapper.treeToValue(entity, ContextEntityModel.class));
 				}
+			} else if (rootNode.has("EntityDescriptions") && model instanceof EntityDescriptionModel) {
+				((ObjectNode) rootNode).withArray("EntityDescriptions").add(mapper.valueToTree(model));
+				for (JsonNode entityDscription : rootNode.get("EntityDescriptions")) {
+					addEntityDescription(mapper.treeToValue(entityDscription, EntityDescriptionModel.class));
+				}
+			} else if (rootNode.has("ContextAnnotations") && model instanceof ContextAnnotationModel) {
+				((ObjectNode) rootNode).withArray("ContextAnnotations").add(mapper.valueToTree(model));
+				for (JsonNode annotation : rootNode.get("ContextAnnotations")) {
+					addAnnotation(mapper.treeToValue(annotation, ContextAnnotationModel.class));
+				}
 			} else {
 				System.out.println("RootNode does not have this node");
 				return false;
@@ -322,7 +378,9 @@ public class ProjectModel extends Observable {
 		File TTLfile = folder.getFile("consert.ttl").getLocation().toFile();
 		
 		//Save OWL and TTL
-		saveContextEntitiesOnDisk(OWLfile, TTLfile, (ContextEntityModel) model);
+		if (model instanceof ContextEntityModel) {
+			saveContextEntitiesOnDisk(OWLfile, TTLfile, (ContextEntityModel) model);
+		}
 		
 		//Save JSON
 		saveNewModelJSONOnDisk(folder,model);
@@ -342,6 +400,30 @@ public class ProjectModel extends Observable {
 		} catch (OWLOntologyCreationException | OWLOntologyStorageException e) {
 			System.err.println("Ontology could not be created or stored.");
  		}
+	}
+	
+	/**
+	 * Save all entity descriptions since the formView does not track them individually, so
+	 * it does not know which changed and which didn't.
+	 */
+	public void updateEntityDescriptionsJsonNode() {
+		((ObjectNode) getRootNode()).withArray("EntityDescriptions").removeAll();
+		for (EntityDescriptionModel edm : getEntityDescriptions()) {
+			((ObjectNode) getRootNode()).withArray("EntityDescriptions").add(mapper.valueToTree(edm));
+		}
+		System.out.println("Updated new entity descriptions into Json: " + getEntityDescriptions());
+	}
+	
+	/**
+	 * Save all annotations since the formView does not track them individually, so
+	 * it does not know which changed and which didn't.
+	 */
+	public void updateAnnotationsJsonNode() {
+		((ObjectNode) getRootNode()).withArray("ContextAnnotations").removeAll();
+		for (ContextAnnotationModel ann : getAnnotations()) {
+			((ObjectNode) getRootNode()).withArray("ContextAnnotations").add(mapper.valueToTree(ann));
+		}
+		System.out.println("Updated new annotations into Json: " + getAnnotations());
 	}
 
 }

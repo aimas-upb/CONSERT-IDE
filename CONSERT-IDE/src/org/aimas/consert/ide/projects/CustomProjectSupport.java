@@ -106,7 +106,7 @@ public class CustomProjectSupport {
 		IFolder folder = newProject.getFolder("origin");
 		IFile file = folder.getFile("consert.txt");
 		if (!file.exists()) {
-			String contents = "{\"ContextEntities\":[],\"ContextAssertions\":[]}";
+			String contents = "{\"ContextEntities\":[],\"ContextAssertions\":[],\"ContextAnnotations\":[],\"EntityDescriptions\":[]}";
 			byte[] bytes = contents.getBytes();
 			InputStream source = new ByteArrayInputStream(bytes);
 			file.create(source, IResource.NONE, null);

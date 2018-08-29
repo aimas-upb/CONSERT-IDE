@@ -35,6 +35,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 public class WorkspaceModel {
 	public static final String CONTEXT_ENTITY_NODE_NAME = "ContextEntities";
 	public static final String CONTEXT_ASSERTION_NODE_NAME = "ContextAssertions";
+	public static final String ENTITY_DESCRIPTION_NODE_NAME = "EntityDescriptions";
+	public static final String CONTEXT_ANNOTATIONS_NODE_NAME = "ContextAnnotations";
 	
 	private static final WorkspaceModel instance = new WorkspaceModel();
 	private static final Map<String, ProjectModel> projects = new HashMap<>();
@@ -75,6 +77,24 @@ public class WorkspaceModel {
 		auxDeleteFromFile(projectInWorkspace, projectModel, cam.getID(), CONTEXT_ASSERTION_NODE_NAME);
 		
 		return projects.get(projectName).removeAssertions(cam);
+	}
+	
+	public boolean removeEntityDescriptionfromProjectModel(String projectName, EntityDescriptionModel edm) {
+		IWorkspace workspace = ResourcesPlugin.getWorkspace();
+		ProjectModel projectModel = getProjectModel(projectName);
+		IProject projectInWorkspace = workspace.getRoot().getProject(projectName);
+		auxDeleteFromFile(projectInWorkspace, projectModel, edm.getID(), ENTITY_DESCRIPTION_NODE_NAME);
+
+		return projects.get(projectName).removeEntityDescription(edm);
+	}
+	
+	public boolean removeAnnotationfromProjectModel(String projectName, ContextAnnotationModel ann) {
+		IWorkspace workspace = ResourcesPlugin.getWorkspace();
+		ProjectModel projectModel = getProjectModel(projectName);
+		IProject projectInWorkspace = workspace.getRoot().getProject(projectName);
+		auxDeleteFromFile(projectInWorkspace, projectModel, ann.getID(), CONTEXT_ANNOTATIONS_NODE_NAME);
+
+		return projects.get(projectName).removeAnnotation(ann);
 	}
 	
 	public void auxDeleteFromFile(IProject projectInWorkspace, ProjectModel projectModel, String modelID, String nodeName){
@@ -310,6 +330,57 @@ public class WorkspaceModel {
 			}
 		} else {
 			System.err.println("File does not have a ContextAssertions JsonNode");
+		}
+		
+		/*
+		 * This code populates the view and the model with the found ENTITY DESCRIPTIONS
+		 * from the rootNode
+		 */
+		nodeName = ENTITY_DESCRIPTION_NODE_NAME;
+		projectModel.getEntityDescriptions().clear();
+		if (rootNode.has(nodeName)) {
+			JsonNode entityDescriptions = rootNode.get(nodeName);
+			if (entityDescriptions.isArray() && entityDescriptions.size() > 0) {
+				for (JsonNode entityDescription : entityDescriptions) {
+					try {
+						/* Populate model with entity descriptions */
+						EntityDescriptionModel edm = mapper.treeToValue(entityDescription, EntityDescriptionModel.class);
+						projectModel.addEntityDescription(edm);
+					} catch (JsonProcessingException e) {
+						e.printStackTrace();
+					}
+				}
+			} else {
+				System.err.println("EntityDescriptions JsonNode has no entity descriptions");
+			}
+		} else {
+			System.err.println("File does not have a EntityDescriptions JsonNode");
+		}
+		
+		
+		/*
+		 * This code populates the view and the model with the found ANNOTATIONS
+		 * from the rootNode
+		 */
+		nodeName = CONTEXT_ANNOTATIONS_NODE_NAME;
+		projectModel.getAnnotations().clear();
+		if (rootNode.has(nodeName)) {
+			JsonNode annotations = rootNode.get(nodeName);
+			if (annotations.isArray() && annotations.size() > 0) {
+				for (JsonNode annotation : annotations) {
+					try {
+						/* Populate model with annotatios */
+						ContextAnnotationModel ann = mapper.treeToValue(annotation, ContextAnnotationModel.class);
+						projectModel.addAnnotation(ann);
+					} catch (JsonProcessingException e) {
+						e.printStackTrace();
+					}
+				}
+			} else {
+				System.err.println("ContextAnnotations JsonNode has no annotations");
+			}
+		} else {
+			System.err.println("File does not have a ContextAnnotations JsonNode");
 		}
 	}
 
