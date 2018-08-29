@@ -1,15 +1,11 @@
 package org.aimas.consert.ide.model;
 
-import java.io.ByteArrayInputStream;
 import java.io.File;
-import java.io.InputStream;
-import java.util.Optional;
 
-import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IFolder;
-import org.eclipse.core.resources.IResource;
 import org.semanticweb.owlapi.apibinding.OWLManager;
-import org.semanticweb.owlapi.model.AddAxiom; 
+import org.semanticweb.owlapi.formats.TurtleDocumentFormat;
+import org.semanticweb.owlapi.model.AddAxiom;
 import org.semanticweb.owlapi.model.IRI;
 import org.semanticweb.owlapi.model.OWLClass;
 import org.semanticweb.owlapi.model.OWLClassExpression;
@@ -17,28 +13,26 @@ import org.semanticweb.owlapi.model.OWLDataFactory;
 import org.semanticweb.owlapi.model.OWLDataProperty;
 import org.semanticweb.owlapi.model.OWLDataRange;
 import org.semanticweb.owlapi.model.OWLDatatype;
-import org.semanticweb.owlapi.model.OWLFunctionalDataPropertyAxiom;
 import org.semanticweb.owlapi.model.OWLLiteral;
 import org.semanticweb.owlapi.model.OWLOntology;
-import org.semanticweb.owlapi.model.OWLOntologyID;
+import org.semanticweb.owlapi.model.OWLOntologyCreationException;
 import org.semanticweb.owlapi.model.OWLOntologyManager;
+import org.semanticweb.owlapi.model.OWLOntologyStorageException;
 import org.semanticweb.owlapi.model.OWLSubClassOfAxiom;
-import org.semanticweb.owlapi.model.SetOntologyID;
+import org.semanticweb.owlapi.rdf.turtle.renderer.TurtleStorer;
 import org.semanticweb.owlapi.util.SimpleIRIMapper;
 import org.semanticweb.owlapi.vocab.OWLFacet;
 
 public class POC {
+	private static OWLOntologyManager manager = OWLManager.createOWLOntologyManager();
 
-	public POC() {
-		// TODO Auto-generated constructor stub
-	}
-	
-	  
-	public static void createAndSaveOntology(File OWLfile) throws Exception{
-        OWLOntologyManager manager = OWLManager.createOWLOntologyManager();
+	public static void createAndSaveOntology(IFolder folder)
+			throws OWLOntologyCreationException, OWLOntologyStorageException {
+		File OWLfile = folder.getFile("consert.owl").getLocation().toFile();
+
         String base = "http://org.semanticweb.datarangeexample";
         IRI ontologyIRI = IRI.create(base);
-        OWLOntology ontology = manager.createOntology(ontologyIRI);
+		OWLOntology ontology = manager.createOntology(ontologyIRI);
         // Create a document IRI which can be resolved to point to where our
         // ontology will be saved.
         IRI documentIRI = IRI.create(OWLfile);
@@ -75,6 +69,14 @@ public class POC {
         // Add our axiom to the ontology
         manager.applyChange(new AddAxiom(ontology, ax));
         manager.saveOntology(ontology, IRI.create(OWLfile.toURI()));
+        
+		saveOntologyInTurtle(folder, ontology);
+	}
+
+	private static void saveOntologyInTurtle(IFolder folder, OWLOntology ontology) throws OWLOntologyStorageException {
+		File turtleFile = folder.getFile("consert.ttl").getLocation().toFile();
+		TurtleStorer storer = new TurtleStorer();
+		storer.storeOntology(ontology, IRI.create(turtleFile.toURI()), new TurtleDocumentFormat());
 	}
 	
 }

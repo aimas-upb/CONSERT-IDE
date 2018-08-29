@@ -12,6 +12,8 @@ import org.eclipse.core.resources.IFolder;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.IPath;
+import org.semanticweb.owlapi.model.OWLOntologyCreationException;
+import org.semanticweb.owlapi.model.OWLOntologyStorageException;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -20,20 +22,22 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 public class ProjectModel extends Observable {
 	private IPath path;
 	private JsonNode rootNode;
-	public String projectName;
+	private String projectName;
 	private List<ContextEntityModel> entities;
 	private List<ContextAssertionModel> assertions;
-	private static ObjectMapper mapper;
 
-	static {
-		mapper = new ObjectMapper();
-	}
+	private static ObjectMapper mapper = new ObjectMapper();
+	private final static String BASE_URI = "org/aimas/consert/ide";
 
 	public ProjectModel(String projectName) {
 		this.addObserver(TreeViewerNew.getInstance());
 		this.projectName = projectName;
 		entities = new ArrayList<ContextEntityModel>();
 		assertions = new ArrayList<ContextAssertionModel>();
+	}
+
+	public String getBaseURI() {
+		return BASE_URI + ResourcesPlugin.getWorkspace().getRoot().getProject(projectName).getFullPath().toString();
 	}
 
 	public String getName() {
@@ -192,13 +196,9 @@ public class ProjectModel extends Observable {
 			return false;
 		}
 		try {
-			File OWLfile = folder.getFile("consert.owl").getLocation().toFile();
-			POC.createAndSaveOntology(OWLfile);
-		}catch(IOException e) {
-			e.printStackTrace();
-		} catch (Exception e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			POC.createAndSaveOntology(folder);
+		} catch (OWLOntologyCreationException | OWLOntologyStorageException e) {
+			System.err.println("Ontology could not be created or stored.");
 		}
 		
 		return true;
