@@ -2,6 +2,7 @@ package org.aimas.consert.ide.model;
 
 import java.io.File;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 import org.semanticweb.owlapi.apibinding.OWLManager;
@@ -96,6 +97,9 @@ public class ContextEntityModel {
 	public String toString() {
 		return "{\"name\":\"" + getName() + "\",\"comment\":\"" + getComment() + "\"}";
 	}
+	
+	
+	
 	
 	public void saveEntityOnDisk() throws OWLOntologyStorageException, OWLOntologyCreationException {
 		OWLOntologyManager manager = OWLManager.createOWLOntologyManager();
