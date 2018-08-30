@@ -46,6 +46,7 @@ public class ProjectModel extends Observable {
 	private List<ContextAnnotationModel> annotations = new ArrayList<>();
 	private static final ObjectMapper mapper = new ObjectMapper();
 	private static final String BASE_URI = "http://example.org/org/aimas/consert/ide/";
+	private OWLOntologyModel OWLModel;
 
 	public ProjectModel(String name) {
 		addObserver(TreeViewerNew.getInstance());
@@ -159,6 +160,20 @@ public class ProjectModel extends Observable {
 	public boolean removeAnnotation(ContextAnnotationModel ann) {
 		return annotations.remove(ann);
 	}
+	
+	public void initializeOWLModel(File OWLfile, File TTLfile) {
+		OWLModel = new OWLOntologyModel(OWLfile, TTLfile, getBaseURI());
+		//TODO decomenteaza dupa ce este implementata metoda
+//		OWLModel.loadOWLOntologyModelFromFile();
+	}
+	
+	public void syncOWLModelWithProjectModel() {
+		OWLModel.syncOWLModelWithProjectModel(entities, assertions);
+	}
+	
+	public void saveOWLModelToDisk() {
+		OWLModel.saveModelOnDisk();
+	}
 
 	public void saveJsonOnDisk() {
 		updateEntitiesJsonNode();
@@ -167,17 +182,17 @@ public class ProjectModel extends Observable {
 		updateAnnotationsJsonNode();
 		writeJsonOnDisk();
 		
-		IProject project = ResourcesPlugin.getWorkspace().getRoot().getProject(name);
-		IFolder folder = project.getFolder("origin");
-		if (!project.exists()) {
-			System.out.println("project does not exist");
-		}
-		
-		try (FileInputStream in = new FileInputStream(folder.getFile("consert.owl").getLocation().toFile())) {
-			updateEntitiesOntology(in);
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
+//		IProject project = ResourcesPlugin.getWorkspace().getRoot().getProject(name);
+//		IFolder folder = project.getFolder("origin");
+//		if (!project.exists()) {
+//			System.out.println("project does not exist");
+//		}
+//		
+//		try (FileInputStream in = new FileInputStream(folder.getFile("consert.owl").getLocation().toFile())) {
+//			updateEntitiesOntology(in);
+//		} catch (IOException e) {
+//			e.printStackTrace();
+//		}
 	}
 
 	/** Write the new Json into File on disk, replacing the old one. */
@@ -374,13 +389,7 @@ public class ProjectModel extends Observable {
 			return false;
 		}
 		
-		File OWLfile = folder.getFile("consert.owl").getLocation().toFile();
-		File TTLfile = folder.getFile("consert.ttl").getLocation().toFile();
-		
-		//Save OWL and TTL
-		if (model instanceof ContextEntityModel) {
-			saveContextEntitiesOnDisk(OWLfile, TTLfile, (ContextEntityModel) model);
-		}
+		//TODO maybe save OWLModel on disk
 		
 		//Save JSON
 		saveNewModelJSONOnDisk(folder,model);
@@ -391,16 +400,6 @@ public class ProjectModel extends Observable {
 		return true;
 	}
 	
-	public void saveContextEntitiesOnDisk(File OWLfile, File TTLfile, ContextEntityModel model) {
-		try {
-			model.setbaseURI(getBaseURI());
-			model.setOWLfile(OWLfile);
-			model.setTTLfile(TTLfile);
-			model.saveEntityOnDisk();
-		} catch (OWLOntologyCreationException | OWLOntologyStorageException e) {
-			System.err.println("Ontology could not be created or stored.");
- 		}
-	}
 	
 	/**
 	 * Save all entity descriptions since the formView does not track them individually, so
@@ -425,5 +424,6 @@ public class ProjectModel extends Observable {
 		}
 		System.out.println("Updated new annotations into Json: " + getAnnotations());
 	}
+	
 
 }

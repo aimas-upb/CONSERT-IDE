@@ -213,7 +213,7 @@ public class TreeViewerNew extends ViewPart implements Observer {
 	 * Method which is called to add a NEW, empty Project to the Tree View
 	 */
 	public void addEmptyProjectToTreeViewer(String projectName, WorkspaceModel workspaceModel){
-Map<String, ProjectModel> projects = workspaceModel.getProjectModels();
+		Map<String, ProjectModel> projects = workspaceModel.getProjectModels();
 		
 		ProjectModel project = projects.get(projectName);
 		
@@ -419,6 +419,7 @@ Map<String, ProjectModel> projects = workspaceModel.getProjectModels();
 		addNewEntityDescriptionActionToMenu(menuMgr);
 		addNewContextAnnotationActionToMenu(menuMgr);
 		addDeleteActionToMenu(menuMgr);
+		addSaveOntologyToMenu(menuMgr);
 	}
 
 	/**
@@ -571,6 +572,27 @@ Map<String, ProjectModel> projects = workspaceModel.getProjectModels();
 		};
 		refresh.setText("Refresh");
 		menuMgr.add(refresh);
+	}
+	
+	private void addSaveOntologyToMenu(MenuManager menuMgr) {
+		Action saveOntology = new Action() {
+			public void run() {
+				ISelection selection = viewer.getSelection();
+				String projectName = WorkspaceModel.getInstance()
+						.getCurrentActiveProject((IStructuredSelection) selection);
+				Map<String, ProjectModel> projects = WorkspaceModel.getInstance().getProjectModels();
+				
+				ProjectModel project = projects.get(projectName);
+				project.syncOWLModelWithProjectModel();
+				project.saveOWLModelToDisk();
+				
+				initialize();
+				viewer.refresh();
+			
+			}
+		};
+		saveOntology.setText("SaveOntologyToFile");
+		menuMgr.add(saveOntology);
 	}
 
 	public void setFocus() {
