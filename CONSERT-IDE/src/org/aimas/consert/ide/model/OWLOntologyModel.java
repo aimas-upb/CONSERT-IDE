@@ -53,15 +53,37 @@ public class OWLOntologyModel {
     private HashMap<String,List<OWLAxiom>> allAnnotationAxiomLHash;
     
     
-    public OWLOntologyModel(){
+    public OWLOntologyModel(File OWLfile, File TTLfile, String baseURI){
+    	this.OWLfile = OWLfile;
+    	this.TTLfile = TTLfile;
+    	this.baseURI = baseURI;
     	manager = OWLManager.createOWLOntologyManager();
         ontologyIRI = IRI.create(baseURI);
         df = manager.getOWLDataFactory();
 
     	pm = new DefaultPrefixManager();
 		pm.setDefaultPrefix(ontologyIRI + "#");
-		pm.setPrefix("core:", "http://pervasive.semanticweb.org/ont/2017/07/consert/core#");
+		pm.setPrefix("core:", baseURI);
+		
+		allEntityAxiomHash = new  HashMap<String,List<OWLAxiom>>();
+		allAssertionAxiomHash = new HashMap<String,List<OWLAxiom>>();
+		allEntityDescriptionAxiomHash = new HashMap<String,List<OWLAxiom>>();
+		allAnnotationAxiomLHash = new HashMap<String,List<OWLAxiom>>();
     }
+    
+    //TODO Add support for all types of context elements
+    public void syncOWLModelWithProjectModel(List<ContextEntityModel> entities, List<ContextAssertionModel> assertions) {
+    	for (ContextEntityModel entity : entities) {
+    		updateEntitiesOWLModel(entity);
+    	}
+    	
+    	for (ContextAssertionModel assertion : assertions) {
+    		System.out.println("Enter first");
+    		updateAssertionsOWLModel(assertion);
+    	}
+    	
+    }
+    
     
     public void updateEntitiesOWLModel(ContextEntityModel cem) {
     	//The OWL Model already contains the Entity
@@ -98,6 +120,24 @@ public class OWLOntologyModel {
     	
     }
     
+    public void updateAssertionsOWLModel(ContextAssertionModel cam) {
+    	//The OWL Model already contains the Assertion
+    	//We must update the axioms if necessary
+    	if (allAssertionAxiomHash.containsKey(cam.getName())) {
+    		List<OWLAxiom> assertionAxiomList = allAssertionAxiomHash.get(cam.getName());
+    		
+    		//TODO
+    		
+    	} else {
+    		System.out.println("Enter second");
+    		//The OWL Model does not contains the Assertion
+        	//We must create another entry in the hash and add the list of axioms to the hash
+    		List<OWLAxiom> assertionAxiomList = createAssertionOWLModel(cam);
+    		System.out.println(assertionAxiomList.size());
+    		allAssertionAxiomHash.put(cam.getName(), assertionAxiomList);
+    	}
+    }
+    
     /**
      * Method used to save OWL model on disk
      */
@@ -130,10 +170,10 @@ public class OWLOntologyModel {
     	  */
     	 
     	 
-    	 Iterator itAssertions = allEntityAxiomHash.entrySet().iterator();
-	 	    while (itEntities.hasNext()) {
+    	 Iterator itAssertions = allAssertionAxiomHash.entrySet().iterator();
+	 	    while (itAssertions.hasNext()) {
 	 	        Map.Entry<String, List<OWLAxiom>> pair = (Map.Entry)itAssertions.next();
-	 	        
+	 	       System.out.println("Enter third");
 	 	        List<OWLAxiom> assertionAxiomList = pair.getValue();
 	 	        for(OWLAxiom assertionAxiom : assertionAxiomList) {
 	 	    		 manager.applyChange(new AddAxiom(ontology, assertionAxiom));
@@ -144,7 +184,7 @@ public class OWLOntologyModel {
     	  * Add Entity Description
     	  */
     	 
-    	 Iterator itEntityDescription = allEntityAxiomHash.entrySet().iterator();
+    	 Iterator itEntityDescription = allEntityDescriptionAxiomHash.entrySet().iterator();
 	 	    while (itEntityDescription.hasNext()) {
 	 	        Map.Entry<String, List<OWLAxiom>> pair = (Map.Entry)itEntityDescription.next();
 	 	        
@@ -158,7 +198,7 @@ public class OWLOntologyModel {
     	  * Add Annotations
     	  */
     	 
-    	 Iterator itAnnotations = allEntityAxiomHash.entrySet().iterator();
+    	 Iterator itAnnotations = allAnnotationAxiomLHash.entrySet().iterator();
 	 	    while (itAnnotations.hasNext()) {
 	 	        Map.Entry<String, List<OWLAxiom>> pair = (Map.Entry)itAnnotations.next();
 	 	        
@@ -195,21 +235,24 @@ public class OWLOntologyModel {
 		String entityName = ":" + cem.getName();
         
         OWLClass newEntity = df.getOWLClass(entityName, pm);
-        OWLAxiom a1 = df.getOWLSubClassOfAxiom(newEntity, OWLUtils.contextEntity);
+      //TODO delete line and replace with commented line
+        OWLClass contextEntity = df.getOWLClass(IRI.create(ontologyIRI + "ContextEntity")); 
+        OWLAxiom a1 = df.getOWLSubClassOfAxiom(newEntity, contextEntity);
+//        OWLAxiom a1 = df.getOWLSubClassOfAxiom(newEntity, OWLUtils.contextEntity); 
         entityAxiomList.add(a1);
        
         OWLAnnotation labelAnnotation = df.getOWLAnnotation(
 				df.getRDFSLabel(),
 				df.getOWLLiteral(cem.getName()));
 
-        OWLAxiom a2 = df.getOWLAnnotationAssertionAxiom(ontologyIRI, labelAnnotation);
+        OWLAxiom a2 = df.getOWLAnnotationAssertionAxiom(newEntity.getIRI(), labelAnnotation);
         entityAxiomList.add(a2);
         
         OWLAnnotation commentAnnotation = df.getOWLAnnotation(
 				df.getRDFSComment(),
 				df.getOWLLiteral(cem.getComment()));
 
-		OWLAxiom a3 = df.getOWLAnnotationAssertionAxiom(ontologyIRI, commentAnnotation);
+		OWLAxiom a3 = df.getOWLAnnotationAssertionAxiom(newEntity.getIRI(), commentAnnotation);
 		entityAxiomList.add(a3);
 
 		
@@ -221,14 +264,17 @@ public class OWLOntologyModel {
 		String assertionName = ":" + cam.getName();
         
         OWLClass newAssertion = df.getOWLClass(assertionName, pm);
-        OWLAxiom a1 = df.getOWLSubClassOfAxiom(newAssertion, OWLUtils.binaryContextAssertion);
+      //TODO delete line and replace with commented line
+        OWLClass contextAssertion = df.getOWLClass(IRI.create(ontologyIRI + "ContextAssertion")); 
+        OWLAxiom a1 = df.getOWLSubClassOfAxiom(newAssertion, contextAssertion);
+//        OWLAxiom a1 = df.getOWLSubClassOfAxiom(newAssertion, OWLUtils.binaryContextAssertion);
         assertionAxiomList.add(a1);
         
         OWLAnnotation commentAnnotation = df.getOWLAnnotation(
 				df.getRDFSComment(),
 				df.getOWLLiteral(cam.getComment()));
 
-		OWLAxiom a2 = df.getOWLAnnotationAssertionAxiom(ontologyIRI, commentAnnotation);
+		OWLAxiom a2 = df.getOWLAnnotationAssertionAxiom(newAssertion.getIRI(), commentAnnotation);
 		assertionAxiomList.add(a2);
 		
 		OWLObjectProperty hasObjectEntity = df.getOWLObjectProperty(IRI.create(baseURI + "#assertionObject"));
@@ -240,13 +286,20 @@ public class OWLOntologyModel {
 		OWLAxiom a3 = df.getOWLSubClassOfAxiom(newAssertion, assertionObject);
 		assertionAxiomList.add(a3);
        
-		OWLObjectProperty hasSubjectEntity = df.getOWLObjectProperty(IRI.create(baseURI + "#assertionObject"));
-		OWLClass entitySubject = df.getOWLClass(IRI.create(baseURI + cam.getObjectEntity().getName()));
+		OWLObjectProperty hasSubjectEntity = df.getOWLObjectProperty(IRI.create(baseURI + "#assertionSubject"));
+		OWLClass entitySubject = df.getOWLClass(IRI.create(baseURI + cam.getSubjectEntity().getName()));
         // Now create a restriction to describe the class of assertions that
         // have an Object Entity of type entitySubject
         OWLClassExpression assertionSubject = df.getOWLObjectSomeValuesFrom(hasSubjectEntity, entitySubject);
 		OWLAxiom a4 = df.getOWLSubClassOfAxiom(newAssertion, assertionSubject);
 		assertionAxiomList.add(a4);
+		
+		OWLObjectProperty hasAssertionAcquisitionType  = df.getOWLObjectProperty(IRI.create(baseURI + "#assertionAcquisitionType "));
+		OWLClass acquisitionType = df.getOWLClass(IRI.create(baseURI + cam.getAcquisitionType()));
+        // Now create a restriction for assertionAcquisitionType
+        OWLClassExpression assertionAcquisitionType = df.getOWLObjectSomeValuesFrom(hasAssertionAcquisitionType, acquisitionType);
+		OWLAxiom a5 = df.getOWLSubClassOfAxiom(newAssertion, assertionAcquisitionType);
+		assertionAxiomList.add(a5);
 		
 		return assertionAxiomList;
 	}

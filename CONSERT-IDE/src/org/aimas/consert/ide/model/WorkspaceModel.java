@@ -2,6 +2,7 @@ package org.aimas.consert.ide.model;
 
 
 import java.io.ByteArrayInputStream;
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.HashMap;
@@ -217,7 +218,12 @@ public class WorkspaceModel {
 							if (fileResources[k] instanceof IFile && fileResources[k].getName().equals("consert.txt")) {
 								TextFileDocumentProvider provider = new TextFileDocumentProvider();
 								IDocument document = provider.getDocument(fileResources[k]);
-								populateProjectModel(projects.get(projectName), document, (IFile) fileResources[k]);
+								ProjectModel pm = projects.get(projectName);
+								populateProjectModel(pm, document, (IFile) fileResources[k]);
+								
+								File OWLfile = resource.getFile("consert.owl").getLocation().toFile();
+								File TTLfile = resource.getFile("consert.ttl").getLocation().toFile();
+								pm.initializeOWLModel(OWLfile,TTLfile);
 							}
 						}
 
