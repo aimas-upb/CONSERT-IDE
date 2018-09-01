@@ -62,7 +62,7 @@ public class ContextEntityWizard extends Wizard implements INewWizard {
 
 		/* finish means adding in the consert.txt file the required fields */
 		ProjectModel projectModel = WorkspaceModel.getInstance().getProjectModel(projectName);
-		projectModel.saveNewModelOntologyOnDisk(model);
+		projectModel.saveNewModelJSONOnDisk(model);
 
 		openEditorOnFinish(projectModel, model);
 		return true;

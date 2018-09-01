@@ -41,6 +41,30 @@ public class AnnotationFormView extends FormPage implements IResourceChangeListe
 		isDirty = false;
 		ResourcesPlugin.getWorkspace().addResourceChangeListener(this);
 	}
+	
+	public void createLabelAndText(String labelName, String textName) {
+		Label nameLabel = new Label(form.getBody(), SWT.NONE);
+		nameLabel.setText(labelName);
+		Text nameText = new Text(form.getBody(), SWT.BORDER | SWT.SINGLE);
+		if (textName == null) {
+			textName = "";
+		}
+		nameText.setText(textName);
+		nameText.setLayoutData(new GridData(180, 30));
+		nameText.addModifyListener(new ModifyListener() {
+
+			@Override
+			public void modifyText(ModifyEvent e) {
+				isDirty = true;
+				firePropertyChange(IEditorPart.PROP_DIRTY);
+				editor.editorDirtyStateChanged();
+
+				if (labelName.equals(" Name: ")) {
+					projectModel.getAnnotationsByName(ann.getName()).setName(nameText.getText());
+				} 
+			}
+		});
+	}
 
 	
 	private void createLabelAndComboAnnotationType(String string, String annotationTypeText) {
@@ -149,6 +173,10 @@ public class AnnotationFormView extends FormPage implements IResourceChangeListe
 
 		Label nameLabel = new Label(form.getBody(), SWT.NONE);
 		nameLabel.setText(" ContextAnnotation: ");
+		new Label(form.getBody(), SWT.NONE);
+		new Label(form.getBody(), SWT.NONE);
+		
+		createLabelAndText(" Name: ", ann.getName());
 		new Label(form.getBody(), SWT.NONE);
 
 		createLabelAndComboAnnotationType(" Annotation Type: ", ann.getAnnotationType().toString());

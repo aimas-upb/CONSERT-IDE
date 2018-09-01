@@ -56,9 +56,7 @@ public class ContextAnnotationModel {
 	public void setName(String name) {
 		this.name = name;
 	}
-
-
-
+	
 	public String toString() {
 		return "{\"name\":\"" + getName() + "\",\"Annotation Type\":\"" + getAnnotationType() + "\",\"Annotation Category\":\"" + getAnnotationCategory() + "}";
 	}

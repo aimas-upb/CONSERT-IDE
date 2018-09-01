@@ -40,7 +40,7 @@ public class EntityDescriptionTextEditor extends JsonTextEditor {
 		ProjectModel projectModel = eiw.getProjectModel();
 		EntityDescriptionModel oldCem = (EntityDescriptionModel) eiw.getModel();
 		projectModel.getEntityDescriptionByName(oldCem.getName()).setName(newCem.getName());
-		projectModel.getEntityDescriptionByName(oldCem.getName()).setObject(newCem.getObject());
+		projectModel.getEntityDescriptionByName(oldCem.getName()).setObjectEntity(newCem.getObjectEntity());
 		projectModel.getEntityDescriptionByName(oldCem.getName()).setSubjectEntity(newCem.getSubjectEntity());
 	}
 

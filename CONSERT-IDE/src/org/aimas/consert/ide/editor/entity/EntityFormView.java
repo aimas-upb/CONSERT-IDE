@@ -12,6 +12,7 @@ import org.eclipse.swt.events.ModifyEvent;
 import org.eclipse.swt.events.ModifyListener;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
+import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Text;
 import org.eclipse.ui.IEditorPart;
@@ -19,6 +20,7 @@ import org.eclipse.ui.forms.IManagedForm;
 import org.eclipse.ui.forms.editor.FormPage;
 import org.eclipse.ui.forms.widgets.FormToolkit;
 import org.eclipse.ui.forms.widgets.ScrolledForm;
+import org.eclipse.ui.forms.widgets.Section;
 
 public class EntityFormView extends FormPage implements IResourceChangeListener {
 	private EntityMultiPageEditor editor;
@@ -83,8 +85,8 @@ public class EntityFormView extends FormPage implements IResourceChangeListener 
 		EditorInputWrapper eiw = (EditorInputWrapper) getEditorInput();
 		cem = (ContextEntityModel) eiw.getModel();
 		projectModel = eiw.getProjectModel();
-		form.setText(cem.getName());
 		GridLayout layout = new GridLayout();
+		form.setText(cem.getName());
 		form.getBody().setLayout(layout);
 		layout.numColumns = 2;
 

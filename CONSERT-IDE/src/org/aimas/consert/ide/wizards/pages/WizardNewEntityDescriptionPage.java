@@ -29,6 +29,7 @@ public class WizardNewEntityDescriptionPage extends WizardPage {
 	private Label labelName;
 	private Label labelObject;
 	private Label labelSubjectEntityName;
+	private Combo comboObjectEntityName;
 	private Combo comboSubjectEntityName;
 	private Composite container;
 	private String projectName;
@@ -96,25 +97,21 @@ public class WizardNewEntityDescriptionPage extends WizardPage {
 
 		// comment of the context entity
 		labelObject = new Label(container, SWT.NONE);
-		labelObject.setText("Object");
+		labelObject.setText("Object Entity Name");
 
-		textObject = new Text(container, SWT.BORDER | SWT.SINGLE);
-		textObject.setText("");
-		textObject.addKeyListener(new KeyListener() {
+		comboObjectEntityName = new Combo(container, SWT.READ_ONLY);
+		String items3[] = Utils.getInstance().getAllEntitiesStringNames(allEntities);
+		comboObjectEntityName.setItems(items3);
+		comboObjectEntityName.addSelectionListener(new SelectionListener() {
 
 			@Override
-			public void keyPressed(KeyEvent e) {
+			public void widgetSelected(SelectionEvent e) {
 			}
 
 			@Override
-			public void keyReleased(KeyEvent e) {
-				if (!textObject.getText().isEmpty()) {
-					setPageComplete(true);
-				}
+			public void widgetDefaultSelected(SelectionEvent e) {
 			}
-
 		});
-		textObject.setLayoutData(gd);
 		
 		// SubjectEntityName of the entity description
 		labelSubjectEntityName = new Label(container, SWT.NONE);
@@ -133,6 +130,7 @@ public class WizardNewEntityDescriptionPage extends WizardPage {
 			public void widgetDefaultSelected(SelectionEvent e) {
 			}
 		});
+		
 
 		setControl(container);
 		setPageComplete(false);
@@ -155,6 +153,17 @@ public class WizardNewEntityDescriptionPage extends WizardPage {
 		String subjectEntityName = comboSubjectEntityName.getItem(index == -1 ? 0 : index);
 		for (ContextEntityModel cem : allEntities) {
 			if (cem.getName().equals(subjectEntityName)) {
+				return cem;
+			}
+		}
+		return null;
+	}
+	
+	public ContextEntityModel getObjectEntity() {
+		int index = comboSubjectEntityName.getSelectionIndex();
+		String objectEntityName = comboObjectEntityName.getItem(index == -1 ? 0 : index);
+		for (ContextEntityModel cem : allEntities) {
+			if (cem.getName().equals(objectEntityName)) {
 				return cem;
 			}
 		}
