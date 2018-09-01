@@ -27,9 +27,9 @@ public class ContextEntityModel {
 	private String name;
 	private String comment;
 	private String ID;
-	private File OWLfile;
-	private File TTLfile; 
-	private String baseURI;
+//	private File OWLfile;
+//	private File TTLfile; 
+//	private String baseURI;
 	
 	public ContextEntityModel() {
 	}
@@ -53,17 +53,17 @@ public class ContextEntityModel {
 		return this.ID;
 	}
 	
-	public File getOWLfile(){
-		return this.OWLfile;
-	}
-	
-	public File getTTLfile(){
-		return this.TTLfile;
-	}
-	
-	public String getbaseURI(){
-		return this.baseURI;
-	}
+//	public File getOWLfile(){
+//		return this.OWLfile;
+//	}
+//	
+//	public File getTTLfile(){
+//		return this.TTLfile;
+//	}
+//	
+//	public String getbaseURI(){
+//		return this.baseURI;
+//	}
 	
 	public String getName() {
 		return name;
@@ -81,17 +81,17 @@ public class ContextEntityModel {
 		this.comment = comment;
 	}
 	
-	public void setOWLfile(File OWLfile){
-		this.OWLfile = OWLfile;
-	}
-	
-	public void setTTLfile(File TTLfile){
-		this.TTLfile = TTLfile;
-	}
-	
-	public void setbaseURI(String baseURI){
-		this.baseURI = baseURI;
-	}
+//	public void setOWLfile(File OWLfile){
+//		this.OWLfile = OWLfile;
+//	}
+//	
+//	public void setTTLfile(File TTLfile){
+//		this.TTLfile = TTLfile;
+//	}
+//	
+//	public void setbaseURI(String baseURI){
+//		this.baseURI = baseURI;
+//	}
 
 	@Override
 	public String toString() {
@@ -102,72 +102,72 @@ public class ContextEntityModel {
 	
 	
 	public void saveEntityOnDisk() throws OWLOntologyStorageException, OWLOntologyCreationException {
-		OWLOntologyManager manager = OWLManager.createOWLOntologyManager();
-        IRI ontologyIRI = IRI.create(baseURI);
-
-		// OWLOntology ontology = manager.createOntology(ontologyIRI);
-		OWLOntology ontology = manager.loadOntologyFromOntologyDocument(OWLfile);
-        OWLDataFactory df = manager.getOWLDataFactory();
-        
-        
-      //Delete any comment annotations of existing ContextEntity before saving new data
-        OWLClass toBeRemoved = manager.getOWLDataFactory().getOWLClass(IRI.create(baseURI + "#" + getName()));
-        Set<OWLAxiom> axiomsToRemove = new HashSet<OWLAxiom>();
-        for (OWLAnnotation annotation : EntitySearcher.getAnnotations(toBeRemoved.getIRI(), ontology)) {
-      	  if (annotation.getValue() instanceof OWLLiteral) {
-      	    OWLLiteral val = (OWLLiteral) annotation.getValue();
-      	    IRI propIri = annotation.getProperty().getIRI();
-      	    String fragment = propIri.getFragment();
-      	    
-      	    if (fragment.equals("comment")) {
-      	    	OWLAxiom ax = df.getOWLAnnotationAssertionAxiom(toBeRemoved.getIRI(), annotation);
-      	    	axiomsToRemove.add(ax);
-      	    }
-      	  }
-        }
-        
-        System.out.println("Before: " + ontology.getAxiomCount());
-        manager.removeAxioms(ontology, axiomsToRemove);
-        System.out.println("After: " + ontology.getAxiomCount());
-      	    
-      	    
-
-        DefaultPrefixManager pm = new DefaultPrefixManager();
-		pm.setDefaultPrefix(ontologyIRI + "#");
-		pm.setPrefix("core:", "http://pervasive.semanticweb.org/ont/2017/07/consert/core#");
+//		OWLOntologyManager manager = OWLManager.createOWLOntologyManager();
+//        IRI ontologyIRI = IRI.create(baseURI);
+//
+//		// OWLOntology ontology = manager.createOntology(ontologyIRI);
+//		OWLOntology ontology = manager.loadOntologyFromOntologyDocument(OWLfile);
+//        OWLDataFactory df = manager.getOWLDataFactory();
+//        
+//        
+//      //Delete any comment annotations of existing ContextEntity before saving new data
+//        OWLClass toBeRemoved = manager.getOWLDataFactory().getOWLClass(IRI.create(baseURI + "#" + getName()));
+//        Set<OWLAxiom> axiomsToRemove = new HashSet<OWLAxiom>();
+//        for (OWLAnnotation annotation : EntitySearcher.getAnnotations(toBeRemoved.getIRI(), ontology)) {
+//      	  if (annotation.getValue() instanceof OWLLiteral) {
+//      	    OWLLiteral val = (OWLLiteral) annotation.getValue();
+//      	    IRI propIri = annotation.getProperty().getIRI();
+//      	    String fragment = propIri.getFragment();
+//      	    
+//      	    if (fragment.equals("comment")) {
+//      	    	OWLAxiom ax = df.getOWLAnnotationAssertionAxiom(toBeRemoved.getIRI(), annotation);
+//      	    	axiomsToRemove.add(ax);
+//      	    }
+//      	  }
+//        }
+//        
+//        System.out.println("Before: " + ontology.getAxiomCount());
+//        manager.removeAxioms(ontology, axiomsToRemove);
+//        System.out.println("After: " + ontology.getAxiomCount());
+//      	    
+//      	    
+//
+//        DefaultPrefixManager pm = new DefaultPrefixManager();
+//		pm.setDefaultPrefix(ontologyIRI + "#");
+//		pm.setPrefix("core:", "http://pervasive.semanticweb.org/ont/2017/07/consert/core#");
 //		 OWLImportsDeclaration coreImport =
 //		 factory.getOWLImportsDeclaration(coreIri);
 //		 manager.applyChange(new AddImport(ontology, coreImport));
 		
-		String entityName = ":" + getName();
-        
-        OWLClass newEntity = df.getOWLClass(entityName, pm);
-        OWLClass contextEntity = df.getOWLClass(IRI.create(ontologyIRI + "ContextEntity"));
-        
-//		OWLDeclarationAxiom declarationAxiom = df.getOWLDeclarationAxiom(newEntity);
-//        manager.addAxiom(ontology, declarationAxiom);
-        
-        manager.addAxiom(ontology, df.getOWLSubClassOfAxiom(newEntity, contextEntity));
-        
-        
-        OWLAnnotation commentAnnotation = df.getOWLAnnotation(
-        										df.getRDFSComment(),
-        										df.getOWLLiteral(this.getComment()));
-        
-        OWLAxiom ax = df.getOWLAnnotationAssertionAxiom(newEntity.getIRI(), commentAnnotation);
-  
-        manager.applyChange(new AddAxiom(ontology, ax));
-        
-        OWLAnnotation labelAnnotation = df.getOWLAnnotation(
-        									df.getRDFSLabel(),
-        									df.getOWLLiteral(this.getName()));
-        
-        OWLAxiom ax2 = df.getOWLAnnotationAssertionAxiom(newEntity.getIRI(), labelAnnotation);
-
-        manager.applyChange(new AddAxiom(ontology, ax2));
-        manager.saveOntology(ontology, IRI.create(OWLfile.toURI()));
-        
-        TurtleStorer storer = new TurtleStorer();
-        storer.storeOntology(ontology, IRI.create(TTLfile.toURI()), new TurtleDocumentFormat());
+//		String entityName = ":" + getName();
+//        
+//        OWLClass newEntity = df.getOWLClass(entityName, pm);
+//        OWLClass contextEntity = df.getOWLClass(IRI.create(ontologyIRI + "ContextEntity"));
+//        
+////		OWLDeclarationAxiom declarationAxiom = df.getOWLDeclarationAxiom(newEntity);
+////        manager.addAxiom(ontology, declarationAxiom);
+//        
+//        manager.addAxiom(ontology, df.getOWLSubClassOfAxiom(newEntity, contextEntity));
+//        
+//        
+//        OWLAnnotation commentAnnotation = df.getOWLAnnotation(
+//        										df.getRDFSComment(),
+//        										df.getOWLLiteral(this.getComment()));
+//        
+//        OWLAxiom ax = df.getOWLAnnotationAssertionAxiom(newEntity.getIRI(), commentAnnotation);
+//  
+//        manager.applyChange(new AddAxiom(ontology, ax));
+//        
+//        OWLAnnotation labelAnnotation = df.getOWLAnnotation(
+//        									df.getRDFSLabel(),
+//        									df.getOWLLiteral(this.getName()));
+//        
+//        OWLAxiom ax2 = df.getOWLAnnotationAssertionAxiom(newEntity.getIRI(), labelAnnotation);
+//
+//        manager.applyChange(new AddAxiom(ontology, ax2));
+//        manager.saveOntology(ontology, IRI.create(OWLfile.toURI()));
+//        
+//        TurtleStorer storer = new TurtleStorer();
+//        storer.storeOntology(ontology, IRI.create(TTLfile.toURI()), new TurtleDocumentFormat());
 	}
 }

@@ -14,22 +14,6 @@ import org.eclipse.core.resources.IFolder;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.IPath;
-import org.semanticweb.owlapi.apibinding.OWLManager;
-import org.semanticweb.owlapi.model.AxiomType;
-import org.semanticweb.owlapi.model.IRI;
-import org.semanticweb.owlapi.model.OWLAnnotation;
-import org.semanticweb.owlapi.model.OWLAnnotationAssertionAxiom;
-import org.semanticweb.owlapi.model.OWLClass;
-import org.semanticweb.owlapi.model.OWLDataFactory;
-import org.semanticweb.owlapi.model.OWLDeclarationAxiom;
-import org.semanticweb.owlapi.model.OWLEntity;
-import org.semanticweb.owlapi.model.OWLLiteral;
-import org.semanticweb.owlapi.model.OWLOntology;
-import org.semanticweb.owlapi.model.OWLOntologyCreationException;
-import org.semanticweb.owlapi.model.OWLOntologyManager;
-import org.semanticweb.owlapi.model.OWLOntologyStorageException;
-import org.semanticweb.owlapi.model.OWLSubClassOfAxiom;
-import org.semanticweb.owlapi.search.EntitySearcher;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -181,18 +165,6 @@ public class ProjectModel extends Observable {
 		updateEntityDescriptionsJsonNode();
 		updateAnnotationsJsonNode();
 		writeJsonOnDisk();
-		
-//		IProject project = ResourcesPlugin.getWorkspace().getRoot().getProject(name);
-//		IFolder folder = project.getFolder("origin");
-//		if (!project.exists()) {
-//			System.out.println("project does not exist");
-//		}
-//		
-//		try (FileInputStream in = new FileInputStream(folder.getFile("consert.owl").getLocation().toFile())) {
-//			updateEntitiesOntology(in);
-//		} catch (IOException e) {
-//			e.printStackTrace();
-//		}
 	}
 
 	/** Write the new Json into File on disk, replacing the old one. */
@@ -222,107 +194,6 @@ public class ProjectModel extends Observable {
 		System.out.println("Updated new entities into Json: " + getEntities());
 	}
 	
-	/**
-	 * Save all entities in OWL and TTL
-	 * @throws IOException 
-	 */
-	
-	public void updateEntitiesOntology(FileInputStream testFile) {
-
-		OWLOntologyManager manager = OWLManager.createOWLOntologyManager();
-		
-		try (InputStream inStream = testFile) {
-			OWLOntology ontology = manager.loadOntologyFromOntologyDocument(inStream);
-			OWLDataFactory df = manager.getOWLDataFactory();
-			
-//			for (OWLClass cls : ontology.getClassesInSignature()) {
-//			    for (OWLAnnotationAssertionAxiom annAx : EntitySearcher.getAnnotationAssertionAxioms(cls.getIRI(), ontology)) {
-//			    		System.out.println(annAx);
-//			        }
-//			}
-			
-			// Don't  load from the File - as it will make URIs absolute 
-			// when loading from RDF/XML (fine from Turtle..)
-//			for (OWLSubClassOfAxiom subClasse : ontology.getAxioms(AxiomType.SUBCLASS_OF)) {
-//				if (subClasse.getSuperClass() instanceof OWLClass 
-//						&& subClasse.getSubClass() instanceof OWLClass) {
-//					System.out.println("UNU");
-//			        System.out.println(subClasse.getSubClass() + " extends " + subClasse.getSuperClass());
-//			     
-//			        OWLClass contextEntity = df.getOWLClass(IRI.create("http://example.org/org/aimas/consert/ide/brand/" + "ContextEntity"));
-//			        System.out.println(contextEntity);
-//			        Set<OWLSubClassOfAxiom> superClasses = ontology.getSubClassAxiomsForSuperClass(contextEntity);
-//			        Set<OWLClass> classes = ontology.getClassesInSignature();
-//			        System.out.println(classes);
-//			        
-//			        
-//			        for(OWLClass cls: classes) {
-//			        	
-//			        	for (OWLAnnotation annotation : EntitySearcher.getAnnotations(cls.getIRI(), ontology)) {
-//			        	  if (annotation.getValue() instanceof OWLLiteral) {
-//			        	    OWLLiteral val = (OWLLiteral) annotation.getValue();
-//			        	    IRI propIri = annotation.getProperty().getIRI();
-//			        	    String fragment = propIri.getFragment();
-//			        	    
-//			        	    if (fragment.equals("comment")) {
-//			        	    	// Get the annotations on the class that use the comment property (rdfs:comment)
-//			        	    	System.out.println(cls + " commented " + val.getLiteral());
-//			        	    }else{
-//			        	    	// Get the annotations on the class that use the label property (rdfs:label)
-//			        	    	System.out.println(cls + " labelled " + val.getLiteral());
-//			        	    }		
-//			        	      
-//			        	   }
-//			        	}
-//			        }
-//			    }    
-//			}   
-			
-			//TRY to load only class which already exists in order to modify it
-			//Get your class of interest
-			for(ContextEntityModel entityModel: getEntities()){
-				//String entityName = "#" + entityModel.getName();
-		
-				Set<OWLClass> classes = ontology.getClassesInSignature();
-		      
-		        for(OWLClass cls: classes) {
-		        	System.out.println("fragm: " + cls.getIRI().getFragment());
-		        	if(cls.getIRI().getFragment().equals(entityModel.getName())){
-						for (OWLAnnotation annotation : EntitySearcher.getAnnotations(cls.getIRI(), ontology)) {
-				        	  if (annotation.getValue() instanceof OWLLiteral) {
-				        	    OWLLiteral val = (OWLLiteral) annotation.getValue();
-				        	    IRI propIri = annotation.getProperty().getIRI();
-				        	    String fragment = propIri.getFragment();
-				        	    
-				        	    if (fragment.equals("comment")) {
-				        	    	// Get the annotations on the class that use the comment property (rdfs:comment)
-				        	    	System.out.println(cls + " commented " + val.getLiteral());
-				        	    	if(!val.getLiteral().equals(entityModel.getComment())){
-				        	    		entityModel.setComment(entityModel.getComment());
-				        	    		entityModel.saveEntityOnDisk();
-				        	    	}
-				        	    }else{
-				        	    	// Get the annotations on the class that use the label property (rdfs:label)
-				        	    	System.out.println(cls + " labelled " + val.getLiteral());
-				        	    	
-				        	    }		
-				        	      
-				        	 }
-						}
-		        	}
-		        }
-			}
-			
-			
-		} catch (OWLOntologyCreationException | IOException e) {
-			e.printStackTrace();
-		} catch (OWLOntologyStorageException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-		
-		System.out.println("Updated new entities into OWL and TTL: " + getEntities());
-	}
 
 	/** Saving all assertions as well. */
 	public void updateAssertionsJsonNode() {
@@ -381,15 +252,13 @@ public class ProjectModel extends Observable {
 		return true;
 	}
 	
-	public boolean saveNewModelOntologyOnDisk(Object model) {
+	public boolean saveNewModelJSONOnDisk(Object model) {
 		IProject project = ResourcesPlugin.getWorkspace().getRoot().getProject(name);
 		IFolder folder = project.getFolder("origin");
 		if (!project.exists()) {
 			System.out.println("project does not exist");
 			return false;
 		}
-		
-		//TODO maybe save OWLModel on disk
 		
 		//Save JSON
 		saveNewModelJSONOnDisk(folder,model);

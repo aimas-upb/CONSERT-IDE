@@ -193,9 +193,7 @@ public class FormView extends FormPage implements IResourceChangeListener {
 
 				if (labelName.equals(" Name: ")) {
 					projectModel.getEntityDescriptionByName(edm.getName()).setName(nameText.getText());
-				} else if (labelName.equals(" Object: ")) {
-					projectModel.getEntityDescriptionByName(edm.getName()).setObject(nameText.getText());
-				}
+				} 
 				
 			}
 		});
@@ -239,7 +237,7 @@ public class FormView extends FormPage implements IResourceChangeListener {
 	protected void createFormContent(IManagedForm managedForm) {
 		form = managedForm.getForm();
 		FormToolkit toolkit = managedForm.getToolkit();
-		form.setText(editor.getTextEditor().getEditorInput().getName());
+		form.setText("All Elements");
 		GridLayout layout = new GridLayout();
 		form.getBody().setLayout(layout);
 		layout.numColumns = 2;
@@ -293,7 +291,6 @@ public class FormView extends FormPage implements IResourceChangeListener {
 
 		for (EntityDescriptionModel edm : projectModel.getEntityDescriptions()) {
 			createLabelAndTextForEntityDescription(" Name: ", edm.getName(), edm);
-			createLabelAndTextForEntityDescription(" Object: ", edm.getObject(), edm);
 
 			Label entitiesPerAssertionLabel = new Label(form.getBody(), SWT.NONE);
 			entitiesPerAssertionLabel.setText(" ContextEntities: ");
@@ -302,6 +299,10 @@ public class FormView extends FormPage implements IResourceChangeListener {
 			ContextEntityModel subjectEntity = edm.getSubjectEntity();
 			createLabelAndTextForEntity2(" Subject Name: ", subjectEntity.getName(), edm, subjectEntity);
 			createLabelAndTextForEntity2(" Subject Comment: ", subjectEntity.getComment(), edm, subjectEntity);
+			
+			ContextEntityModel objectEntity = edm.getObjectEntity();
+			createLabelAndTextForEntity2(" Object Name: ", objectEntity.getName(), edm, objectEntity);
+			createLabelAndTextForEntity2(" Object Comment: ", objectEntity.getComment(), edm, objectEntity);
 		}
 		
 		Label annotationsNameLabel = new Label(form.getBody(), SWT.NONE);

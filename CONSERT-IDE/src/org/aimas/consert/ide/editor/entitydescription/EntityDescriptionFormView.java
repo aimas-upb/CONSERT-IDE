@@ -56,7 +56,7 @@ public class EntityDescriptionFormView extends FormPage implements IResourceChan
 			textName = "";
 		}
 		nameText.setText(textName);
-		nameText.setLayoutData(new GridData(100, 10));
+		nameText.setLayoutData(new GridData(180, 30));
 		nameText.addModifyListener(new ModifyListener() {
 
 			@Override
@@ -67,46 +67,11 @@ public class EntityDescriptionFormView extends FormPage implements IResourceChan
 
 				if (labelName.equals(" Name: ")) {
 					projectModel.getEntityByName(edm.getName()).setName(nameText.getText());
-				} else if (labelName.equals(" Comment: "))
-					projectModel.getEntityByName(edm.getName()).setComment(nameText.getText());
+				} 
 			}
 		});
 	}
 	
-	public void createLabelAndTextForEntity(String labelName, String textName, ContextEntityModel cem) {
-		Label nameLabel = new Label(form.getBody(), SWT.NONE);
-		nameLabel.setText(labelName);
-		Text nameText = new Text(form.getBody(), SWT.BORDER | SWT.SINGLE);
-		if (textName == null) {
-			textName = "";
-		}
-		nameText.setText(textName);
-		nameText.setLayoutData(new GridData(100, 10));
-		nameText.addModifyListener(new ModifyListener() {
-
-			@Override
-			public void modifyText(ModifyEvent e) {
-				isDirty = true;
-				firePropertyChange(IEditorPart.PROP_DIRTY);
-				editor.editorDirtyStateChanged();
-
-				/*
-				 * This entity belongs to an Entity Description, and is not present in
-				 * the getEntities() of the ProjectModel!!!
-				 */
-				ContextEntityModel entity = projectModel.getAssertionByName(edm.getName()).getSubjectEntity();
-				
-				if (entity.equals(cem)) {
-					if (labelName.equals(" Name: ")) {
-						entity.setName(nameText.getText());
-					} else if (labelName.equals(" Comment: ")) {
-						entity.setComment(nameText.getText());
-					}
-				}
-				
-			}
-		});
-	}
 
 	public ContextEntityModel getSelectedEntity(CCombo combo, List<ContextEntityModel> allEntities) {
 		int index = combo.getSelectionIndex();
@@ -166,7 +131,7 @@ public class EntityDescriptionFormView extends FormPage implements IResourceChan
 
 	@Override
 	public void resourceChanged(IResourceChangeEvent event) {
-		System.out.println("Reload EntityformView");
+		System.out.println("Reload EntityDescriptionFormView");
 	}
 	
 	private void adddEntityGotoButton(ContextEntityModel givenEntity) {
@@ -215,24 +180,31 @@ public class EntityDescriptionFormView extends FormPage implements IResourceChan
 		System.out.println("Entity Description inside Entity Description Form View parsed: " + edm.toString());
 
 		Label nameLabel = new Label(form.getBody(), SWT.NONE);
-		nameLabel.setText(" ContextAssertion: ");
+		nameLabel.setText(" EntityDescription: ");
 		new Label(form.getBody(), SWT.NONE);
 		new Label(form.getBody(), SWT.NONE);
 
 		createLabelAndText(" Name: ", edm.getName());
 		new Label(form.getBody(), SWT.NONE);
-		createLabelAndText(" Object: ", edm.getObject());
-		new Label(form.getBody(), SWT.NONE);
 
 		Label entitiesNameLabel = new Label(form.getBody(), SWT.NONE);
 		entitiesNameLabel.setText(" ContextEntities: ");
+		entitiesNameLabel.setLayoutData(new GridData(180, 30));
+		new Label(form.getBody(), SWT.NONE);
 		new Label(form.getBody(), SWT.NONE);
 
 		/* combos for entities selection */
 		Label nameSubjectLabel = new Label(form.getBody(), SWT.NONE);
 		nameSubjectLabel.setText(" Subject Entity: ");
+		nameSubjectLabel.setLayoutData(new GridData(180, 30));
 		addEntityCComboBox(edm.getSubjectEntity());
 		adddEntityGotoButton(edm.getSubjectEntity());
+		
+		Label nameObjectLabel = new Label(form.getBody(), SWT.NONE);
+		nameObjectLabel.setText(" Object Entity: ");
+		nameObjectLabel.setLayoutData(new GridData(180, 30));
+		addEntityCComboBox(edm.getObjectEntity());
+		adddEntityGotoButton(edm.getObjectEntity());
 
 	}
 	

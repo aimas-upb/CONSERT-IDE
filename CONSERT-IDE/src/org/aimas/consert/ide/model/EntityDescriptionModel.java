@@ -4,17 +4,17 @@ package org.aimas.consert.ide.model;
 public class EntityDescriptionModel {
 	
 	private String name;
-	private String object;
 	private String ID;
 
 	protected ContextEntityModel subjectEntity;
+	private ContextEntityModel objectEntity;
 
 	public EntityDescriptionModel() {
 	}
 
 	public EntityDescriptionModel(String name, String object, ContextEntityModel subjectEntity) {
 		setName(name);
-		setObject(object);
+		setObjectEntity(objectEntity);
 		setSubjectEntity(subjectEntity);
 	}
 	
@@ -22,7 +22,7 @@ public class EntityDescriptionModel {
 			ContextEntityModel objectEntity, AcquisitionType acquisitionType) {
 		setID(ID);
 		setName(name);
-		setObject(object);
+		setObjectEntity(objectEntity);
 		setSubjectEntity(subjectEntity);
 	}
 	
@@ -42,23 +42,24 @@ public class EntityDescriptionModel {
 		this.name = name;
 	}
 
-	public String getObject() {
-		return object;
-	}
-
-	public void setObject(String object) {
-		this.object = object;
-	}
 
 	public ContextEntityModel getSubjectEntity() {
 		return subjectEntity;
+	}
+	
+	public ContextEntityModel getObjectEntity() {
+		return objectEntity;
 	}
 
 	public void setSubjectEntity(ContextEntityModel subjectEntity) {
 		this.subjectEntity = subjectEntity;
 	}
+	
+	public void setObjectEntity(ContextEntityModel objectEntity) {
+		this.objectEntity = objectEntity;
+	}
 
 	public String toString() {
-		return "{\"name\":\"" + getName() + "\",\"object\":\"" + getObject() + "\",\"arity\":\"" + "\",\"subjectEntity\":" + getSubjectEntity() + "}";
+		return "{\"name\":\"" + getName() + "\",\"objectEntity\":\"" + getObjectEntity() + "\",\"subjectEntity\":" + getSubjectEntity() + "}";
 	}
 }

@@ -61,13 +61,8 @@
             id="ConsertPerspective.contextmodeldefinition"
             name="ContextModelDefinition">
       </category>
-      <category
-            id="ConsertPerspective.contextentity"
-            name="ContextEntity"
-            parentCategory="ConsertPerspective.contextmodeldefinition">
-      </category>
       <wizard
-            category="ConsertPerspective.contextmodeldefinition/ConsertPerspective.contextentity"
+            category="CONSERT-IDE"
             class="org.aimas.consert.ide.wizards.ContextEntityWizard"
             finalPerspective="ConsertPerspective.perspective1"
             hasPages="true"
@@ -76,17 +71,12 @@
             name="ContextEntity"
             project="false">
       </wizard>
-      <category
-            id="ConsertPerspective.contextassertion"
-            name="ContextAssertion"
-            parentCategory="ConsertPerspective.contextmodeldefinition">
-      </category>
       <wizard
-            category="ConsertPerspective.contextmodeldefinition/ConsertPerspective.contextassertion"
+            category="CONSERT-IDE"
             class="org.aimas.consert.ide.wizards.ContextAssertionWizard"
             finalPerspective="ConsertPerspective.perspective1"
             hasPages="true"
-            icon="icons/cherry1600.png"
+            icon="icons/assertion.png"
             id="ConsertPerspective.contextassertion"
             name="ContextAssertion"
             project="false">
@@ -100,7 +90,7 @@
             class="org.aimas.consert.ide.wizards.EntityDescriptionWizard"
             finalPerspective="ConsertPerspective.perspective1"
             hasPages="true"
-            icon="icons/sample.gif"
+            icon="icons/entity_description.png"
             id="consertide.wizards.EntityDescriptionWizard"
             name="Entity Description"
             project="false">
@@ -110,7 +100,7 @@
             class="org.aimas.consert.ide.wizards.ContextAnnotationWizard"
             finalPerspective="ConsertPerspective.perspective1"
             hasPages="true"
-            icon="icons/sample.gif"
+            icon="icons/annotation.png"
             id="org.aimas.consert.ide.wizards.ContextAnnotationWizard"
             name="Context Annotation"
             project="false">
