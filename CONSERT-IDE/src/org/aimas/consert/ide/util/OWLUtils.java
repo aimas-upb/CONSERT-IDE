@@ -30,9 +30,14 @@ public class OWLUtils {
 	 
 	 public static String coreURI = "http://pervasive.semanticweb.org/ont/2017/07/consert/core/";
 	 public static String contextEntity = "ContextEntity";
-	 public static String contextAssertion = "ContextAssertion";
+	 public static String binaryContextAssertion = "BinaryContextAssertion";
+	 public static String contextAnnotation = "ContextAnnotation";
+	 public static String entityDescription = "EntityDescription";
 	 public static IRI iricontextEntity= IRI.create(OWLUtils.coreURI + OWLUtils.contextEntity);
-	 public static IRI iricontextAssertion= IRI.create(OWLUtils.coreURI + OWLUtils.contextAssertion);
+	 public static IRI iriBinaryContextAssertion= IRI.create(OWLUtils.coreURI + OWLUtils.binaryContextAssertion);
+	 public static IRI iriContextAnnotation= IRI.create(OWLUtils.coreURI + OWLUtils.contextAnnotation);
+	 public static IRI iriEntityDescription= IRI.create(OWLUtils.coreURI + OWLUtils.entityDescription);
+	 
 	 
 	 public static Set<OWLClassExpression> getSuperClasses(OWLClass subCls, OWLOntology ont) {
 			Set<OWLClassExpression> result;
