@@ -152,7 +152,7 @@ public class ProjectModel extends Observable {
 	}
 	
 	public void syncOWLModelWithProjectModel() {
-		OWLModel.syncOWLModelWithProjectModel(entities, assertions);
+		OWLModel.syncOWLModelWithProjectModel(entities, assertions, annotations, entityDescriptions);
 	}
 	
 	public void saveOWLModelToDisk() {

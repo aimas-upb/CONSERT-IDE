@@ -35,7 +35,7 @@ public class CustomProjectSupport {
 		try {
 			addNature(project);
 
-			String[] paths = { "ontology", "metamodel/contextEntity", "metamodel/contextAssertion", "origin" }; //$NON-NLS-1$ //$NON-NLS-2$
+			String[] paths = { "origin" }; //$NON-NLS-1$ //$NON-NLS-2$
 			addToProjectStructure(project, paths);
 		} catch (CoreException e) {
 			e.printStackTrace();
