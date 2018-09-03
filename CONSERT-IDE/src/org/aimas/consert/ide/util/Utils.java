@@ -1,49 +1,49 @@
 package org.aimas.consert.ide.util;
 
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import org.aimas.consert.ide.model.ContextEntityModel;
 import org.aimas.consert.ide.model.ProjectModel;
 import org.aimas.consert.ide.model.WorkspaceModel;
+import org.eclipse.swt.widgets.Combo;
 
 public class Utils {
-	private static Utils instance;
+
+	public enum ModelType {
+		ENTITY, ASSERTION, ANNOTATION, ENTITY_DESCRIPTION
+	}
 
 	private Utils() {
 	}
 
-	public static Utils getInstance() {
-		if (instance == null) {
-			instance = new Utils();
-		}
-		return instance;
-	}
-
-	public List<ContextEntityModel> getAllEntities() {
-		List<ContextEntityModel> allEntities = new ArrayList<>();
+	public static List<ContextEntityModel> getAllEntities() {
 		Collection<ProjectModel> projects = WorkspaceModel.getInstance().getProjectModels().values();
-		projects.forEach(project -> allEntities.addAll(project.getEntities()));
-		return allEntities;
+
+		return projects.stream().map(project -> project.getEntities()).flatMap(List::stream)
+				.collect(Collectors.toList());
 	}
 
-	public String[] getAllEntitiesStringNames(List<ContextEntityModel> allEntities) {
-		List<String> entityNames = new ArrayList<>();
-		allEntities.forEach(entity -> entityNames.add(entity.getName()));
-		return entityNames.toArray(new String[entityNames.size()]);
+	public static String[] getAllEntitiesStringNames() {
+		return getAllEntities().stream().map(entity -> entity.getName()).toArray(String[]::new);
 	}
-	
-	/**
-	 * 
-	 * @param projectName
-	 * @param modelType
-	 * @param modelName
-	 * @return
-	 * Method used to generate a unique ID for a certain model
-	 */
-	public String generateID(String projectName, String modelType, String modelName){
-		String ID = projectName + "_"+ modelType +  "_" + modelName;
-		return ID;
+
+	public static String generateID(String projectName, ModelType modelType, String modelName) {
+		return projectName + "_" + modelType.name() + "_" + modelName;
+	}
+
+	public static ContextEntityModel getEntityModelFromCombo(Combo entityCombo) {
+		int index = entityCombo.getSelectionIndex();
+		String subjectEntityName = entityCombo.getItem(index == -1 ? 0 : index);
+
+		for (ContextEntityModel cem : getAllEntities()) {
+			if (cem.getName().equals(subjectEntityName)) {
+				return cem;
+			}
+		}
+
+		// TODO: returning null is bad idea
+		return null;
 	}
 }

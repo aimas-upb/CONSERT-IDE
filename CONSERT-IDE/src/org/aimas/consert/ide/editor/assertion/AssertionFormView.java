@@ -32,7 +32,6 @@ import org.eclipse.ui.IWorkbenchPage;
 import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.forms.IManagedForm;
 import org.eclipse.ui.forms.editor.FormPage;
-import org.eclipse.ui.forms.widgets.FormToolkit;
 import org.eclipse.ui.forms.widgets.ScrolledForm;
 
 public class AssertionFormView extends FormPage implements IResourceChangeListener {
@@ -68,7 +67,7 @@ public class AssertionFormView extends FormPage implements IResourceChangeListen
 					projectModel.getAssertionByName(cam.getName()).setName(nameText.getText());
 				} else if (labelName.equals(" Comment: ")) {
 					projectModel.getAssertionByName(cam.getName()).setComment(nameText.getText());
-				} else if (labelName.equals(" Arity: ")) { 
+				} else if (labelName.equals(" Arity: ")) {
 					try {
 						projectModel.getAssertionByName(cam.getName()).setArity(Integer.parseInt((nameText.getText())));
 					} catch (NumberFormatException exp) {
@@ -128,15 +127,14 @@ public class AssertionFormView extends FormPage implements IResourceChangeListen
 
 	private void addEntityCComboBox(ContextEntityModel givenEntity) {
 		CCombo comboEntities = new CCombo(form.getBody(), SWT.READ_ONLY);
-		List<ContextEntityModel> allEntities = Utils.getInstance().getAllEntities();
-		String items[] = Utils.getInstance().getAllEntitiesStringNames(allEntities);
+		String items[] = Utils.getAllEntitiesStringNames();
 		comboEntities.setItems(items);
 		comboEntities.setText(givenEntity.getName());
 		comboEntities.addSelectionListener(new SelectionListener() {
 
 			@Override
 			public void widgetSelected(SelectionEvent e) {
-				ContextEntityModel cem = getSelectedEntity(comboEntities, allEntities);
+				ContextEntityModel cem = getSelectedEntity(comboEntities, Utils.getAllEntities());
 				/*
 				 * if a different entity was selected, set it and mark editor
 				 * dirty
@@ -237,7 +235,6 @@ public class AssertionFormView extends FormPage implements IResourceChangeListen
 	@Override
 	protected void createFormContent(IManagedForm managedForm) {
 		form = managedForm.getForm();
-		FormToolkit toolkit = managedForm.getToolkit();
 
 		EditorInputWrapper eiw = (EditorInputWrapper) getEditorInput();
 		cam = (ContextAssertionModel) eiw.getModel();

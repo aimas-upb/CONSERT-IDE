@@ -20,21 +20,20 @@ public class ConsertProjectWizard extends Wizard implements INewWizard, IExecuta
 	private IConfigurationElement _configurationElement;
 	private WizardNewProjectCreationPage _pageOne;
 
-	public ConsertProjectWizard() {
-		setWindowTitle(NewWizardMessages.NewConsertProjectTitle);
-	}
-
 	@Override
 	public void addPages() {
 		super.addPages();
+
 		_pageOne = new WizardNewProjectCreationPage(NewWizardMessages.NewConsertProjectWizard);
 		_pageOne.setDescription(NewWizardMessages.NewConsertProjectDescription);
 		_pageOne.setTitle(NewWizardMessages.NewConsertProjectTitle);
+
 		addPage(_pageOne);
 	}
 
 	@Override
 	public void init(IWorkbench workbench, IStructuredSelection selection) {
+		setWindowTitle(NewWizardMessages.NewConsertProjectTitle);
 	}
 
 	@Override

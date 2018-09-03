@@ -30,7 +30,6 @@ import org.eclipse.ui.IWorkbenchPage;
 import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.forms.IManagedForm;
 import org.eclipse.ui.forms.editor.FormPage;
-import org.eclipse.ui.forms.widgets.FormToolkit;
 import org.eclipse.ui.forms.widgets.ScrolledForm;
 
 public class EntityDescriptionFormView extends FormPage implements IResourceChangeListener {
@@ -67,11 +66,10 @@ public class EntityDescriptionFormView extends FormPage implements IResourceChan
 
 				if (labelName.equals(" Name: ")) {
 					projectModel.getEntityByName(edm.getName()).setName(nameText.getText());
-				} 
+				}
 			}
 		});
 	}
-	
 
 	public ContextEntityModel getSelectedEntity(CCombo combo, List<ContextEntityModel> allEntities) {
 		int index = combo.getSelectionIndex();
@@ -86,15 +84,14 @@ public class EntityDescriptionFormView extends FormPage implements IResourceChan
 
 	private void addEntityCComboBox(ContextEntityModel givenEntity) {
 		CCombo comboEntities = new CCombo(form.getBody(), SWT.READ_ONLY);
-		List<ContextEntityModel> allEntities = Utils.getInstance().getAllEntities();
-		String items[] = Utils.getInstance().getAllEntitiesStringNames(allEntities);
+		String items[] = Utils.getAllEntitiesStringNames();
 		comboEntities.setItems(items);
 		comboEntities.setText(givenEntity.getName());
 		comboEntities.addSelectionListener(new SelectionListener() {
 
 			@Override
 			public void widgetSelected(SelectionEvent e) {
-				ContextEntityModel cem = getSelectedEntity(comboEntities, allEntities);
+				ContextEntityModel cem = getSelectedEntity(comboEntities, Utils.getAllEntities());
 				/*
 				 * if a different entity was selected, set it and mark editor
 				 * dirty
@@ -113,7 +110,6 @@ public class EntityDescriptionFormView extends FormPage implements IResourceChan
 		});
 	}
 
-
 	@Override
 	public boolean isDirty() {
 		return isDirty;
@@ -128,12 +124,11 @@ public class EntityDescriptionFormView extends FormPage implements IResourceChan
 		editor.editorDirtyStateChanged();
 	}
 
-
 	@Override
 	public void resourceChanged(IResourceChangeEvent event) {
 		System.out.println("Reload EntityDescriptionFormView");
 	}
-	
+
 	private void adddEntityGotoButton(ContextEntityModel givenEntity) {
 		Button entityGotoButton = new Button(form.getBody(), SWT.NONE);
 		entityGotoButton.setText("Goto");
@@ -163,11 +158,10 @@ public class EntityDescriptionFormView extends FormPage implements IResourceChan
 			}
 		});
 	}
-	
+
 	@Override
 	protected void createFormContent(IManagedForm managedForm) {
 		form = managedForm.getForm();
-		FormToolkit toolkit = managedForm.getToolkit();
 
 		EditorInputWrapper eiw = (EditorInputWrapper) getEditorInput();
 		edm = (EntityDescriptionModel) eiw.getModel();
@@ -199,7 +193,7 @@ public class EntityDescriptionFormView extends FormPage implements IResourceChan
 		nameSubjectLabel.setLayoutData(new GridData(180, 30));
 		addEntityCComboBox(edm.getSubjectEntity());
 		adddEntityGotoButton(edm.getSubjectEntity());
-		
+
 		Label nameObjectLabel = new Label(form.getBody(), SWT.NONE);
 		nameObjectLabel.setText(" Object Entity: ");
 		nameObjectLabel.setLayoutData(new GridData(180, 30));
@@ -207,6 +201,5 @@ public class EntityDescriptionFormView extends FormPage implements IResourceChan
 		adddEntityGotoButton(edm.getObjectEntity());
 
 	}
-	
-	
+
 }

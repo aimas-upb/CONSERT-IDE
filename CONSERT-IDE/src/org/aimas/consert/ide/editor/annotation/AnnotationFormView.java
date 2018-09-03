@@ -1,7 +1,5 @@
 package org.aimas.consert.ide.editor.annotation;
 
-
-
 import org.aimas.consert.ide.editor.EditorInputWrapper;
 import org.aimas.consert.ide.model.AnnotationCategory;
 import org.aimas.consert.ide.model.AnnotationType;
@@ -24,7 +22,6 @@ import org.eclipse.swt.widgets.Text;
 import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.forms.IManagedForm;
 import org.eclipse.ui.forms.editor.FormPage;
-import org.eclipse.ui.forms.widgets.FormToolkit;
 import org.eclipse.ui.forms.widgets.ScrolledForm;
 
 public class AnnotationFormView extends FormPage implements IResourceChangeListener {
@@ -41,7 +38,7 @@ public class AnnotationFormView extends FormPage implements IResourceChangeListe
 		isDirty = false;
 		ResourcesPlugin.getWorkspace().addResourceChangeListener(this);
 	}
-	
+
 	public void createLabelAndText(String labelName, String textName) {
 		Label nameLabel = new Label(form.getBody(), SWT.NONE);
 		nameLabel.setText(labelName);
@@ -61,19 +58,18 @@ public class AnnotationFormView extends FormPage implements IResourceChangeListe
 
 				if (labelName.equals(" Name: ")) {
 					projectModel.getAnnotationsByName(ann.getName()).setName(nameText.getText());
-				} 
+				}
 			}
 		});
 	}
 
-	
 	private void createLabelAndComboAnnotationType(String string, String annotationTypeText) {
 		Label labelAnnotationType = new Label(form.getBody(), SWT.NONE);
 		labelAnnotationType.setText("AnnotationType");
 		labelAnnotationType.setLayoutData(new GridData(180, 30));
 
 		CCombo comboAnnotationType = new CCombo(form.getBody(), SWT.READ_ONLY);
-		String itemsAnnotationType[] = { AnnotationType.TIMESTAMP.toString(), AnnotationType.TRUST.toString()};
+		String itemsAnnotationType[] = { AnnotationType.TIMESTAMP.toString(), AnnotationType.TRUST.toString() };
 		comboAnnotationType.setItems(itemsAnnotationType);
 		comboAnnotationType.setText(annotationTypeText);
 		comboAnnotationType.setLayoutData(new GridData(180, 30));
@@ -100,14 +96,15 @@ public class AnnotationFormView extends FormPage implements IResourceChangeListe
 			}
 		});
 	}
-	
+
 	private void createLabelAndComboAnnotationCategory(String string, String annotationTypeText) {
 		Label labelAnnotationCategory = new Label(form.getBody(), SWT.NONE);
 		labelAnnotationCategory.setText("AnnotationCategory");
 		labelAnnotationCategory.setLayoutData(new GridData(180, 30));
 
 		CCombo comboAnnotationCategory = new CCombo(form.getBody(), SWT.READ_ONLY);
-		String itemsAnnotationCategory[] = { AnnotationCategory.SIMPLE.toString(), AnnotationCategory.STRUCTURED.toString()};
+		String itemsAnnotationCategory[] = { AnnotationCategory.SIMPLE.toString(),
+				AnnotationCategory.STRUCTURED.toString() };
 		comboAnnotationCategory.setItems(itemsAnnotationCategory);
 		comboAnnotationCategory.setText(annotationTypeText);
 		comboAnnotationCategory.setLayoutData(new GridData(180, 30));
@@ -134,7 +131,7 @@ public class AnnotationFormView extends FormPage implements IResourceChangeListe
 			}
 		});
 	}
-	
+
 	@Override
 	public boolean isDirty() {
 		return isDirty;
@@ -149,17 +146,14 @@ public class AnnotationFormView extends FormPage implements IResourceChangeListe
 		editor.editorDirtyStateChanged();
 	}
 
-
 	@Override
 	public void resourceChanged(IResourceChangeEvent event) {
 		System.out.println("Reload EntityformView");
 	}
-	
-	
+
 	@Override
 	protected void createFormContent(IManagedForm managedForm) {
 		form = managedForm.getForm();
-		FormToolkit toolkit = managedForm.getToolkit();
 
 		EditorInputWrapper eiw = (EditorInputWrapper) getEditorInput();
 		ann = (ContextAnnotationModel) eiw.getModel();
@@ -175,7 +169,7 @@ public class AnnotationFormView extends FormPage implements IResourceChangeListe
 		nameLabel.setText(" ContextAnnotation: ");
 		new Label(form.getBody(), SWT.NONE);
 		new Label(form.getBody(), SWT.NONE);
-		
+
 		createLabelAndText(" Name: ", ann.getName());
 		new Label(form.getBody(), SWT.NONE);
 
@@ -183,8 +177,6 @@ public class AnnotationFormView extends FormPage implements IResourceChangeListe
 
 		createLabelAndComboAnnotationCategory(" Annotation Category: ", ann.getAnnotationCategory().toString());
 
-
 	}
-	
-	
+
 }

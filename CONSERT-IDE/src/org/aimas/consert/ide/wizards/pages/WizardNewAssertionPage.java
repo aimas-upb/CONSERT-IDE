@@ -1,9 +1,6 @@
 package org.aimas.consert.ide.wizards.pages;
 
-import java.util.List;
-
 import org.aimas.consert.ide.model.AcquisitionType;
-import org.aimas.consert.ide.model.ContextEntityModel;
 import org.aimas.consert.ide.util.Utils;
 import org.eclipse.jface.wizard.WizardPage;
 import org.eclipse.swt.SWT;
@@ -19,111 +16,100 @@ import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Text;
 
 public class WizardNewAssertionPage extends WizardPage {
-	private Text textName;
-	private Text textComment;
-	private Text textprojectName;
-	private Label labelName;
-	private Label labelComment;
-	private Label labelprojectName;
-	private Label labelAcquisitionType;
-	private Label labelObjectEntityName;
-	private Label labelSubjectEntityName;
-	private Composite container;
+
+	private Text textProjectName;
+	private Text textAssertionName;
+	private Text textAssertionComment;
+
 	private Combo comboAcquisitionType;
-	private Combo comboObjectEntityName;
-	private Combo comboSubjectEntityName;
+	private Combo objectEntityCombo;
+	private Combo subjectEntityCombo;
+
 	private String projectName;
-	private List<ContextEntityModel> allEntities;
+	private String allEntitiesNames[];
 
 	public WizardNewAssertionPage(String pageName, String projectName) {
 		super(pageName);
 		this.projectName = projectName;
-		allEntities = Utils.getInstance().getAllEntities();
+		allEntitiesNames = Utils.getAllEntitiesStringNames();
+	}
+
+	public Combo getObjectCombo() {
+		return objectEntityCombo;
+	}
+
+	public Combo getSubjectCombo() {
+		return subjectEntityCombo;
+	}
+
+	public String getProjectName() {
+		return textProjectName.getText();
+	}
+
+	public String getTextName() {
+		return textAssertionName.getText();
+	}
+
+	public String getTextComment() {
+		return textAssertionComment.getText();
+	}
+
+	public AcquisitionType getAcquisitionType() {
+		int index = comboAcquisitionType.getSelectionIndex();
+		return AcquisitionType.toValue(comboAcquisitionType.getItem(index == -1 ? 0 : index));
 	}
 
 	@Override
 	public void createControl(Composite parent) {
-		container = new Composite(parent, SWT.NONE);
-		GridLayout layout = new GridLayout();
-		container.setLayout(layout);
-		layout.numColumns = 2;
-		GridData gridData = new GridData(GridData.FILL_HORIZONTAL);
+		Composite container = new Composite(parent, SWT.NONE);
+		container.setLayout(new GridLayout(2, false));
 
-		// project name
-		labelprojectName = new Label(container, SWT.NONE);
-		labelprojectName.setText("Project Name");
+		textProjectName = createLabelAndTextWidgets(container, "Project Name");
+		textProjectName.setText(projectName);
 
-		String projectName = this.projectName;
-		this.textprojectName = new Text(container, SWT.BORDER | SWT.SINGLE);
-		this.textprojectName.setText(projectName);
-		textprojectName.addKeyListener(new KeyListener() {
+		textAssertionName = createLabelAndTextWidgets(container, "Name");
+		textAssertionComment = createLabelAndTextWidgets(container, "Comment");
+
+		comboAcquisitionType = createLabelAndTextForAcquisitionType(container, "AcquisitionType");
+
+		objectEntityCombo = createLabelAndComboForEntity(container, "Object Entity Name");
+		subjectEntityCombo = createLabelAndComboForEntity(container, "Subject Entity Name");
+
+		setControl(container);
+		setPageComplete(false);
+	}
+
+	private Combo createLabelAndComboForEntity(Composite container, String labelText) {
+		Label entityLabel = new Label(container, SWT.NONE);
+		entityLabel.setText(labelText);
+
+		Combo entityCombo = new Combo(container, SWT.READ_ONLY);
+		entityCombo.setItems(allEntitiesNames);
+		setSelectionListenerOnCombo(entityCombo);
+
+		return entityCombo;
+	}
+
+	private void setSelectionListenerOnCombo(Combo entityCombo) {
+		entityCombo.addSelectionListener(new SelectionListener() {
 
 			@Override
-			public void keyPressed(KeyEvent e) {
+			public void widgetSelected(SelectionEvent e) {
 			}
 
 			@Override
-			public void keyReleased(KeyEvent e) {
-				if (!textprojectName.getText().isEmpty()) {
-					setPageComplete(true);
-				}
+			public void widgetDefaultSelected(SelectionEvent e) {
 			}
-
 		});
-		textprojectName.setLayoutData(gridData);
+	}
 
-		// name of the context assertion
-		labelName = new Label(container, SWT.NONE);
-		labelName.setText("Name");
+	private Combo createLabelAndTextForAcquisitionType(Composite container, String labelText) {
+		Label labelAcquisitionType = new Label(container, SWT.NONE);
+		labelAcquisitionType.setText(labelText);
 
-		textName = new Text(container, SWT.BORDER | SWT.SINGLE);
-		textName.setText("");
-		textName.addKeyListener(new KeyListener() {
-
-			@Override
-			public void keyPressed(KeyEvent e) {
-			}
-
-			@Override
-			public void keyReleased(KeyEvent e) {
-				if (!textName.getText().isEmpty()) {
-					setPageComplete(true);
-				}
-			}
-
-		});
-		textName.setLayoutData(gridData);
-
-		// comment of the context assertion
-		labelComment = new Label(container, SWT.NONE);
-		labelComment.setText("Comment");
-
-		textComment = new Text(container, SWT.BORDER | SWT.SINGLE);
-		textComment.setText("");
-		textComment.addKeyListener(new KeyListener() {
-
-			@Override
-			public void keyPressed(KeyEvent e) {
-			}
-
-			@Override
-			public void keyReleased(KeyEvent e) {
-				if (!textComment.getText().isEmpty()) {
-					setPageComplete(true);
-				}
-			}
-
-		});
-		textComment.setLayoutData(gridData);
-
-		// AcquisitionType
-		labelAcquisitionType = new Label(container, SWT.NONE);
-		labelAcquisitionType.setText("AcquisitionType");
-
-		comboAcquisitionType = new Combo(container, SWT.READ_ONLY);
-		String items[] = { AcquisitionType.DERIVED.toString(), AcquisitionType.PROFILED.toString(),
-				AcquisitionType.SENSED.toString() };
-		comboAcquisitionType.setItems(items);
+		Combo comboAcquisitionType = new Combo(container, SWT.READ_ONLY);
+		comboAcquisitionType.setItems(new String[] { AcquisitionType.DERIVED.name(), AcquisitionType.PROFILED.name(),
+				AcquisitionType.SENSED.name() });
 		comboAcquisitionType.addSelectionListener(new SelectionListener() {
 
 			@Override
@@ -137,82 +123,37 @@ public class WizardNewAssertionPage extends WizardPage {
 			}
 		});
 
-		// objectEntityName of the context assertion
-		labelObjectEntityName = new Label(container, SWT.NONE);
-		labelObjectEntityName.setText("Object Entity Name");
+		return comboAcquisitionType;
+	}
 
-		comboObjectEntityName = new Combo(container, SWT.READ_ONLY);
-		String items2[] = Utils.getInstance().getAllEntitiesStringNames(allEntities);
-		comboObjectEntityName.setItems(items2);
-		comboObjectEntityName.addSelectionListener(new SelectionListener() {
+	private Text createLabelAndTextWidgets(Composite parent, String labelText) {
+		Label label = new Label(parent, SWT.NONE);
+		label.setText(labelText);
+
+		Text text = new Text(parent, SWT.BORDER | SWT.SINGLE);
+		text.setText("");
+		setKeyListenerOnText(text);
+
+		return text;
+	}
+
+	private void setKeyListenerOnText(Text text) {
+		text.addKeyListener(new KeyListener() {
 
 			@Override
-			public void widgetSelected(SelectionEvent e) {
+			public void keyPressed(KeyEvent e) {
 			}
 
 			@Override
-			public void widgetDefaultSelected(SelectionEvent e) {
+			public void keyReleased(KeyEvent e) {
+				if (!text.getText().isEmpty()) {
+					setPageComplete(true);
+				}
 			}
+
 		});
 
-		// subjectEntityName of the context assertion
-		labelSubjectEntityName = new Label(container, SWT.NONE);
-		labelSubjectEntityName.setText("Subject Entity Name");
-
-		comboSubjectEntityName = new Combo(container, SWT.READ_ONLY);
-		comboSubjectEntityName.setItems(items2);
-		comboSubjectEntityName.addSelectionListener(new SelectionListener() {
-
-			@Override
-			public void widgetSelected(SelectionEvent e) {
-			}
-
-			@Override
-			public void widgetDefaultSelected(SelectionEvent e) {
-			}
-		});
-
-		setControl(container);
-		setPageComplete(false);
+		text.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
 	}
 
-	public String getProjectName() {
-		return textprojectName.getText();
-	}
-
-	public String getTextName() {
-		return textName.getText();
-	}
-
-	public String getTextComment() {
-		return textComment.getText();
-	}
-
-	public AcquisitionType getAcquisitionType() {
-		int index = comboAcquisitionType.getSelectionIndex();
-		String acquisitionTypeName = comboAcquisitionType.getItem(index == -1 ? 0 : index);
-		return AcquisitionType.toValue(acquisitionTypeName);
-	}
-
-	public ContextEntityModel getObjectEntity() {
-		int index = comboObjectEntityName.getSelectionIndex();
-		String objectEntityName = comboObjectEntityName.getItem(index == -1 ? 0 : index);
-		for (ContextEntityModel cem : allEntities) {
-			if (cem.getName().equals(objectEntityName)) {
-				return cem;
-			}
-		}
-		return null;
-	}
-
-	public ContextEntityModel getSubjectEntity() {
-		int index = comboSubjectEntityName.getSelectionIndex();
-		String subjectEntityName = comboSubjectEntityName.getItem(index == -1 ? 0 : index);
-		for (ContextEntityModel cem : allEntities) {
-			if (cem.getName().equals(subjectEntityName)) {
-				return cem;
-			}
-		}
-		return null;
-	}
 }
