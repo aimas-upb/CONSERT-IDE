@@ -18,19 +18,15 @@ public class WizardNewEntityDescriptionPage extends WizardPage {
 
 	private Text textName;
 	private Text textprojectName;
-	private Text textObject;
 
 	private Combo objectEntityCombo;
 	private Combo subjectEntityCombo;
-
-	private String allEntitiesNames[];
 
 	private String projectName;
 
 	public WizardNewEntityDescriptionPage(String pageName, String projectName) {
 		super(pageName);
 		this.projectName = projectName;
-		allEntitiesNames = Utils.getAllEntitiesStringNames();
 	}
 
 	public Combo getObjectEntityCombo() {
@@ -47,10 +43,6 @@ public class WizardNewEntityDescriptionPage extends WizardPage {
 
 	public String getTextName() {
 		return textName.getText();
-	}
-
-	public String getTextObject() {
-		return textObject.getText();
 	}
 
 	@Override
@@ -86,7 +78,7 @@ public class WizardNewEntityDescriptionPage extends WizardPage {
 		labelSubjectEntityName.setText(labelText);
 
 		Combo entityCombo = new Combo(parent, SWT.READ_ONLY);
-		entityCombo.setItems(allEntitiesNames);
+		entityCombo.setItems(Utils.getAllEntitiesStringNames());
 		setSelectionListenerOnCombo(entityCombo);
 
 		return entityCombo;

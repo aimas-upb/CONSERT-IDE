@@ -83,8 +83,8 @@ public class ContextAssertionWizard extends Wizard implements INewWizard {
 		model.setName(_pageOne.getTextName());
 		model.setComment(_pageOne.getTextComment());
 		model.setAcquisitionType(_pageOne.getAcquisitionType());
-		model.setObjectEntity(Utils.getEntityModelFromCombo(_pageOne.getObjectCombo()));
-		model.setSubjectEntity(Utils.getEntityModelFromCombo(_pageOne.getSubjectCombo()));
+		model.setObjectEntity(Utils.getEntityModelFromCombo(_pageOne.getObjectEntityCombo()));
+		model.setSubjectEntity(Utils.getEntityModelFromCombo(_pageOne.getSubjectEntityCombo()));
 
 		return model;
 	}

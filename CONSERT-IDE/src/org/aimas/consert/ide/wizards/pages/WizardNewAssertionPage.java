@@ -26,19 +26,17 @@ public class WizardNewAssertionPage extends WizardPage {
 	private Combo subjectEntityCombo;
 
 	private String projectName;
-	private String allEntitiesNames[];
 
 	public WizardNewAssertionPage(String pageName, String projectName) {
 		super(pageName);
 		this.projectName = projectName;
-		allEntitiesNames = Utils.getAllEntitiesStringNames();
 	}
 
-	public Combo getObjectCombo() {
+	public Combo getObjectEntityCombo() {
 		return objectEntityCombo;
 	}
 
-	public Combo getSubjectCombo() {
+	public Combo getSubjectEntityCombo() {
 		return subjectEntityCombo;
 	}
 
@@ -84,7 +82,7 @@ public class WizardNewAssertionPage extends WizardPage {
 		entityLabel.setText(labelText);
 
 		Combo entityCombo = new Combo(container, SWT.READ_ONLY);
-		entityCombo.setItems(allEntitiesNames);
+		entityCombo.setItems(Utils.getAllEntitiesStringNames());
 		setSelectionListenerOnCombo(entityCombo);
 
 		return entityCombo;

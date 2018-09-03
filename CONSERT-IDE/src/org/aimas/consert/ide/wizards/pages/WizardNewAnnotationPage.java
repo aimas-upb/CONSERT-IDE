@@ -30,14 +30,6 @@ public class WizardNewAnnotationPage extends WizardPage {
 		this.projectName = projectName;
 	}
 
-	public Combo getComboAnnotationCategory() {
-		return comboAnnotationCategory;
-	}
-
-	public Combo getComboAnnotationType() {
-		return comboAnnotationType;
-	}
-
 	public String getProjectName() {
 		return textprojectName.getText();
 	}
