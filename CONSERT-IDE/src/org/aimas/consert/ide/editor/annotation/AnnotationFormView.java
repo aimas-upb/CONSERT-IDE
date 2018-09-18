@@ -168,10 +168,9 @@ public class AnnotationFormView extends FormPage implements IResourceChangeListe
 		Label nameLabel = new Label(form.getBody(), SWT.NONE);
 		nameLabel.setText(" ContextAnnotation: ");
 		new Label(form.getBody(), SWT.NONE);
-		new Label(form.getBody(), SWT.NONE);
 
 		createLabelAndText(" Name: ", ann.getName());
-		new Label(form.getBody(), SWT.NONE);
+//		new Label(form.getBody(), SWT.NONE);
 
 		createLabelAndComboAnnotationType(" Annotation Type: ", ann.getAnnotationType().toString());
 

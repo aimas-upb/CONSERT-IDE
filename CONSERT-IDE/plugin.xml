@@ -178,7 +178,7 @@
             category="org.aimas.consert.ide.category.view"
             class="org.aimas.consert.ide.views.TreeViewerNew"
             id="org.aimas.consert.ide.views.TreeViewerNew"
-            name="TreeViewerNew"
+            name="Tree View"
             restorable="true">
       </view>
       <category
