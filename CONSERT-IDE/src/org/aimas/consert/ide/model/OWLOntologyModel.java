@@ -3,6 +3,7 @@ package org.aimas.consert.ide.model;
 
 import java.io.File;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -17,6 +18,7 @@ import org.semanticweb.owlapi.formats.TurtleDocumentFormat;
 import org.semanticweb.owlapi.model.AddAxiom;
 import org.semanticweb.owlapi.model.AddImport;
 import org.semanticweb.owlapi.model.AxiomType;
+import org.semanticweb.owlapi.model.ClassExpressionType;
 import org.semanticweb.owlapi.model.IRI;
 import org.semanticweb.owlapi.model.OWLAnnotation;
 import org.semanticweb.owlapi.model.OWLAnnotationAssertionAxiom;
@@ -26,16 +28,20 @@ import org.semanticweb.owlapi.model.OWLDeclarationAxiom;
 import org.semanticweb.owlapi.model.OWLImportsDeclaration;
 import org.semanticweb.owlapi.model.OWLIndividual;
 import org.semanticweb.owlapi.model.OWLLiteral;
+import org.semanticweb.owlapi.model.OWLNamedIndividual;
 import org.semanticweb.owlapi.model.OWLObjectProperty;
 import org.semanticweb.owlapi.model.OWLOntology;
 import org.semanticweb.owlapi.model.OWLOntologyCreationException;
 import org.semanticweb.owlapi.model.OWLOntologyIRIMapper;
 import org.semanticweb.owlapi.model.OWLOntologyManager;
 import org.semanticweb.owlapi.model.OWLOntologyStorageException;
+import org.semanticweb.owlapi.model.OWLRestriction;
 import org.semanticweb.owlapi.model.OWLSubClassOfAxiom;
 import org.semanticweb.owlapi.rdf.turtle.renderer.TurtleStorer;
+import org.semanticweb.owlapi.search.EntitySearcher;
 import org.semanticweb.owlapi.util.AutoIRIMapper;
 import org.semanticweb.owlapi.util.DefaultPrefixManager;
+import org.semanticweb.owlapi.vocab.OWLRDFVocabulary;
 
 import com.google.common.io.Files;
 
@@ -72,6 +78,14 @@ public class OWLOntologyModel {
     private HashMap<String,List<OWLAxiom>> allEntityDescriptionAxiomHash;
     private HashMap<String,List<OWLAxiom>> allAnnotationAxiomLHash;
     
+    public HashMap<String,List<OWLAxiom>> getallEntityAxiomHash() {
+    	return allEntityAxiomHash;
+    }
+    
+    public HashMap<String,List<OWLAxiom>> getallAssertionAxiomHash() {
+    	return allAssertionAxiomHash;
+    }
+    
     
     public OWLOntologyModel(File OWLfile, File TTLfile, String baseURI){
     	this.OWLfile = OWLfile;
@@ -94,11 +108,139 @@ public class OWLOntologyModel {
     
     public void loadOWLOntologyModelFromFile() {
     	//TODO: implement
+
+		try {
+			ontology = manager.loadOntologyFromOntologyDocument(OWLfile);
+		} catch (OWLOntologyCreationException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		
+		loadEntities();
+		loadAssertions();
+		
 	
     }
     
+    public void loadEntities() {
+    	OWLClass entityClass = df.getOWLClass(OWLUtils.iricontextEntity);
+    	
+    	Set<OWLSubClassOfAxiom> axiomsSubClassOfContextEntity = ontology.getSubClassAxiomsForSuperClass(entityClass);
+		
+		for(OWLSubClassOfAxiom entityAxiom1 : axiomsSubClassOfContextEntity){
+			//Find the entity name
+			OWLClass ourEntityClass = entityAxiom1.getSubClass().asOWLClass();
+			String entityName = ourEntityClass.getIRI().getShortForm();
+			
+			List<OWLAxiom> entityAxiomList = new ArrayList<>();
+			
+			entityAxiomList.add(entityAxiom1);
+    		
+    		Collection<OWLAnnotation> annotations = EntitySearcher.getAnnotations(ourEntityClass.getIRI(), ontology);
+    		for (OWLAnnotation annotation : annotations) 
+    		{
+    			OWLLiteral val = (OWLLiteral) annotation.getValue();
+    			String name = OWLUtils.getName(annotation);
+//    		    System.out.println("\nannotation property->value: "+annotation.getProperty()+" -> "+ val.getLiteral());
+    		    
+    		    
+    		    if (name.equals(OWLUtils.label)) {
+    		    	OWLAnnotation labelAnnotation = df.getOWLAnnotation(
+    						df.getRDFSLabel(),
+    						val);
+
+    		        OWLAxiom entityAxiom2 = df.getOWLAnnotationAssertionAxiom(ourEntityClass.getIRI(), labelAnnotation);
+    		        entityAxiomList.add(entityAxiom2);
+    		    }
+    		    
+    		    if (name.equals(OWLUtils.comment)) {
+    		    	OWLAnnotation commentAnnotation = df.getOWLAnnotation(
+    						df.getRDFSComment(),
+    						val);
+
+    		        OWLAxiom entityAxiom3 = df.getOWLAnnotationAssertionAxiom(ourEntityClass.getIRI(), commentAnnotation);
+    		        entityAxiomList.add(entityAxiom3);
+    		    }
+
+    		}
+
+    		allEntityAxiomHash.put(entityName, entityAxiomList);
+ 		   
+		}
+    }
     
-    //TODO Add support for all types of context elements
+    public void loadAssertions() {
+    	 OWLClass contextAssertion = df.getOWLClass(OWLUtils.iriBinaryContextAssertion); 
+    	 Set<OWLSubClassOfAxiom> axiomsSubClassOfContextAssertion = ontology.getSubClassAxiomsForSuperClass(contextAssertion);
+ 		 System.out.println(axiomsSubClassOfContextAssertion);
+ 		 
+ 		for(OWLSubClassOfAxiom assertionAxiom1 : axiomsSubClassOfContextAssertion){
+			//Find the entity name
+			OWLClass ourAssertionClass = assertionAxiom1.getSubClass().asOWLClass();
+			String assertionName = ourAssertionClass.getIRI().getShortForm();
+			
+			List<OWLAxiom> assertionAxiomList = new ArrayList<>();
+			
+			assertionAxiomList.add(assertionAxiom1);
+    		
+    		Collection<OWLAnnotation> annotations = EntitySearcher.getAnnotations(ourAssertionClass.getIRI(), ontology);
+    		for (OWLAnnotation annotation : annotations) 
+    		{
+    			OWLLiteral val = (OWLLiteral) annotation.getValue();
+    			String name = OWLUtils.getName(annotation);
+//    		    System.out.println("\nannotation property->value: "+annotation.getProperty()+" -> "+ val.getLiteral());
+    			
+    			if (name.equals(OWLUtils.comment)) {
+    		    	OWLAnnotation commentAnnotation = df.getOWLAnnotation(
+    						df.getRDFSComment(),
+    						val);
+
+    		        OWLAxiom assertionAxiom2 = df.getOWLAnnotationAssertionAxiom(ourAssertionClass.getIRI(), commentAnnotation);
+    		        assertionAxiomList.add(assertionAxiom2);
+    		    } 
+    		}
+    		
+    		 Collection<OWLClassExpression> axiomSuperclasses = EntitySearcher.getSuperClasses(ourAssertionClass, ontology);
+    		 
+    		 for (OWLClassExpression superClass: axiomSuperclasses) {
+    			 if(superClass.getClassExpressionType()==ClassExpressionType.OBJECT_ALL_VALUES_FROM) {
+    	                System.out.println("\t\t\tDATA_ALL_VALUES_FROM:" + superClass.getNNF());
+    	                Set<OWLClass> classes = superClass.getNNF().getClassesInSignature();
+    	                Set<OWLObjectProperty> properties = superClass.getNNF().getObjectPropertiesInSignature();
+    	                
+    	                Iterator<OWLClass> itClasses = classes.iterator();
+    	                Iterator<OWLObjectProperty> itProp = properties.iterator();
+    	                
+    	                OWLObjectProperty restrictionProperty = itProp.next();
+    	                OWLClass restrictionSubject =  itClasses.next();
+    	                OWLClassExpression assertionSubject = df.getOWLObjectAllValuesFrom(restrictionProperty, restrictionSubject);
+    	                OWLAxiom assertionAxiom3 = df.getOWLSubClassOfAxiom(ourAssertionClass, assertionSubject);
+    	                assertionAxiomList.add(assertionAxiom3);
+    	         }
+    			 
+    			 if(superClass.getClassExpressionType()==ClassExpressionType.OBJECT_HAS_VALUE) {
+ 	                System.out.println("\t\t\tOBJECT_HAS_VALUE:" + superClass.getNNF());
+ 	                Set<OWLNamedIndividual> classes = superClass.getNNF().getIndividualsInSignature();
+	                Set<OWLObjectProperty> properties = superClass.getNNF().getObjectPropertiesInSignature();
+	                
+	                Iterator<OWLNamedIndividual> itClasses = classes.iterator();
+	                Iterator<OWLObjectProperty> itProp = properties.iterator();
+	                
+	                OWLObjectProperty restrictionProperty = itProp.next();
+	                OWLNamedIndividual restrictionSubject =  itClasses.next();
+	                OWLClassExpression assertionSubject = df.getOWLObjectHasValue(restrictionProperty, restrictionSubject);
+	        		OWLAxiom assertionAxiom4 = df.getOWLSubClassOfAxiom(ourAssertionClass, assertionSubject);
+	        		assertionAxiomList.add(assertionAxiom4);
+    			 }
+    			 
+    		 }
+    		
+    		 allAssertionAxiomHash.put(assertionName, assertionAxiomList);
+ 		}
+
+    }
+    
+    
     public void syncOWLModelWithProjectModel(
     		List<ContextEntityModel> entities, 
     		List<ContextAssertionModel> assertions, 
@@ -223,8 +365,8 @@ public class OWLOntologyModel {
     	 /**
     	  * Add import declaration
     	  */
-    	OWLImportsDeclaration importDeclaration=manager.getOWLDataFactory().getOWLImportsDeclaration(IRI.create(OWLUtils.coreURI));
- 		manager.applyChange(new AddImport(ontology, importDeclaration));
+//    	OWLImportsDeclaration importDeclaration=manager.getOWLDataFactory().getOWLImportsDeclaration(IRI.create(OWLUtils.coreURI));
+// 		manager.applyChange(new AddImport(ontology, importDeclaration));
  		
  	
     	 /**

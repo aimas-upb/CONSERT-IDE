@@ -219,11 +219,10 @@ public class WorkspaceModel {
 								TextFileDocumentProvider provider = new TextFileDocumentProvider();
 								IDocument document = provider.getDocument(fileResources[k]);
 								ProjectModel pm = projects.get(projectName);
-								populateProjectModel(pm, document, (IFile) fileResources[k]);
-								
 								File OWLfile = resource.getFile("consert.owl").getLocation().toFile();
 								File TTLfile = resource.getFile("consert.ttl").getLocation().toFile();
 								pm.initializeOWLModel(OWLfile,TTLfile);
+								populateProjectModel(pm, document, (IFile) fileResources[k]);
 							}
 						}
 
@@ -275,7 +274,12 @@ public class WorkspaceModel {
 		}
 	}
 
-	private void populateProjectModel(ProjectModel projectModel, IDocument document, IFile file)
+	private void populateProjectModel(ProjectModel projectModel, IDocument document, IFile file) {
+		projectModel.loadEntities();
+		projectModel.loadAssertions();
+	}
+	
+	private void populateProjectModelOld(ProjectModel projectModel, IDocument document, IFile file)
 			throws JsonProcessingException, IOException, CoreException {
 
 		/* get string content from file, first refreshed on disk */
