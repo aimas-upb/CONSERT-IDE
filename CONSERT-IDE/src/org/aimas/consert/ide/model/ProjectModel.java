@@ -5,15 +5,26 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.Observable;
 import java.util.Set;
 
+import org.aimas.consert.ide.util.OWLUtils;
 import org.aimas.consert.ide.views.TreeViewerNew;
 import org.eclipse.core.resources.IFolder;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.IPath;
+import org.semanticweb.owlapi.model.AxiomType;
+import org.semanticweb.owlapi.model.OWLAnnotationAssertionAxiom;
+import org.semanticweb.owlapi.model.OWLAxiom;
+import org.semanticweb.owlapi.model.OWLClass;
+import org.semanticweb.owlapi.model.OWLLiteral;
+import org.semanticweb.owlapi.model.OWLNamedIndividual;
+import org.semanticweb.owlapi.model.OWLObjectProperty;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -148,7 +159,7 @@ public class ProjectModel extends Observable {
 	public void initializeOWLModel(File OWLfile, File TTLfile) {
 		OWLModel = new OWLOntologyModel(OWLfile, TTLfile, getBaseURI());
 		//TODO decomenteaza dupa ce este implementata metoda
-//		OWLModel.loadOWLOntologyModelFromFile();
+		OWLModel.loadOWLOntologyModelFromFile();
 	}
 	
 	public void syncOWLModelWithProjectModel() {
@@ -294,5 +305,106 @@ public class ProjectModel extends Observable {
 		System.out.println("Updated new annotations into Json: " + getAnnotations());
 	}
 	
+	/**
+	 * This method is used to load the Context Entities (which were read in the OWLOntologyModel from the OWL file) in the ProjectModel
+	 */
+	public void loadEntities() {
+	 HashMap<String,List<OWLAxiom>> allEntityAxiomHash = OWLModel.getallEntityAxiomHash();
+   	 Iterator itEntities = allEntityAxiomHash.entrySet().iterator();
+   	 
+   	    while (itEntities.hasNext()) {
+   	    	Map.Entry<String, List<OWLAxiom>> pair = (Map.Entry)itEntities.next();
+	        List<OWLAxiom> entityAxiomList = pair.getValue();
+	        
+	        for(OWLAxiom ax : entityAxiomList){
+	        	if(ax.isOfType(AxiomType.ANNOTATION_ASSERTION)){
+	        		OWLAnnotationAssertionAxiom a2 =  (OWLAnnotationAssertionAxiom) ax;
+		        	if(a2.getProperty().isComment()){
+			        	OWLLiteral val = (OWLLiteral)a2.getValue();
+			        	
+			   	    	ContextEntityModel cem = new ContextEntityModel(pair.getKey(),val.getLiteral());
+			   	    	addEntity(cem);
+			        }
+	        	}
+	        }
+   	    }
+	}
+	
+	/**
+	 * This method is used to load the Context Assertions (which were read in the OWLOntologyModel from the OWL file) in the ProjectModel
+	 */
+	public void loadAssertions() {
+		 HashMap<String,List<OWLAxiom>> allAssertionAxiomHash = OWLModel.getallAssertionAxiomHash();
+	   	 Iterator itAssertions = allAssertionAxiomHash.entrySet().iterator();
+	   	 
+	   	 String assertionSubject = "";
+	   	 String assertionObject = "";
+	   	 String comment = "";
+	   	 AcquisitionType acquisitionType = AcquisitionType.DERIVED; //default value - will be overridden
+	   	 
+	   	while (itAssertions.hasNext()) {
+   	    	Map.Entry<String, List<OWLAxiom>> pair = (Map.Entry)itAssertions.next();
+	        List<OWLAxiom> assertionAxiomList = pair.getValue();
+	        assertionAxiomList.remove(0);
+	        for(OWLAxiom ax : assertionAxiomList){
+	        	
+	         //For an Assertion we can have ANNOTATION_ASSERTION or SUBCLASS_OF axioms
+	           if(ax.isOfType(AxiomType.ANNOTATION_ASSERTION)){
+	        	   OWLAnnotationAssertionAxiom a2 =  (OWLAnnotationAssertionAxiom) ax;
+	        	   
+	        	   if(a2.getProperty().isComment()){
+	        		   OWLLiteral val = (OWLLiteral)a2.getValue();
+	        		   comment = val.getLiteral();
+			           System.out.println("COMMENT " + comment);
+
+			        }
+	           } else { //SUBCLASS_OF axioms
+	        	   
+	        		   //An axiom is formed by an OWLObjectProperty,
+	        	   	   //an OWLClass - the subject of the Restriction
+	        	       //and an OWLClass/OWLIndividual - which is the object of the Restriction
+	        	   
+	        	   		//Get the property name- which can be either assertionAcquisitionType, assertionSubject or assertionObject
+	        		   Set<OWLObjectProperty> properties = ax.getObjectPropertiesInSignature();
+		        	   Iterator<OWLObjectProperty> itProp = properties.iterator();
+		               OWLObjectProperty restrictionProperty = itProp.next();
+		               String propertyName = OWLUtils.getTerminologyId(restrictionProperty.getIRI());
+		               
+		               
+		               //Get OWLClass/OWLIndividual which is the object of the Restriction 
+		               Set<OWLClass> classes = ax.getClassesInSignature();
+		               Iterator<OWLClass> itClasses = classes.iterator();
+		               OWLClass restrictionSubject = null;
+		               while(itClasses.hasNext()){
+		            	   restrictionSubject =  itClasses.next();
+		               }
+		              
+		               //If the assertion only contains one OWLClass - then we have an OWLIndividual -> we have a assertionAcquisitionType property for the Restriction
+		               if(classes.size() == 1){
+		            	   Set<OWLNamedIndividual> ind = ax.getIndividualsInSignature();
+		            	   if(propertyName.equals(OWLUtils.assertionAcquisitionType)){
+		            		   acquisitionType = AcquisitionType.toValue(OWLUtils.getTerminologyId(ind.iterator().next().getIRI()));
+		            	   }
+		            	  
+		               } else { // We have a  assertionSubject or assertionObject property for the Restriction
+			            	   if(propertyName.equals(OWLUtils.assertionSubject)){
+				            	   assertionSubject = OWLUtils.getTerminologyId(restrictionSubject.getIRI());
+				            	   System.out.println("SUBJECT " +assertionSubject);
+				               }else{
+				            	   assertionObject = OWLUtils.getTerminologyId(restrictionSubject.getIRI());
+				            	   System.out.println("OBJECT " +assertionObject);
+				               }
+		               }
+
+	           }
+ 	
+	        }
+	        
+	        //Create new ContextAssertionModel
+	        ContextAssertionModel cam = new ContextAssertionModel(pair.getKey(),comment, getEntityByName(assertionSubject), getEntityByName(assertionObject), acquisitionType);
+	        addAssertion(cam);
+	    }
+
+	}
 
 }

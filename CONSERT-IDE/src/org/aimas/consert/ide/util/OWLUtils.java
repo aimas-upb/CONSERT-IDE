@@ -33,10 +33,19 @@ public class OWLUtils {
 	 public static String binaryContextAssertion = "BinaryContextAssertion";
 	 public static String contextAnnotation = "ContextAnnotation";
 	 public static String entityDescription = "EntityDescription";
+	 public static String assertionSubject = "assertionSubject";
+	 public static String assertionObject = "assertionObject";
+	 public static String assertionAcquisitionType = "assertionAcquisitionType";
 	 public static IRI iricontextEntity= IRI.create(OWLUtils.coreURI + OWLUtils.contextEntity);
 	 public static IRI iriBinaryContextAssertion= IRI.create(OWLUtils.coreURI + OWLUtils.binaryContextAssertion);
 	 public static IRI iriContextAnnotation= IRI.create(OWLUtils.coreURI + OWLUtils.contextAnnotation);
 	 public static IRI iriEntityDescription= IRI.create(OWLUtils.coreURI + OWLUtils.entityDescription);
+	 public static IRI iriAssertionSubject= IRI.create(OWLUtils.coreURI + OWLUtils.assertionSubject);
+	 public static IRI iriAssertionObject= IRI.create(OWLUtils.coreURI + OWLUtils.assertionObject);
+	 public static IRI iriAssertionAcquisitionTypet= IRI.create(OWLUtils.coreURI + OWLUtils.assertionAcquisitionType);
+	 
+	 public static final String label = "label";
+	 public static final String comment = "comment";
 	 
 	 
 	 public static Set<OWLClassExpression> getSuperClasses(OWLClass subCls, OWLOntology ont) {
@@ -84,5 +93,36 @@ public class OWLUtils {
 			}
 			return annotations;
 		}
+	    
+	    /**
+	     * Returns the term type.
+	     *
+	     * @param annotation the annotation
+	     * @return the term type
+	     */
+	    public static String getName(OWLAnnotation annotation) {
+	      return getTerminologyId(annotation.getProperty().getIRI());
+	    }
+	    
+	    /**
+	     * Returns the terminology id.
+	     *
+	     * @param iri the iri
+	     * @return the terminology id
+	     */
+	    
+	    public static String getTerminologyId(IRI iri) {
+
+	      if (iri.toString().contains("#")) {
+	        // everything after the last #
+	        return iri.toString().substring(iri.toString().lastIndexOf("#") + 1);
+	      } else if (iri.toString().contains("/")) {
+	        // everything after the last slash
+	        return iri.toString().substring(iri.toString().lastIndexOf("/") + 1);
+	      }
+	      // otherwise, just return the iri
+	      return iri.toString();
+	    }
+
 
 }
